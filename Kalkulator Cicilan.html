@@ -1,0 +1,403 @@
+﻿<!DOCTYPE html>
+<html lang="id" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kalkulator Simulasi - Zenith Cell</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0,0,0,0.02);
+        }
+
+        .glass-panel-dark {
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .radio-btn-label { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .radio-input:checked + .radio-btn-label { transform: scale(0.95); }
+        
+        /* Animasi Pop untuk Voucher */
+        @keyframes popIn {
+            0% { transform: scale(0.95); opacity: 0; }
+            50% { transform: scale(1.02); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop { animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Styling saat input terkunci */
+        input:disabled {
+            background-color: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+            border-color: #e2e8f0;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex p-4 sm:p-6 lg:p-8 text-slate-800 selection:bg-emerald-200">
+
+    <main class="m-auto w-full max-w-5xl glass-card rounded-[2.5rem] overflow-hidden flex flex-col lg:flex-row relative z-10">
+        
+        <!-- ================= KIRI: FORM INPUT ================= -->
+        <section class="w-full lg:w-7/12 p-6 sm:p-8 md:p-10 flex flex-col justify-center">
+            
+            <header class="mb-8">
+                <a href="index.html" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors mb-5 shadow-sm">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </a>
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-100/80 text-emerald-700 text-xs font-bold tracking-wider uppercase border border-emerald-200">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i> Standar OJK
+                    </div>
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-100/80 text-amber-700 text-xs font-bold tracking-wider uppercase border border-amber-200">
+                        <i data-lucide="badge-percent" class="w-4 h-4"></i> Bebas Denda
+                    </div>
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">Simulasi Cicilan <br/><span class="text-emerald-600">Zenith Cell.</span></h1>
+                <p class="text-slate-500 mt-2 font-medium text-sm sm:text-base leading-relaxed">Cek estimasi pembiayaan gadget impianmu. Angka fix, diawasi, dan transparan.</p>
+            </header>
+
+            <form id="calcForm" class="space-y-8" onsubmit="event.preventDefault();">
+                
+                <div class="space-y-5">
+                    <!-- Harga Gadget -->
+                    <div class="group">
+                        <label class="block text-sm font-bold text-slate-700 mb-2 transition-colors group-focus-within:text-emerald-600">Harga Gadget Normal</label>
+                        <div class="relative flex items-center">
+                            <div class="absolute left-4 text-slate-400 font-bold group-focus-within:text-emerald-500 pointer-events-none">Rp</div>
+                            <input type="text" id="price" inputmode="numeric" placeholder="Misal: 15.000.000" class="w-full pl-12 pr-4 py-4 bg-slate-50 hover:bg-slate-100 border-2 border-slate-200 rounded-2xl text-slate-900 font-black text-xl sm:text-2xl focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Uang Muka (DP) -->
+                    <div class="group">
+                        <label class="block text-sm font-bold text-slate-700 mb-2 transition-colors group-focus-within:text-emerald-600">Uang Muka (DP) <span class="text-slate-400 font-normal ml-1">Opsional</span></label>
+                        <div class="relative flex items-center">
+                            <div class="absolute left-4 text-slate-400 font-bold group-focus-within:text-emerald-500 pointer-events-none">Rp</div>
+                            <input type="text" id="dp" inputmode="numeric" placeholder="0" class="w-full pl-12 pr-4 py-4 bg-slate-50 hover:bg-slate-100 border-2 border-slate-200 rounded-2xl text-slate-900 font-bold text-xl focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= FITUR GACHA VOUCHER (KODE PROMO) ================= -->
+                <div class="relative" id="voucherContainer">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-amber-400 to-orange-500 rounded-3xl blur opacity-25" id="voucherGlow"></div>
+                    <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 p-4 sm:p-5 rounded-2xl relative overflow-hidden flex flex-col gap-4" id="voucherBox">
+                        
+                        <div class="flex items-center gap-4 w-full">
+                            <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center shrink-0 border border-amber-300 shadow-inner" id="voucherIconBox">
+                                <i data-lucide="ticket-percent" class="w-6 h-6 text-amber-600" id="voucherIcon"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="text-sm font-black text-amber-900 mb-0.5" id="voucherTitle">Punya Kode Voucher?</h3>
+                                <p class="text-xs text-amber-700 font-medium leading-relaxed" id="voucherDesc">Ketik kode promo atau kosongkan lalu klik <b class="text-amber-800">Cek Hoki</b> untuk undian diskon biaya layanan!</p>
+                            </div>
+                        </div>
+
+                        <!-- Area Input & Tombol Gacha -->
+                        <div class="flex flex-col sm:flex-row gap-2 w-full">
+                            <input type="text" id="kodePromo" placeholder="Ketik kode promo (Opsional)" class="w-full sm:w-1/2 px-4 py-3.5 bg-white border-2 border-amber-200 rounded-xl text-sm font-bold text-amber-900 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/20 outline-none uppercase transition-all placeholder:normal-case">
+                            
+                            <button id="btnVoucher" onclick="klaimVoucher()" class="w-full sm:w-1/2 shrink-0 bg-amber-500 hover:bg-amber-600 text-white text-sm font-extrabold py-3.5 px-5 rounded-xl shadow-lg shadow-amber-500/30 transition-all active:scale-95 flex justify-center items-center gap-2">
+                                <i data-lucide="party-popper" class="w-5 h-5" id="btnIcon"></i> <span id="btnText">Cek Hoki Saya</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pilihan Tenor -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-3">Pilih Durasi Cicilan (Tenor)</label>
+                    <div class="grid grid-cols-5 gap-2 sm:gap-3">
+                        <script>
+                            for(let i=1; i<=10; i++) {
+                                let isChecked = i === 6 ? 'checked' : '';
+                                document.write(`
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="tenor" value="${i}" class="radio-input peer sr-only" ${isChecked} onchange="calculate()">
+                                    <div class="radio-btn-label w-full py-3 rounded-xl bg-white border-2 border-slate-200 flex flex-col items-center justify-center peer-checked:bg-slate-800 peer-checked:text-white peer-checked:border-slate-800 hover:border-slate-400 shadow-sm transition-all group">
+                                        <span class="text-lg sm:text-xl font-black leading-none group-[.peer:checked+&]:text-white text-slate-700">${i}</span>
+                                        <span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bulan</span>
+                                    </div>
+                                </label>`);
+                            }
+                        </script>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- ================= KANAN: HASIL KALKULASI ================= -->
+        <section class="w-full lg:w-5/12 bg-slate-900 text-white p-6 sm:p-8 md:p-10 flex flex-col relative overflow-hidden">
+            <!-- Background Ornamen Modern -->
+            <div class="absolute top-0 right-0 w-full h-full overflow-hidden pointer-events-none">
+                <div class="absolute -top-[20%] -right-[10%] w-[80%] h-[70%] bg-emerald-500/20 rounded-full blur-[80px]" id="glowRightTop"></div>
+                <div class="absolute -bottom-[20%] -left-[10%] w-[60%] h-[60%] bg-blue-500/20 rounded-full blur-[80px]" id="glowRightBottom"></div>
+            </div>
+
+            <div class="relative z-10 flex-grow flex flex-col h-full">
+                
+                 <!-- Hasil Utama (Cicilan) -->
+                <div class="mb-6 lg:mb-10 mt-2">
+                    <h2 class="text-slate-400 font-semibold tracking-widest text-xs uppercase mb-4 flex items-center gap-2">
+                        <i data-lucide="calculator" class="w-4 h-4"></i> Estimasi Cicilan
+                    </h2>
+                    
+                    <div class="flex items-start gap-1.5 mb-2">
+                        <span class="text-2xl sm:text-3xl font-bold mt-1.5 text-emerald-400">Rp</span>
+                        <span class="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tighter transition-all" id="resCicilan">0</span>
+                    </div>
+                    <p class="text-slate-400 text-sm font-medium">Per bulan, fix selama <span id="resTenorText" class="text-white font-bold">6 bulan</span>.</p>
+                </div>
+
+                <!-- Rincian Akad -->
+                <div class="glass-panel-dark rounded-[2rem] p-6 space-y-4 mb-6 relative mt-auto border border-white/5 shadow-2xl">
+                    <!-- Garis vertikal dekoratif -->
+                    <div class="absolute left-6 top-8 bottom-8 w-px bg-white/10 hidden sm:block"></div>
+                    
+                    <div class="flex justify-between items-center sm:pl-4 relative">
+                        <div class="absolute left-[-5px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-slate-400 hidden sm:block"></div>
+                        <span class="text-slate-300 text-sm font-medium">Pokok Pembiayaan</span>
+                        <span class="font-bold tracking-wide text-white" id="resPokok">Rp 0</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center sm:pl-4 relative">
+                        <div class="absolute left-[-5px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-blue-400 hidden sm:block shadow-[0_0_8px_rgba(96,165,250,0.8)]" id="dotMargin"></div>
+                        <span class="text-slate-300 text-sm font-medium flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                            Biaya Layanan
+                            <span class="text-[9px] font-bold bg-blue-500/20 px-1.5 py-0.5 rounded text-blue-300 uppercase tracking-wider border border-blue-500/30" id="resMarginText">Standar OJK</span>
+                        </span>
+                        <span class="font-bold tracking-wide text-white" id="resMargin">Rp 0</span>
+                    </div>
+                    
+                    <div class="pt-4 border-t border-white/10 flex justify-between items-center sm:pl-4">
+                        <span class="text-emerald-400 text-sm font-bold uppercase tracking-wider">Total Keseluruhan</span>
+                        <span class="font-black text-xl text-white drop-shadow-md" id="resTotal">Rp 0</span>
+                    </div>
+                </div>
+
+                <!-- Call to Action -->
+                <a href="form-pengajuan.html" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-xl shadow-emerald-500/20">
+                    Lanjut Isi Form Pengajuan <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </a>
+                
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        const priceInput = document.getElementById('price');
+        const dpInput = document.getElementById('dp');
+        
+        const resPokok = document.getElementById('resPokok');
+        const resMargin = document.getElementById('resMargin');
+        const resTotal = document.getElementById('resTotal');
+        const resCicilan = document.getElementById('resCicilan');
+        const resTenorText = document.getElementById('resTenorText');
+        const resMarginText = document.getElementById('resMarginText');
+        const dotMargin = document.getElementById('dotMargin');
+
+        // ================= SISTEM VOUCHER & GACHA =================
+        // Default Bunga 25% (Sesuai Standar OJK)
+        let currentMargin = 25; 
+        let isVoucherClaimed = false;
+
+        function klaimVoucher() {
+            if (isVoucherClaimed) return;
+            
+            const btn = document.getElementById('btnVoucher');
+            const desc = document.getElementById('voucherDesc');
+            const title = document.getElementById('voucherTitle');
+            const inputKode = document.getElementById('kodePromo');
+            const kodeVal = inputKode.value.trim().toLowerCase();
+            
+            // 1. Kunci Input & Beri Efek Loading
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> <span id="btnText">Memproses...</span>`;
+            btn.classList.add('opacity-90', 'cursor-wait');
+            inputKode.disabled = true; // MENGUNCI INPUT AGAR TIDAK BISA DIKETIK LAGI
+            
+            setTimeout(() => {
+                let pesanBerhasil = "";
+                let isDiskon = true;
+                
+                // LOGIKA 1: JIKA MENGGUNAKAN KODE KHUSUS
+                if (kodeVal === 'dulurdewe22') {
+                    currentMargin = 22;
+                    pesanBerhasil = `Kode valid! Biaya layanan dipotong spesial sedulur menjadi <b class="text-emerald-700 bg-emerald-100 px-1 rounded">22%</b> 🎉`;
+                } 
+                else if (kodeVal === 'nawakewed') {
+                    currentMargin = 20;
+                    pesanBerhasil = `Kode valid! Biaya layanan VVIP dipotong maksimal menjadi <b class="text-emerald-700 bg-emerald-100 px-1 rounded">20%</b> 🔥`;
+                } 
+                // LOGIKA 2: UNDIAN (PROBABILITAS 75% di angka 23,24,25)
+                else {
+                    // Total 20 slot probabilitas:
+                    // 25% (5 slot), 24% (5 slot), 23% (5 slot) -> Total 15 slot = 75%
+                    // 22% (2 slot), 21% (2 slot), 20% (1 slot) -> Total 5 slot = 25%
+                    const gachaPool = [
+                        25, 25, 25, 25, 25,
+                        24, 24, 24, 24, 24,
+                        23, 23, 23, 23, 23,
+                        22, 22,
+                        21, 21,
+                        20
+                    ];
+                    
+                    currentMargin = gachaPool[Math.floor(Math.random() * gachaPool.length)];
+                    
+                    if (currentMargin === 25) {
+                        isDiskon = false; // Jika 25%, ini standar OJK, bukan diskon
+                        pesanBerhasil = `Sistem menetapkan biaya normal <b class="text-blue-700 bg-blue-100 px-1 rounded">25%</b> (Sesuai Standar OJK). Transaksi aman diawasi negara! 🛡️`;
+                    } else if (kodeVal !== "") {
+                        pesanBerhasil = `Kode hangus/salah, tapi undian hoki memotong biaya Anda menjadi <b class="text-emerald-700 bg-emerald-100 px-1 rounded">${currentMargin}%</b> 🥳`;
+                    } else {
+                        pesanBerhasil = `Hoki! Hasil undian otomatis memotong biaya layanan kamu menjadi <b class="text-emerald-700 bg-emerald-100 px-1 rounded">${currentMargin}%</b> 🎉`;
+                    }
+                }
+                
+                isVoucherClaimed = true;
+                
+                // 2. Ubah Tampilan UI sesuai hasil (Diskon vs Standar)
+                btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> Selesai`;
+                btn.classList.remove('cursor-wait');
+                
+                if(isDiskon) {
+                    // Tema Hijau (Hoki / Diskon)
+                    title.innerText = "Status: Potongan Aktif!";
+                    btn.classList.replace('bg-amber-500', 'bg-emerald-500');
+                    btn.classList.replace('hover:bg-amber-600', 'hover:bg-emerald-600');
+                    btn.classList.replace('shadow-amber-500/30', 'shadow-emerald-500/30');
+                    
+                    document.getElementById('voucherBox').className = "bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 p-4 sm:p-5 rounded-2xl relative overflow-hidden flex flex-col gap-4";
+                    document.getElementById('voucherGlow').className = "absolute -inset-1 bg-gradient-to-r from-emerald-400 to-teal-500 rounded-3xl blur opacity-25";
+                    document.getElementById('voucherIconBox').className = "w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center shrink-0 border border-emerald-300 shadow-inner";
+                    document.getElementById('voucherIcon').className = "w-6 h-6 text-emerald-600";
+                    desc.className = "text-xs text-emerald-800 font-medium leading-relaxed";
+                    title.className = "text-sm font-black text-emerald-900 mb-0.5";
+                } else {
+                    // Tema Biru (Standar OJK)
+                    title.innerText = "Status: Terverifikasi OJK";
+                    btn.classList.replace('bg-amber-500', 'bg-blue-500');
+                    btn.classList.replace('hover:bg-amber-600', 'hover:bg-blue-600');
+                    btn.classList.replace('shadow-amber-500/30', 'shadow-blue-500/30');
+                    
+                    document.getElementById('voucherBox').className = "bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 p-4 sm:p-5 rounded-2xl relative overflow-hidden flex flex-col gap-4";
+                    document.getElementById('voucherGlow').className = "absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-3xl blur opacity-25";
+                    document.getElementById('voucherIconBox').className = "w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center shrink-0 border border-blue-300 shadow-inner";
+                    document.getElementById('voucherIcon').className = "w-6 h-6 text-blue-600";
+                    desc.className = "text-xs text-blue-800 font-medium leading-relaxed";
+                    title.className = "text-sm font-black text-blue-900 mb-0.5";
+                }
+                
+                // Input Tetap Disabled Tapi Tampak Nyatu dengan Tema
+                inputKode.classList.add('opacity-60');
+                
+                // Animasi Teks
+                desc.innerHTML = pesanBerhasil;
+                document.getElementById('voucherBox').classList.add('animate-pop');
+
+                lucide.createIcons();
+                calculate(); // Hitung ulang harga
+                
+            }, 1200); 
+        }
+        // =======================================================
+
+        const formatRupiah = (num) => {
+            if (num === 0 || isNaN(num)) return "0";
+            return new Intl.NumberFormat('id-ID').format(num);
+        };
+        const parseRupiah = (str) => parseInt(str.replace(/[^0-9]/g, '')) || 0;
+
+        const handleInput = (e) => {
+            let val = parseRupiah(e.target.value);
+            e.target.value = val === 0 ? '' : formatRupiah(val);
+            calculate();
+        };
+
+        priceInput.addEventListener('input', handleInput);
+        dpInput.addEventListener('input', handleInput);
+
+        // Logika Kalkulasi Utama
+        function calculate() {
+            const price = parseRupiah(priceInput.value);
+            const dp = parseRupiah(dpInput.value);
+            const tenorRadio = document.querySelector('input[name="tenor"]:checked');
+            const tenor = tenorRadio ? parseInt(tenorRadio.value) : 6;
+
+            resTenorText.innerText = `${tenor} bulan`;
+            
+            // Label status di sebelah "Biaya Layanan"
+            if (currentMargin < 25) {
+                resMarginText.innerText = `Diskon Promo (${currentMargin}%)`;
+                resMarginText.className = "text-[9px] font-bold bg-amber-500/20 px-1.5 py-0.5 rounded text-amber-400 uppercase tracking-wider border border-amber-500/30";
+                dotMargin.className = "absolute left-[-5px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-amber-400 hidden sm:block shadow-[0_0_8px_rgba(251,191,36,0.8)]";
+            } else {
+                resMarginText.innerText = `Standar OJK (${currentMargin}%)`;
+                resMarginText.className = "text-[9px] font-bold bg-blue-500/20 px-1.5 py-0.5 rounded text-blue-300 uppercase tracking-wider border border-blue-500/30";
+                dotMargin.className = "absolute left-[-5px] top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-blue-400 hidden sm:block shadow-[0_0_8px_rgba(96,165,250,0.8)]";
+            }
+
+            if (price === 0) {
+                resPokok.innerText = "Rp 0"; resMargin.innerText = "Rp 0"; resTotal.innerText = "Rp 0"; resCicilan.innerText = "0";
+                return;
+            }
+
+            let pokokPembiayaan = price - dp;
+            if (pokokPembiayaan < 0) pokokPembiayaan = 0; 
+
+            // Hitung Biaya Layanan menggunakan currentMargin
+            const nominalMargin = pokokPembiayaan * (currentMargin / 100);
+            const totalHargaJual = pokokPembiayaan + nominalMargin;
+            const cicilanBulan = totalHargaJual / tenor;
+
+            // Render Teks Output
+            resPokok.innerText = `Rp ${formatRupiah(pokokPembiayaan)}`;
+            resMargin.innerText = `Rp ${formatRupiah(nominalMargin)}`;
+            resTotal.innerText = `Rp ${formatRupiah(totalHargaJual)}`;
+            
+            const cicilanFormatted = formatRupiah(Math.round(cicilanBulan));
+            resCicilan.innerText = cicilanFormatted;
+
+            // Auto Resize font cicilan jika angkanya puluhan juta agar tidak nabrak
+            if (cicilanFormatted.length > 9) {
+                resCicilan.classList.remove('text-5xl', 'sm:text-6xl', 'lg:text-7xl');
+                resCicilan.classList.add('text-4xl', 'sm:text-5xl', 'lg:text-5xl');
+            } else {
+                resCicilan.classList.remove('text-4xl', 'sm:text-5xl', 'lg:text-5xl');
+                resCicilan.classList.add('text-5xl', 'sm:text-6xl', 'lg:text-7xl');
+            }
+        }
+
+        // Kalkulasi di awal load
+        calculate();
+    </script>
+</body>
+</html>

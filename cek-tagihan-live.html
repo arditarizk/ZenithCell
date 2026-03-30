@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html lang="id" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cek Tagihan - Zenith Cell</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px; -webkit-tap-highlight-color: transparent; }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); }
+        input:focus-within { outline: 2px solid #10b981; outline-offset: 2px; transition: all 0.2s ease; }
+        .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid #fff; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="text-slate-800 pb-20 pt-4 px-4 flex justify-center selection:bg-emerald-200">
+
+    <main class="w-full max-w-md relative z-10 flex flex-col min-h-[90vh]">
+        
+        <!-- Header -->
+        <header class="mb-6 flex flex-col items-center text-center mt-4 relative">
+            <a href="index.html" class="absolute top-0 left-0 p-2 bg-white rounded-full text-slate-500 hover:bg-slate-100 shadow-sm border border-slate-100 transition-colors z-20">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </a>
+            
+            <div class="w-16 h-16 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-2xl shadow-lg shadow-emerald-500/30 flex items-center justify-center mb-4">
+                <i data-lucide="search" class="w-8 h-8 text-white"></i>
+            </div>
+            <h1 class="font-extrabold text-slate-900 text-2xl tracking-tight leading-none">Cek Tagihan</h1>
+            <p class="text-xs font-semibold text-emerald-600 mt-1 uppercase tracking-widest">Sistem Transparan Zenith Cell</p>
+        </header>
+
+        <!-- Area Pencarian -->
+        <section class="glass-panel p-5 sm:p-6 rounded-[2rem] mb-6 relative z-20">
+            <form id="searchForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide text-center">Masukkan Nomor WhatsApp Anda</label>
+                    <div class="relative flex items-center mt-3">
+                        <i data-lucide="phone" class="absolute left-4 w-5 h-5 text-slate-400 pointer-events-none"></i>
+                        <input type="tel" id="waInput" placeholder="Contoh: 081234567890" required class="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-slate-900 font-bold text-lg focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all outline-none text-center tracking-wide">
+                    </div>
+                </div>
+                <button type="submit" id="btnSearch" class="w-full bg-slate-900 hover:bg-black text-white font-extrabold py-4 px-6 rounded-2xl shadow-xl shadow-slate-900/20 active:scale-[0.98] transition-all flex justify-center items-center gap-2 border border-slate-700">
+                    <i data-lucide="search" id="searchIcon" class="w-5 h-5"></i>
+                    <span id="searchText">Cari Data Saya</span>
+                </button>
+            </form>
+        </section>
+
+        <!-- Area Hasil Pencarian -->
+        <section id="resultContainer" class="hidden flex-col gap-5 opacity-0 translate-y-4 transition-all duration-500">
+            <div class="glass-panel p-6 rounded-[2rem] relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="flex items-center gap-3 mb-5 border-b border-slate-100 pb-4">
+                    <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 shrink-0"><i data-lucide="user" class="w-5 h-5"></i></div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pelanggan Aktif</p>
+                        <h2 class="font-black text-slate-800 text-lg" id="resNama">...</h2>
+                    </div>
+                </div>
+                <div class="text-center mb-6">
+                    <p class="text-xs font-bold text-slate-500 mb-1">Sisa Tagihan Berjalan</p>
+                    <div class="flex items-start justify-center gap-1">
+                        <span class="text-emerald-500 font-bold mt-1.5">Rp</span>
+                        <span class="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter" id="resSisa">0</span>
+                    </div>
+                    <div id="statusLunas" class="hidden mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full border border-emerald-200 uppercase tracking-wider">
+                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Alhamdulillah Lunas
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between items-end mb-1.5">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Progress</span>
+                        <span class="text-xs font-black text-emerald-600" id="resPersen">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden shadow-inner">
+                        <div id="resBar" class="bg-gradient-to-r from-emerald-400 to-teal-500 h-full rounded-full transition-all duration-1000 w-0"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tombol WA -->
+            <a id="btnWA" href="#" target="_blank" class="w-full bg-[#25D366] hover:bg-[#1ebd5a] text-white font-extrabold py-4 px-6 rounded-2xl shadow-xl shadow-[#25D366]/30 active:scale-[0.98] transition-all flex justify-center items-center gap-2">
+                <i data-lucide="message-circle" class="w-5 h-5"></i>
+                <span class="tracking-wide">Konfirmasi Bayar Via WA</span>
+            </a>
+        </section>
+
+        <!-- Toast Error -->
+        <div id="errorToast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-5 py-3 rounded-2xl shadow-xl shadow-red-600/20 text-sm font-bold transition-all duration-300 opacity-0 -translate-y-4 pointer-events-none z-[100] flex items-center gap-2">
+            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+            <span id="errorMsg">Terjadi kesalahan!</span>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // ===============================================================
+        // 1 API GOOGLE SCRIPT ANDA DITARUH DI SINI:
+        const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbzuM2qfXalz8Z8tYPHYXPd0SuB-FAxGOo39CjB_LgLysp2IAvAsprUc8kTDdcFPTx1M/exec";
+        const NOMOR_WA_ADMIN = "62895410571547"; // Ganti nomor Anda
+        // ===============================================================
+
+        const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num);
+        const form = document.getElementById('searchForm');
+        const waInput = document.getElementById('waInput');
+        const btnSearch = document.getElementById('btnSearch');
+        const resultContainer = document.getElementById('resultContainer');
+        const errorToast = document.getElementById('errorToast');
+
+        const showError = (msg) => {
+            document.getElementById('errorMsg').innerText = msg;
+            errorToast.classList.remove('opacity-0', '-translate-y-4');
+            setTimeout(() => { errorToast.classList.add('opacity-0', '-translate-y-4'); }, 3000);
+        };
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            let inputStr = waInput.value.replace(/[^0-9]/g, '');
+            if(inputStr === "") return;
+            
+            if (GOOGLE_API_URL === "TARUH_URL_GOOGLE_SCRIPT_ANDA_DISINI") {
+                showError("Sistem belum dihubungkan ke Database."); return;
+            }
+
+            btnSearch.disabled = true;
+            document.getElementById('searchText').innerText = "Mencari ke Server...";
+            document.getElementById('searchIcon').outerHTML = `<div class="spinner" id="searchIcon"></div>`;
+            resultContainer.classList.add('hidden', 'opacity-0', 'translate-y-4');
+
+            try {
+                const response = await fetch(`${GOOGLE_API_URL}?wa=${inputStr}`);
+                const result = await response.json();
+
+                btnSearch.disabled = false;
+                document.getElementById('searchText').innerText = "Cari Data Saya";
+                document.getElementById('searchIcon').outerHTML = `<i data-lucide="search" id="searchIcon" class="w-5 h-5"></i>`;
+                lucide.createIcons();
+
+                if (result.status === "success") {
+                    tampilkanHasil(result.data);
+                } else {
+                    showError("Nomor Anda tidak terdaftar di sistem.");
+                }
+            } catch (error) {
+                btnSearch.disabled = false;
+                document.getElementById('searchText').innerText = "Cari Data Saya";
+                document.getElementById('searchIcon').outerHTML = `<i data-lucide="search" id="searchIcon" class="w-5 h-5"></i>`;
+                lucide.createIcons();
+                showError("Gagal terhubung. Pastikan internet stabil.");
+            }
+        });
+
+        function tampilkanHasil(data) {
+            let hutangVal = parseInt(data.totalHutang) || 0;
+            let bayarVal = parseInt(data.terbayar) || 0;
+            let sisa = hutangVal - bayarVal;
+            if (sisa < 0) sisa = 0;
+            
+            let persenLunas = hutangVal > 0 ? Math.round((bayarVal / hutangVal) * 100) : 0;
+            if (persenLunas > 100) persenLunas = 100;
+
+            document.getElementById('resNama').innerText = data.nama;
+            document.getElementById('resSisa').innerText = formatRupiah(sisa);
+            document.getElementById('resPersen').innerText = `${persenLunas}%`;
+
+            const waText = `Halo Admin Zenith Cell, saya ${data.nama} mau konfirmasi pembayaran cicilan. Sisa tagihan saya di web Rp ${formatRupiah(sisa)}.`;
+            document.getElementById('btnWA').href = `https://api.whatsapp.com/send?phone=${NOMOR_WA_ADMIN}&text=${encodeURIComponent(waText)}`;
+
+            const bar = document.getElementById('resBar');
+            bar.style.width = '0%';
+            resultContainer.classList.remove('hidden');
+            
+            if (sisa === 0 && hutangVal > 0) {
+                document.getElementById('statusLunas').classList.remove('hidden');
+                document.getElementById('resSisa').classList.replace('text-slate-900', 'text-emerald-500');
+            } else {
+                document.getElementById('statusLunas').classList.add('hidden');
+                document.getElementById('resSisa').classList.replace('text-emerald-500', 'text-slate-900');
+            }
+
+            void resultContainer.offsetWidth; 
+            resultContainer.classList.remove('opacity-0', 'translate-y-4');
+            setTimeout(() => { bar.style.width = `${persenLunas}%`; }, 300);
+        }
+    </script>
+</body>
+</html>
+
+
