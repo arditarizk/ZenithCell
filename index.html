@@ -48,8 +48,6 @@
                         <div class="flex-grow"><h3 class="font-bold text-white text-base mb-1">Kasir POS (Penerimaan)</h3><p class="text-xs text-slate-400">Catat setoran cicilan masuk.</p></div>
                         <i data-lucide="unlock" class="w-4 h-4 text-slate-500 opacity-0 group-hover:opacity-100"></i>
                     </button>
-
-                    <!-- SEKARANG MENJADI DASHBOARD 2-IN-1 -->
                     <button onclick="requestPin('reminder-tagihan-dinamis.html')" class="menu-card w-full text-left bg-slate-800/80 border border-slate-700 p-5 rounded-3xl flex items-center gap-5 group hover:border-amber-500/50">
                         <div class="w-14 h-14 bg-slate-700 rounded-[1.25rem] flex items-center justify-center text-slate-300 shrink-0 group-hover:bg-amber-500 group-hover:text-white"><i data-lucide="clipboard-check" class="w-6 h-6"></i></div>
                         <div class="flex-grow"><h3 class="font-bold text-white text-base mb-1">Dashboard Admin Server</h3><p class="text-xs text-slate-400">ACC Pengajuan & Reminder Tagihan.</p></div>
@@ -61,6 +59,7 @@
         <footer class="text-center text-slate-400 text-[10px] font-bold pb-4"><p>Zenith Cell Ecosystem &copy; 2026</p></footer>
     </main>
 
+    <!-- Modal PIN -->
     <div id="pinModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity">
         <div class="bg-white rounded-[2rem] p-8 max-w-[340px] w-full text-center shadow-2xl transform scale-95 transition-transform relative" id="pinCard">
             <button onclick="closePin()" class="absolute top-4 right-4 p-2 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -86,8 +85,7 @@
                 pinInput.classList.replace('border-slate-200', 'border-emerald-500'); document.querySelector('#pinCard h3').innerText = "Akses Diberikan";
                 setTimeout(() => { window.location.href = pendingUrl; }, 400); 
             } else {
-                pinError.classList.remove('hidden'); pinInput.classList.replace('border-slate-200', 'border-red-500');
-                pinInput.value = ""; pinInput.focus();
+                pinError.classList.remove('hidden'); pinInput.classList.replace('border-slate-200', 'border-red-500'); pinInput.value = ""; pinInput.focus();
             }
         });
     </script>

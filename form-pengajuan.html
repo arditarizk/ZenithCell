@@ -29,6 +29,7 @@
 
         <form id="pengajuanForm">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-8">
+                
                 <div class="space-y-6 lg:space-y-8">
                     <!-- KARTU 1 -->
                     <section class="glass-panel p-6 sm:p-8 rounded-[2rem]">
@@ -64,7 +65,7 @@
                                 </div>
                                 <div class="grid grid-cols-2 gap-3">
                                     <input type="text" id="daruratNama" minlength="3" placeholder="Nama Kerabat" required class="w-full p-3 bg-white border rounded-lg text-sm font-bold outline-none">
-                                    <input type="tel" id="daruratWa" pattern="^(08|628|\+628)\d{8,11}$" placeholder="No. HP" required class="w-full p-3 bg-white border rounded-lg text-sm font-bold outline-none">
+                                    <input type="tel" id="daruratWa" placeholder="No. HP" required class="w-full p-3 bg-white border rounded-lg text-sm font-bold outline-none">
                                 </div>
                             </div>
                         </div>
@@ -93,7 +94,7 @@
 
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 mb-1.5">Durasi Tenor</label>
-                                <div class="flex overflow-x-auto no-scrollbar gap-2.5 pb-2 pt-1 snap-x snap-mandatory px-1 -mx-1">
+                                <div class="flex overflow-x-auto no-scrollbar gap-2.5 pb-2 pt-1 snap-x snap-mandatory px-1 -mx-1" id="tenorContainer">
                                     <script>
                                         for(let i=1; i<=12; i++) {
                                             let isChecked = i === 6 ? 'checked' : '';
@@ -120,36 +121,36 @@
         </form>
     </main>
 
-    <!-- Modal Sukses -->
+    <!-- Modal Sukses WA -->
     <div id="instruksiModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity">
         <div class="bg-white rounded-[2.5rem] p-8 max-w-[340px] w-full text-center shadow-2xl transform scale-95 transition-transform" id="instruksiCard">
             <div class="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-5"><i data-lucide="check-circle" class="w-10 h-10 text-emerald-500"></i></div>
             <h3 class="text-xl font-extrabold text-slate-900 mb-2">Pendaftaran Sukses!</h3>
-            <p class="text-slate-500 text-sm mb-6">Mohon lanjut ke WhatsApp Admin untuk melampirkan Foto KTP & Jaminan.</p>
-            <button id="btnLanjutWA" class="w-full bg-[#25D366] text-white font-extrabold py-4 rounded-2xl flex justify-center gap-2"><i data-lucide="message-circle" class="w-5 h-5"></i> Lanjut Buka WA</button>
+            <p class="text-slate-500 text-sm mb-6">Mohon kembali ke WhatsApp Admin untuk melampirkan Foto KTP & Jaminan.</p>
+            <button onclick="tutupModal()" class="w-full bg-slate-100 text-slate-600 font-bold py-3 rounded-xl">Tutup Formulir</button>
         </div>
     </div>
 
-    <!-- Toast Error -->
-    <div id="toastError" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-5 py-3 rounded-2xl opacity-0 -translate-y-4 pointer-events-none z-[100] flex gap-3 border"><i data-lucide="info" class="w-5 h-5 text-amber-400 shrink-0"></i><span id="errorMsg">Isian tidak valid!</span></div>
-
     <script>
         lucide.createIcons();
+
         const formatRupiah = (num) => (num === 0 || isNaN(num)) ? "" : new Intl.NumberFormat('id-ID').format(num);
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
 
+        // TANGKAP DATA DARI URL (VIA NETLIFY)
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.has('harga')) document.getElementById('hargaBarang').value = formatRupiah(parseInt(urlParams.get('harga')));
             if(urlParams.has('dp')) { let dpVal = parseInt(urlParams.get('dp')); if(dpVal > 0) document.getElementById('dpBarang').value = formatRupiah(dpVal); }
             if(urlParams.has('tenor')) {
-                let radio = document.querySelector(`input[name="tenor"][value="${urlParams.get('tenor')} Bulan"]`);
-                if(radio) { radio.checked = true; radio.scrollIntoView({inline: "center"}); }
+                let t = urlParams.get('tenor');
+                let radio = document.querySelector(`input[name="tenor"][value="${t} Bulan"]`);
+                if(radio) { radio.checked = true; radio.scrollIntoView({inline: "center", behavior: "smooth"}); }
             }
         });
 
         async function pickContact() {
-            if (!('contacts' in navigator && 'ContactsManager' in window)) return showError("Browser Anda tidak mendukung fitur ini.");
+            if (!('contacts' in navigator && 'ContactsManager' in window)) return alert("Browser Anda tidak mendukung pilih kontak.");
             try {
                 const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
                 if (contacts.length > 0) {
@@ -165,23 +166,16 @@
         ['hargaBarang', 'dpBarang'].forEach(id => { document.getElementById(id).addEventListener('input', (e) => { e.target.value = formatRupiah(parseRupiah(e.target.value)); }); });
 
         const modal = document.getElementById('instruksiModal');
-        const showError = (msg) => { document.getElementById('errorMsg').innerText = msg; document.getElementById('toastError').classList.remove('opacity-0', '-translate-y-4'); setTimeout(() => { document.getElementById('toastError').classList.add('opacity-0', '-translate-y-4'); }, 3000); };
 
-        function validateForm() {
-            const nama = document.getElementById('nama').value;
-            if (nama.length < 3 || /\d/.test(nama)) { showError("Nama minimal 3 huruf tanpa angka!"); return false; }
-            return true;
-        }
-
-        let pendingWaLink = "";
-
-        document.getElementById('pengajuanForm').addEventListener('submit', async (e) => {
+        document.getElementById('pengajuanForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            if (!validateForm()) return;
+
+            const nama = document.getElementById('nama').value;
+            if (nama.length < 3 || /\d/.test(nama)) { alert("Nama tidak valid!"); return; }
 
             const btnSubmit = document.getElementById('btnSubmitForm'), txtBtn = document.getElementById('txtBtnSubmit');
             const data = {
-                nama: document.getElementById('nama').value, nik: document.getElementById('nik').value, wa: document.getElementById('wa').value,
+                nama: nama, nik: document.getElementById('nik').value, wa: document.getElementById('wa').value,
                 alamat: document.getElementById('alamat').value, pekerjaan: document.getElementById('pekerjaan').value, gaji: document.getElementById('gaji').value,
                 daruratNama: document.getElementById('daruratNama').value, daruratWa: document.getElementById('daruratWa').value,
                 barang: document.getElementById('barang').value, harga: document.getElementById('hargaBarang').value, dp: document.getElementById('dpBarang').value || "0",
@@ -193,25 +187,24 @@
 
             btnSubmit.disabled = true; txtBtn.innerText = "Mengirim Data...";
 
-            try {
-                fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payloadSheet) });
+            // TEMBAK DATA KE GOOGLE SHEET
+            fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payloadSheet) });
                 
-                const teksPesan = `*PENGAJUAN SYARIAH ZENITH CELL* 📝\nNama: ${data.nama}\nNIK: ${data.nik}\nBarang: *${data.barang}*\nHarga: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor}\nJatuh Tempo: *Tgl ${data.jatuhTempo} Tiap Bulan*\n\n_Mohon dilanjut Min. Berikut saya lampirkan KTP & Jaminan:_`;
-                pendingWaLink = `https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(teksPesan)}`;
+            // BUKA WHATSAPP LANGSUNG (ANTI-BLOCKER)
+            const teksPesan = `*PENGAJUAN SYARIAH ZENITH CELL* 📝\nNama: ${data.nama}\nNIK: ${data.nik}\nBarang: *${data.barang}*\nHarga: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor}\nJatuh Tempo: *Tgl ${data.jatuhTempo} Tiap Bulan*\n\n_Mohon dilanjut Min. Berikut saya lampirkan KTP & Jaminan:_`;
+            const waLink = `https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(teksPesan)}`;
+            window.open(waLink, '_blank');
 
-                btnSubmit.disabled = false; txtBtn.innerText = "Ajukan Pembiayaan";
-                modal.classList.remove('hidden'); modal.classList.add('flex');
-                setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
-            } catch (err) {
-                btnSubmit.disabled = false; txtBtn.innerText = "Ajukan Pembiayaan"; showError("Koneksi gagal. Coba lagi.");
-            }
+            // Tampilkan Sukses
+            btnSubmit.disabled = false; txtBtn.innerText = "Ajukan Pembiayaan";
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
         });
 
-        document.getElementById('btnLanjutWA').addEventListener('click', () => {
-            window.open(pendingWaLink, '_blank');
+        function tutupModal() {
             modal.classList.add('opacity-0'); setTimeout(() => modal.classList.replace('flex','hidden'), 300);
             document.getElementById('pengajuanForm').reset(); 
-        });
+        }
     </script>
 </body>
 </html>

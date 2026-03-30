@@ -12,7 +12,7 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); }
-        .radio-peer:checked + div { transform: scale(0.95); background-color: #10b981; color: white; border-color: #10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        .radio-peer:checked + div { transform: scale(0.95); background-color: #10b981; color: white; border-color: #10b981; }
         .radio-peer-month:checked + div { transform: scale(0.95); background-color: #0f172a; color: white; }
         .no-scrollbar::-webkit-scrollbar { display: none; } 
         .spinner { border: 3px solid rgba(16, 185, 129, 0.3); border-top: 3px solid #10b981; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
@@ -31,7 +31,6 @@
             <button onclick="fetchCustomersFromCloud()" id="btnRefresh" class="p-2.5 bg-emerald-50 rounded-xl text-emerald-600"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
         </header>
 
-        <!-- Status Pelanggan Terpilih -->
         <div id="customerStats" class="mb-5 glass-panel p-4 rounded-3xl hidden">
             <div class="flex justify-between mb-3 border-b pb-2"><span class="text-xs font-bold text-slate-500">Rekap <span id="statName" class="text-emerald-600 font-black">...</span></span></div>
             <div class="flex justify-between items-end">
@@ -41,9 +40,9 @@
         </div>
 
         <section class="glass-panel p-5 rounded-[2rem] mb-6">
-            <form id="posForm" class="space-y-6">
+            <form id="posForm" class="space-y-6" onsubmit="event.preventDefault();">
                 <div>
-                    <label class="block text-[11px] font-extrabold text-slate-400 mb-2">1. PELANGGAN AKTIF (CLOUD)</label>
+                    <label class="block text-[11px] font-extrabold text-slate-400 mb-2">1. PELANGGAN DARI GOOGLE SHEETS</label>
                     <div id="customerGrid" class="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto no-scrollbar p-1"></div>
                 </div>
                 <div>
@@ -51,37 +50,25 @@
                     <div class="flex overflow-x-auto no-scrollbar gap-2 pb-1" id="cicilanGrid"></div>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-extrabold text-slate-400 mb-2">3. NOMINAL UANG MASUK</label>
+                    <label class="block text-[11px] font-extrabold text-slate-400 mb-2">3. NOMINAL MASUK</label>
                     <div class="relative flex items-center">
                         <span class="absolute left-5 text-emerald-500 font-black text-xl">Rp</span>
-                        <input type="text" id="nominal" inputmode="numeric" class="w-full pl-14 pr-5 py-4 bg-slate-50 border rounded-2xl text-slate-900 font-black text-2xl focus:border-emerald-500 outline-none">
+                        <input type="text" id="nominal" inputmode="numeric" class="w-full pl-14 pr-5 py-4 bg-slate-50 border rounded-2xl text-slate-900 font-black text-2xl outline-none">
                     </div>
                 </div>
             </form>
         </section>
 
-        <!-- Preview Kuitansi -->
         <section class="mb-8 opacity-0 translate-y-2 transition-all duration-300" id="previewContainer">
             <div class="flex flex-col items-end px-2"><div class="p-4 bg-[#d9fdd3] rounded-2xl rounded-tr-none text-[#111b21] max-w-[95%]"><p id="previewText" class="whitespace-pre-wrap text-[12px] font-medium"></p></div></div>
         </section>
 
         <div class="fixed bottom-6 left-0 right-0 px-4 z-40 flex justify-center pointer-events-none">
             <button id="btnProses" class="pointer-events-auto w-full max-w-md bg-slate-900 text-white font-extrabold py-4 rounded-[1.25rem] active:scale-95 flex justify-center gap-2 border">
-                <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i><span id="txtBtnProses">Simpan Transaksi</span>
+                <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i><span id="txtBtnProses">Catat & Kirim WA Kuitansi</span>
             </button>
         </div>
     </main>
-
-    <!-- Modal Sukses WA -->
-    <div id="modalSukses" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity">
-        <div class="bg-white rounded-[2rem] p-8 max-w-[320px] w-full text-center transform scale-95 transition-transform" id="cardSukses">
-            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="check-circle" class="w-8 h-8 text-emerald-600"></i></div>
-            <h3 class="text-xl font-extrabold text-slate-900 mb-2">Transaksi Tercatat!</h3>
-            <p class="text-slate-500 text-sm mb-6">Data masuk ke Google Sheets. Silakan kirim kuitansi digital ke pelanggan.</p>
-            <button id="btnLanjutWA" class="w-full bg-[#25D366] text-white font-extrabold py-3.5 rounded-xl flex justify-center gap-2 active:scale-95"><i data-lucide="message-circle" class="w-5 h-5"></i> Kirim WA Kuitansi</button>
-            <button onclick="tutupModal()" class="mt-4 text-xs font-bold text-slate-400">Tutup Saja</button>
-        </div>
-    </div>
 
     <script>
         lucide.createIcons();
@@ -140,41 +127,23 @@
             return { pesan, custData, cicilan: cicilanEl.value, nominalVal, sisaBaru };
         };
 
-        let linkWaTertunda = "";
-
         document.getElementById('btnProses').addEventListener('click', () => {
-            const data = renderPreview(); if (!data) return;
-            const btnSubmit = document.getElementById('btnProses');
+            const data = renderPreview(); if (!data) { alert("Pilih Pelanggan & Masukkan Nominal!"); return; }
 
             const payloadKasir = { tipe: "KAS_MASUK_CICILAN", waktu: new Date().toLocaleString('id-ID'), nama: data.custData.nama, whatsapp: data.custData.wa, cicilanKe: data.cicilan, nominalMasuk: data.nominalVal, catatan: "Sisa: Rp " + formatRupiah(data.sisaBaru) };
 
-            btnSubmit.disabled = true; document.getElementById('txtBtnProses').innerText = "Menyinkronkan ke Cloud...";
-
-            // Tembak Data Langsung Lanjut (No Cors gak bisa ditunggu hasil jsonnya)
+            // TEMBAK DATA KE SERVER
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payloadKasir) });
 
-            // Persiapkan Link WA
-            linkWaTertunda = `https://api.whatsapp.com/send?phone=${data.custData.wa}&text=${encodeURIComponent(data.pesan)}`;
+            // BUKA WA LANGSUNG AGAR TIDAK DIBLOKIR BROWSER
+            const waLink = `https://api.whatsapp.com/send?phone=${data.custData.wa}&text=${encodeURIComponent(data.pesan)}`;
+            window.open(waLink, '_blank');
 
-            // Tampilkan Modal setelah 1 detik
-            setTimeout(() => {
-                btnSubmit.disabled = false; document.getElementById('txtBtnProses').innerText = "Simpan Transaksi";
-                document.getElementById('modalSukses').classList.replace('hidden', 'flex');
-                setTimeout(() => document.getElementById('modalSukses').classList.remove('opacity-0'), 10);
-            }, 1000);
-        });
-
-        document.getElementById('btnLanjutWA').addEventListener('click', () => {
-            window.open(linkWaTertunda, '_blank');
-            tutupModal(); fetchCustomersFromCloud();
+            // Reset UI
+            fetchCustomersFromCloud(); 
             document.getElementById('nominal').value = '';
             document.getElementById('previewContainer').classList.add('opacity-0');
         });
-
-        function tutupModal() {
-            document.getElementById('modalSukses').classList.add('opacity-0');
-            setTimeout(() => document.getElementById('modalSukses').classList.replace('flex', 'hidden'), 300);
-        }
 
         fetchCustomersFromCloud(); 
     </script>

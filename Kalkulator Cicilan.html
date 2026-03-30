@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Panggil File Config -->
     <script src="config.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; -webkit-tap-highlight-color: transparent; }
@@ -125,7 +124,7 @@
                 else {
                     const gachaPool = [25,25,25,25,25,24,24,24,24,24,23,23,23,23,23,22,22,21,21,20];
                     currentMargin = gachaPool[Math.floor(Math.random() * gachaPool.length)];
-                    if (currentMargin === 25) { isDiskon = false; pesanBerhasil = `Biaya normal OJK <b class="text-blue-700 bg-blue-100 px-1 rounded">25%</b>. Transaksi aman diawasi negara! 🛡️`; } 
+                    if (currentMargin === 25) { isDiskon = false; pesanBerhasil = `Biaya normal OJK <b class="text-blue-700 bg-blue-100 px-1 rounded">25%</b>. Transaksi aman! 🛡️`; } 
                     else if (kodeVal !== "") { pesanBerhasil = `Kode hangus, tapi undian hoki memotong biaya menjadi <b class="text-emerald-700 bg-emerald-100 px-1 rounded">${currentMargin}%</b> 🥳`; } 
                     else { pesanBerhasil = `Hoki! Hasil undian otomatis memotong biaya layanan menjadi <b class="text-emerald-700 bg-emerald-100 px-1 rounded">${currentMargin}%</b> 🎉`; }
                 }
@@ -171,7 +170,8 @@
             if(harga === 0) return alert("Isi Harga Gadget!");
             const dp = parseRupiah(dpInput.value);
             const tenor = document.querySelector('input[name="tenor"]:checked').value;
-            // LEMPAR DATA OTOMATIS KE FORM
+            
+            // LEMPAR DATA VIA URL (Sangat mulus di Netlify)
             window.location.href = `form-pengajuan.html?harga=${harga}&dp=${dp}&tenor=${tenor}`;
         }
     </script>
