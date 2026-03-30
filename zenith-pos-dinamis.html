@@ -7,13 +7,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="config.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); }
         .radio-peer:checked + div { transform: scale(0.95); background-color: #10b981; color: white; border-color: #10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
         .radio-peer-month:checked + div { transform: scale(0.95); background-color: #0f172a; color: white; }
-        .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; } 
         .spinner { border: 3px solid rgba(16, 185, 129, 0.3); border-top: 3px solid #10b981; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
@@ -27,8 +28,7 @@
                 <div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shrink-0"><i data-lucide="smartphone-charging" class="w-6 h-6 text-emerald-400"></i></div>
                 <div><h1 class="font-black text-xl leading-none">Kasir POS</h1><p class="text-[10px] font-bold text-emerald-600 uppercase">Cloud Sync</p></div>
             </div>
-            <!-- Tombol Refresh API -->
-            <button onclick="fetchCustomersFromCloud()" id="btnRefresh" class="p-2.5 bg-emerald-50 rounded-xl border border-emerald-100 text-emerald-600"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
+            <button onclick="fetchCustomersFromCloud()" id="btnRefresh" class="p-2.5 bg-emerald-50 rounded-xl text-emerald-600"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
         </header>
 
         <!-- Status Pelanggan Terpilih -->
@@ -43,21 +43,15 @@
         <section class="glass-panel p-5 rounded-[2rem] mb-6">
             <form id="posForm" class="space-y-6">
                 <div>
-                    <label class="block text-[11px] font-extrabold text-slate-400 mb-2">1. PELANGGAN DARI GOOGLE SHEETS</label>
-                    <div id="customerGrid" class="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto no-scrollbar p-1">
-                        <!-- Loading/Data masuk sini -->
-                    </div>
+                    <label class="block text-[11px] font-extrabold text-slate-400 mb-2">1. PELANGGAN AKTIF (CLOUD)</label>
+                    <div id="customerGrid" class="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto no-scrollbar p-1"></div>
                 </div>
-
                 <div>
                     <label class="block text-[11px] font-extrabold text-slate-400 mb-2">2. CICILAN KE</label>
-                    <div class="flex overflow-x-auto no-scrollbar gap-2 pb-1" id="cicilanGrid">
-                        <!-- Diisi otomatis via JS saat pelanggan diklik agar sesuai dengan cicilan yg berjalan -->
-                    </div>
+                    <div class="flex overflow-x-auto no-scrollbar gap-2 pb-1" id="cicilanGrid"></div>
                 </div>
-
                 <div>
-                    <label class="block text-[11px] font-extrabold text-slate-400 mb-2">3. NOMINAL MASUK</label>
+                    <label class="block text-[11px] font-extrabold text-slate-400 mb-2">3. NOMINAL UANG MASUK</label>
                     <div class="relative flex items-center">
                         <span class="absolute left-5 text-emerald-500 font-black text-xl">Rp</span>
                         <input type="text" id="nominal" inputmode="numeric" class="w-full pl-14 pr-5 py-4 bg-slate-50 border rounded-2xl text-slate-900 font-black text-2xl focus:border-emerald-500 outline-none">
@@ -66,53 +60,53 @@
             </form>
         </section>
 
-        <!-- Preview Kuitansi WA -->
+        <!-- Preview Kuitansi -->
         <section class="mb-8 opacity-0 translate-y-2 transition-all duration-300" id="previewContainer">
-            <div class="flex flex-col items-end px-2"><div class="wa-bubble p-4 text-[#111b21] max-w-[95%]"><p id="previewText" class="whitespace-pre-wrap text-[12px] font-medium"></p></div></div>
+            <div class="flex flex-col items-end px-2"><div class="p-4 bg-[#d9fdd3] rounded-2xl rounded-tr-none text-[#111b21] max-w-[95%]"><p id="previewText" class="whitespace-pre-wrap text-[12px] font-medium"></p></div></div>
         </section>
 
         <div class="fixed bottom-6 left-0 right-0 px-4 z-40 flex justify-center pointer-events-none">
             <button id="btnProses" class="pointer-events-auto w-full max-w-md bg-slate-900 text-white font-extrabold py-4 rounded-[1.25rem] active:scale-95 flex justify-center gap-2 border">
-                <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i><span id="txtBtnProses">Simpan Data & Kirim WA</span>
+                <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i><span id="txtBtnProses">Simpan Transaksi</span>
             </button>
         </div>
     </main>
 
+    <!-- Modal Sukses WA -->
+    <div id="modalSukses" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity">
+        <div class="bg-white rounded-[2rem] p-8 max-w-[320px] w-full text-center transform scale-95 transition-transform" id="cardSukses">
+            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="check-circle" class="w-8 h-8 text-emerald-600"></i></div>
+            <h3 class="text-xl font-extrabold text-slate-900 mb-2">Transaksi Tercatat!</h3>
+            <p class="text-slate-500 text-sm mb-6">Data masuk ke Google Sheets. Silakan kirim kuitansi digital ke pelanggan.</p>
+            <button id="btnLanjutWA" class="w-full bg-[#25D366] text-white font-extrabold py-3.5 rounded-xl flex justify-center gap-2 active:scale-95"><i data-lucide="message-circle" class="w-5 h-5"></i> Kirim WA Kuitansi</button>
+            <button onclick="tutupModal()" class="mt-4 text-xs font-bold text-slate-400">Tutup Saja</button>
+        </div>
+    </div>
+
     <script>
         lucide.createIcons();
-        const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbzuM2qfXalz8Z8tYPHYXPd0SuB-FAxGOo39CjB_LgLysp2IAvAsprUc8kTDdcFPTx1M/exec";
-
         let dbCustomers = [];
         const formatRupiah = (num) => (num === 0 || isNaN(num)) ? "0" : new Intl.NumberFormat('id-ID').format(num);
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
 
-        // FETCH DATA DARI GOOGLE SHEETS
         async function fetchCustomersFromCloud() {
             const grid = document.getElementById('customerGrid');
-            const icon = document.querySelector('#btnRefresh i');
-            icon.classList.add('animate-spin');
-            grid.innerHTML = `<div class="col-span-3 text-center py-4 text-emerald-600 text-xs font-bold flex justify-center gap-2"><div class="spinner"></div> Menarik data dari Cloud...</div>`;
+            document.querySelector('#btnRefresh i').classList.add('animate-spin');
+            grid.innerHTML = `<div class="col-span-3 text-center py-4 text-emerald-600 text-xs font-bold flex justify-center"><div class="spinner"></div> Menarik data...</div>`;
             
-            if(GOOGLE_API_URL === "https://script.google.com/macros/s/AKfycbzuM2qfXalz8Z8tYPHYXPd0SuB-FAxGOo39CjB_LgLysp2IAvAsprUc8kTDdcFPTx1M/exec") {
-                grid.innerHTML = `<div class="col-span-3 text-center py-4 text-red-500 text-xs font-bold">Error: Hubungkan URL Google Script!</div>`; return;
-            }
-
             try {
-                const res = await fetch(GOOGLE_API_URL + "?action=getAll");
+                const res = await fetch(CONFIG.API_URL + "?action=getAll");
                 const result = await res.json();
-                
-                dbCustomers = result.data.filter(c => c.nama && c.wa); // Filter yg valid
+                dbCustomers = result.data.filter(c => c.nama && c.wa && (c.hutang - c.terbayar) > 0); 
                 
                 grid.innerHTML = '';
-                if(dbCustomers.length === 0) grid.innerHTML = `<div class="col-span-3 text-center py-2 text-slate-400 text-xs">Tab Pelanggan di Excel masih kosong.</div>`;
+                if(dbCustomers.length === 0) grid.innerHTML = `<div class="col-span-3 text-center py-2 text-slate-400 text-xs">Semua pelanggan Lunas.</div>`;
                 
                 dbCustomers.forEach(cust => {
                     grid.innerHTML += `<label class="cursor-pointer relative"><input type="radio" name="pelanggan" value="${cust.wa}" class="radio-peer sr-only" onchange="selectCustomer('${cust.wa}')"><div class="w-full py-3 px-2 rounded-xl bg-slate-50 border-2 border-slate-100 text-slate-600 font-bold text-sm text-center truncate">${cust.nama}</div></label>`;
                 });
-            } catch(e) {
-                grid.innerHTML = `<div class="col-span-3 text-center py-2 text-red-500 text-xs">Gagal load data internet.</div>`;
-            }
-            icon.classList.remove('animate-spin');
+            } catch(e) { grid.innerHTML = `<div class="col-span-3 text-center py-2 text-red-500 text-xs">Gagal memuat API.</div>`; }
+            document.querySelector('#btnRefresh i').classList.remove('animate-spin');
         }
 
         document.getElementById('nominal').addEventListener('input', (e) => { e.target.value = formatRupiah(parseRupiah(e.target.value)); renderPreview(); });
@@ -125,28 +119,20 @@
             document.getElementById('statName').innerText = cust.nama;
             document.getElementById('statSisa').innerText = `Rp ${formatRupiah(sisa)}`;
             document.getElementById('statTerbayar').innerText = `Rp ${formatRupiah(cust.terbayar)}`;
-            
-            // Set input nominal ke rekomendasi cicilan per bulan
             document.getElementById('nominal').value = formatRupiah(cust.cicilanPerBulan);
             
-            // Otomatis bikin tombol cicilan yg berjalan
-            const gridBulan = document.getElementById('cicilanGrid');
-            gridBulan.innerHTML = `<label class="cursor-pointer relative shrink-0"><input type="radio" name="cicilan" value="${cust.cicilanKe}" class="radio-peer-month sr-only" checked onchange="renderPreview()"><div class="px-4 h-12 rounded-xl bg-slate-50 border-2 border-slate-100 text-slate-600 font-black text-sm flex items-center shadow-sm">Bulan Ke-${cust.cicilanKe}</div></label> <label class="cursor-pointer relative shrink-0"><input type="radio" name="cicilan" value="Pelunasan" class="radio-peer-month sr-only" onchange="renderPreview()"><div class="px-4 h-12 rounded-xl bg-slate-50 border-2 border-slate-100 text-slate-600 font-black text-sm flex items-center shadow-sm">Lunas Full</div></label>`;
-
+            document.getElementById('cicilanGrid').innerHTML = `<label class="cursor-pointer relative shrink-0"><input type="radio" name="cicilan" value="${cust.cicilanKe}" class="radio-peer-month sr-only" checked onchange="renderPreview()"><div class="px-4 h-12 rounded-xl bg-slate-50 border-2 border-slate-100 text-slate-600 font-black text-sm flex items-center shadow-sm">Bulan Ke-${cust.cicilanKe}</div></label> <label class="cursor-pointer relative shrink-0"><input type="radio" name="cicilan" value="Pelunasan" class="radio-peer-month sr-only" onchange="renderPreview()"><div class="px-4 h-12 rounded-xl bg-slate-50 border-2 border-slate-100 text-slate-600 font-black text-sm flex items-center shadow-sm">Lunas Full</div></label>`;
             renderPreview();
         };
 
         const renderPreview = () => {
-            const custRadio = document.querySelector('input[name="pelanggan"]:checked');
-            const cicilanEl = document.querySelector('input[name="cicilan"]:checked');
-            const nominalVal = parseRupiah(document.getElementById('nominal').value);
-
+            const custRadio = document.querySelector('input[name="pelanggan"]:checked'), cicilanEl = document.querySelector('input[name="cicilan"]:checked'), nominalVal = parseRupiah(document.getElementById('nominal').value);
             if (!custRadio || !cicilanEl || nominalVal === 0) { document.getElementById('previewContainer').classList.add('opacity-0'); return null; } 
             else { document.getElementById('previewContainer').classList.remove('opacity-0'); }
 
             const custData = dbCustomers.find(c => c.wa === custRadio.value);
             const terbayarBaru = custData.terbayar + nominalVal;
-            let sisaBaru = custData.hutang - terbayarBaru;
+            let sisaBaru = custData.hutang - terbayarBaru; if(sisaBaru < 0) sisaBaru = 0;
             
             const tgl = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
             const pesan = `*KUITANSI RESMI - ZENITH CELL* 📱\n-----------------------------------\n📅 Tgl : ${tgl}\n👤 Dari : *${custData.nama}*\n-----------------------------------\n*PEMBAYARAN:*\n📌 Cicilan : *${cicilanEl.value}*\n💵 Nominal : *Rp ${formatRupiah(nominalVal)}*\n-----------------------------------\n📊 *SISA TAGIHAN:*\nTotal Terbayar: Rp ${formatRupiah(terbayarBaru)}\n*Sisa Hutang : Rp ${formatRupiah(sisaBaru)}*\n-----------------------------------\n_Terima kasih!_`;
@@ -154,25 +140,43 @@
             return { pesan, custData, cicilan: cicilanEl.value, nominalVal, sisaBaru };
         };
 
-        document.getElementById('btnProses').addEventListener('click', async () => {
+        let linkWaTertunda = "";
+
+        document.getElementById('btnProses').addEventListener('click', () => {
             const data = renderPreview(); if (!data) return;
             const btnSubmit = document.getElementById('btnProses');
 
-            // Payload akan merubah tab Transaksi dan tab Pelanggan (Terbayar) di GSheet
-            const payloadKasir = { tipe: "KAS_MASUK_CICILAN", waktu: new Date().toLocaleString('id-ID'), nama: data.custData.nama, whatsapp: data.custData.wa, cicilanKe: data.cicilan, nominalMasuk: data.nominalVal };
+            const payloadKasir = { tipe: "KAS_MASUK_CICILAN", waktu: new Date().toLocaleString('id-ID'), nama: data.custData.nama, whatsapp: data.custData.wa, cicilanKe: data.cicilan, nominalMasuk: data.nominalVal, catatan: "Sisa: Rp " + formatRupiah(data.sisaBaru) };
 
             btnSubmit.disabled = true; document.getElementById('txtBtnProses').innerText = "Menyinkronkan ke Cloud...";
 
-            if (GOOGLE_API_URL !== "https://script.google.com/macros/s/AKfycbzuM2qfXalz8Z8tYPHYXPd0SuB-FAxGOo39CjB_LgLysp2IAvAsprUc8kTDdcFPTx1M/exec") {
-                try { await fetch(GOOGLE_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payloadKasir) }); } catch(e){}
-            }
+            // Tembak Data Langsung Lanjut (No Cors gak bisa ditunggu hasil jsonnya)
+            fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payloadKasir) });
 
-            btnSubmit.disabled = false; document.getElementById('txtBtnProses').innerText = "Simpan Data & Kirim WA";
-            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(data.pesan)}`, '_blank');
-            fetchCustomersFromCloud(); // Refresh data layar kasir
+            // Persiapkan Link WA
+            linkWaTertunda = `https://api.whatsapp.com/send?phone=${data.custData.wa}&text=${encodeURIComponent(data.pesan)}`;
+
+            // Tampilkan Modal setelah 1 detik
+            setTimeout(() => {
+                btnSubmit.disabled = false; document.getElementById('txtBtnProses').innerText = "Simpan Transaksi";
+                document.getElementById('modalSukses').classList.replace('hidden', 'flex');
+                setTimeout(() => document.getElementById('modalSukses').classList.remove('opacity-0'), 10);
+            }, 1000);
         });
 
-        fetchCustomersFromCloud(); // Run on Startup
+        document.getElementById('btnLanjutWA').addEventListener('click', () => {
+            window.open(linkWaTertunda, '_blank');
+            tutupModal(); fetchCustomersFromCloud();
+            document.getElementById('nominal').value = '';
+            document.getElementById('previewContainer').classList.add('opacity-0');
+        });
+
+        function tutupModal() {
+            document.getElementById('modalSukses').classList.add('opacity-0');
+            setTimeout(() => document.getElementById('modalSukses').classList.replace('flex', 'hidden'), 300);
+        }
+
+        fetchCustomersFromCloud(); 
     </script>
 </body>
 </html>

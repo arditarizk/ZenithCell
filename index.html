@@ -8,246 +8,86 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f8fafc;
-            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-            background-size: 24px 24px;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
-        }
-
-        /* Efek Hover Modern */
-        .menu-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .menu-card:hover {
-            transform: translateY(-4px);
-        }
-
-        /* Animasi goyang untuk PIN salah */
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-5px); }
-            40%, 80% { transform: translateX(5px); }
-        }
-        .animate-shake {
-            animation: shake 0.4s ease-in-out;
-        }
-
-        input[type=password]::-webkit-inner-spin-button, 
-        input[type=password]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; -webkit-tap-highlight-color: transparent; }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); }
+        .menu-card { transition: all 0.3s ease; } .menu-card:hover { transform: translateY(-4px); }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+        .animate-shake { animation: shake 0.4s ease-in-out; }
+        input[type=password]::-webkit-inner-spin-button, input[type=password]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body class="text-slate-800 pb-10 pt-6 px-4 sm:px-8 flex justify-center selection:bg-emerald-200 min-h-screen">
 
-    <!-- Container Utama: max-w-5xl agar lebar dan lega di desktop/tablet -->
     <main class="w-full max-w-5xl relative z-10 flex flex-col">
-        
-        <!-- Header Branding -->
         <header class="mb-10 flex flex-col items-center text-center mt-4 relative">
             <div class="absolute top-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] -z-10"></div>
-            
-            <div class="w-24 h-24 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-3xl shadow-xl shadow-emerald-500/30 flex items-center justify-center mb-5 transform -rotate-3 hover:rotate-0 transition-transform duration-300">
-                <i data-lucide="smartphone" class="w-12 h-12 text-white"></i>
-            </div>
-            <h1 class="font-extrabold text-slate-900 text-4xl sm:text-5xl tracking-tight leading-none mb-2">Zenith Cell</h1>
+            <div class="w-24 h-24 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-3xl shadow-xl flex items-center justify-center mb-5 transform -rotate-3 hover:rotate-0 transition-transform"><i data-lucide="smartphone" class="w-12 h-12 text-white"></i></div>
+            <h1 class="font-extrabold text-slate-900 text-4xl sm:text-5xl tracking-tight mb-2">Zenith Cell</h1>
             <p class="text-sm font-bold text-emerald-600 uppercase tracking-widest bg-white/60 backdrop-blur-md px-4 py-1.5 rounded-full border border-emerald-100">Ekosistem Pembiayaan Syariah</p>
         </header>
 
-        <!-- Grid Pembagian Area (Kiri: Publik, Kanan: Admin) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 w-full mb-10 flex-grow">
-            
-            <!-- ZONA 1: LAYANAN PELANGGAN (PUBLIK) -->
+            <!-- ZONA 1: PUBLIK -->
             <section class="bg-white/40 p-6 sm:p-8 rounded-[2.5rem] border border-white shadow-sm">
-                <h2 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-5 ml-2 flex items-center gap-2">
-                    <span class="p-1.5 bg-slate-200/50 rounded-lg"><i data-lucide="users" class="w-4 h-4 text-slate-500"></i></span>
-                    Layanan Pelanggan
-                </h2>
+                <h2 class="text-xs font-extrabold text-slate-400 uppercase mb-5 ml-2 flex items-center gap-2"><span class="p-1.5 bg-slate-200/50 rounded-lg"><i data-lucide="users" class="w-4 h-4 text-slate-500"></i></span> Layanan Pelanggan</h2>
                 <div class="space-y-4">
-                    
-                    <!-- Menu 1: Kalkulator Cicilan -->
-                    <a href="Kalkulator Cicilan.html" class="menu-card glass-panel p-5 rounded-3xl flex items-center gap-5 group hover:border-emerald-300 hover:shadow-emerald-500/10">
-                        <div class="w-14 h-14 bg-emerald-50 rounded-[1.25rem] flex items-center justify-center text-emerald-600 shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                            <i data-lucide="calculator" class="w-6 h-6"></i>
-                        </div>
-                        <div class="flex-grow">
-                            <h3 class="font-bold text-slate-800 text-base mb-1 group-hover:text-emerald-700 transition-colors">Kalkulator Simulasi</h3>
-                            <p class="text-xs font-medium text-slate-500 leading-relaxed">Cek estimasi budget dan cicilan per bulan secara transparan.</p>
-                        </div>
-                        <i data-lucide="arrow-right" class="w-5 h-5 text-slate-300 group-hover:text-emerald-500 transition-colors shrink-0"></i>
-                    </a>
-
-                    <!-- Menu 2: Form Pengajuan -->
-                    <a href="form-pengajuan.html" class="menu-card glass-panel p-5 rounded-3xl flex items-center gap-5 group hover:border-teal-300 hover:shadow-teal-500/10">
-                        <div class="w-14 h-14 bg-teal-50 rounded-[1.25rem] flex items-center justify-center text-teal-600 shrink-0 group-hover:bg-teal-500 group-hover:text-white transition-colors">
-                            <i data-lucide="file-check-2" class="w-6 h-6"></i>
-                        </div>
-                        <div class="flex-grow">
-                            <h3 class="font-bold text-slate-800 text-base mb-1 group-hover:text-teal-700 transition-colors">Form Pengajuan Resmi</h3>
-                            <p class="text-xs font-medium text-slate-500 leading-relaxed">Isi data diri untuk disurvei dan diproses akadnya.</p>
-                        </div>
-                        <i data-lucide="arrow-right" class="w-5 h-5 text-slate-300 group-hover:text-teal-500 transition-colors shrink-0"></i>
-                    </a>
-
-                    <!-- Menu 3: Cek Tagihan -->
-                    <a href="cek-tagihan-live.html" class="menu-card glass-panel p-5 rounded-3xl flex items-center gap-5 group hover:border-blue-300 hover:shadow-blue-500/10">
-                        <div class="w-14 h-14 bg-blue-50 rounded-[1.25rem] flex items-center justify-center text-blue-600 shrink-0 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                            <i data-lucide="search" class="w-6 h-6"></i>
-                        </div>
-                        <div class="flex-grow">
-                            <h3 class="font-bold text-slate-800 text-base mb-1 group-hover:text-blue-700 transition-colors">Cek Sisa Tagihan</h3>
-                            <p class="text-xs font-medium text-slate-500 leading-relaxed">Pantau cicilan berjalan Anda secara mandiri via WhatsApp.</p>
-                        </div>
-                        <i data-lucide="arrow-right" class="w-5 h-5 text-slate-300 group-hover:text-blue-500 transition-colors shrink-0"></i>
-                    </a>
-
+                    <a href="Kalkulator Cicilan.html" class="menu-card glass-panel p-5 rounded-3xl flex items-center gap-5 group hover:border-emerald-300"><div class="w-14 h-14 bg-emerald-50 rounded-[1.25rem] flex items-center justify-center text-emerald-600 shrink-0"><i data-lucide="calculator" class="w-6 h-6"></i></div><div class="flex-grow"><h3 class="font-bold text-slate-800 text-base mb-1">Kalkulator Simulasi</h3><p class="text-xs text-slate-500">Cek estimasi budget dan cicilan.</p></div><i data-lucide="arrow-right" class="w-5 h-5 text-slate-300"></i></a>
+                    <a href="form-pengajuan.html" class="menu-card glass-panel p-5 rounded-3xl flex items-center gap-5 group hover:border-teal-300"><div class="w-14 h-14 bg-teal-50 rounded-[1.25rem] flex items-center justify-center text-teal-600 shrink-0"><i data-lucide="file-check-2" class="w-6 h-6"></i></div><div class="flex-grow"><h3 class="font-bold text-slate-800 text-base mb-1">Form Pengajuan Resmi</h3><p class="text-xs text-slate-500">Isi data diri untuk disurvei Admin.</p></div><i data-lucide="arrow-right" class="w-5 h-5 text-slate-300"></i></a>
+                    <a href="cek-tagihan-live.html" class="menu-card glass-panel p-5 rounded-3xl flex items-center gap-5 group hover:border-blue-300"><div class="w-14 h-14 bg-blue-50 rounded-[1.25rem] flex items-center justify-center text-blue-600 shrink-0"><i data-lucide="search" class="w-6 h-6"></i></div><div class="flex-grow"><h3 class="font-bold text-slate-800 text-base mb-1">Cek Sisa Tagihan</h3><p class="text-xs text-slate-500">Pantau cicilan Anda via WhatsApp.</p></div><i data-lucide="arrow-right" class="w-5 h-5 text-slate-300"></i></a>
                 </div>
             </section>
 
-            <!-- ZONA 2: MANAJEMEN ADMIN (PRIVAT) -->
-            <section class="bg-slate-900 p-6 sm:p-8 rounded-[2.5rem] shadow-2xl shadow-slate-900/20 relative overflow-hidden">
+            <!-- ZONA 2: ADMIN -->
+            <section class="bg-slate-900 p-6 sm:p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
                 <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-emerald-500/20 rounded-full blur-[80px] pointer-events-none"></div>
-
-                <h2 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-5 ml-2 flex items-center gap-2 relative z-10">
-                    <span class="p-1.5 bg-slate-800 rounded-lg"><i data-lucide="lock" class="w-4 h-4 text-slate-300"></i></span>
-                    Otoritas Internal
-                </h2>
+                <h2 class="text-xs font-extrabold text-slate-400 uppercase mb-5 ml-2 flex items-center gap-2 relative z-10"><span class="p-1.5 bg-slate-800 rounded-lg"><i data-lucide="lock" class="w-4 h-4 text-slate-300"></i></span> Otoritas Internal</h2>
+                
                 <div class="space-y-4 relative z-10">
-                    
-                    <!-- Menu 4: Kasir POS -->
-                    <button onclick="requestPin('zenith-pos-dinamis.html')" class="menu-card w-full text-left bg-slate-800/80 backdrop-blur-sm border border-slate-700 p-5 rounded-3xl flex items-center gap-5 group hover:border-emerald-500/50 hover:bg-slate-800">
-                        <div class="w-14 h-14 bg-slate-700 rounded-[1.25rem] flex items-center justify-center text-slate-300 shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                            <i data-lucide="smartphone-charging" class="w-6 h-6"></i>
-                        </div>
-                        <div class="flex-grow">
-                            <h3 class="font-bold text-white text-base mb-1">Kasir POS (Penerimaan)</h3>
-                            <p class="text-xs font-medium text-slate-400 leading-relaxed">Catat setoran cicilan masuk & kirim struk WA otomatis.</p>
-                        </div>
-                        <i data-lucide="unlock" class="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors shrink-0 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0"></i>
+                    <button onclick="requestPin('zenith-pos-dinamis.html')" class="menu-card w-full text-left bg-slate-800/80 border border-slate-700 p-5 rounded-3xl flex items-center gap-5 group hover:border-emerald-500/50">
+                        <div class="w-14 h-14 bg-slate-700 rounded-[1.25rem] flex items-center justify-center text-slate-300 shrink-0 group-hover:bg-emerald-500 group-hover:text-white"><i data-lucide="smartphone-charging" class="w-6 h-6"></i></div>
+                        <div class="flex-grow"><h3 class="font-bold text-white text-base mb-1">Kasir POS (Penerimaan)</h3><p class="text-xs text-slate-400">Catat setoran cicilan masuk.</p></div>
+                        <i data-lucide="unlock" class="w-4 h-4 text-slate-500 opacity-0 group-hover:opacity-100"></i>
                     </button>
 
-                    <!-- Menu 5: Dashboard Penagihan -->
-                    <button onclick="requestPin('reminder-tagihan-dinamis.html')" class="menu-card w-full text-left bg-slate-800/80 backdrop-blur-sm border border-slate-700 p-5 rounded-3xl flex items-center gap-5 group hover:border-amber-500/50 hover:bg-slate-800">
-                        <div class="w-14 h-14 bg-slate-700 rounded-[1.25rem] flex items-center justify-center text-slate-300 shrink-0 group-hover:bg-amber-500 group-hover:text-white transition-colors">
-                            <i data-lucide="bell-ring" class="w-6 h-6"></i>
-                        </div>
-                        <div class="flex-grow">
-                            <h3 class="font-bold text-white text-base mb-1">Dashboard Penagihan</h3>
-                            <p class="text-xs font-medium text-slate-400 leading-relaxed">Pantau arus kas, jatuh tempo & kirim tagihan massal.</p>
-                        </div>
-                        <i data-lucide="unlock" class="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition-colors shrink-0 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0"></i>
+                    <!-- SEKARANG MENJADI DASHBOARD 2-IN-1 -->
+                    <button onclick="requestPin('reminder-tagihan-dinamis.html')" class="menu-card w-full text-left bg-slate-800/80 border border-slate-700 p-5 rounded-3xl flex items-center gap-5 group hover:border-amber-500/50">
+                        <div class="w-14 h-14 bg-slate-700 rounded-[1.25rem] flex items-center justify-center text-slate-300 shrink-0 group-hover:bg-amber-500 group-hover:text-white"><i data-lucide="clipboard-check" class="w-6 h-6"></i></div>
+                        <div class="flex-grow"><h3 class="font-bold text-white text-base mb-1">Dashboard Admin Server</h3><p class="text-xs text-slate-400">ACC Pengajuan & Reminder Tagihan.</p></div>
+                        <i data-lucide="unlock" class="w-4 h-4 text-slate-500 opacity-0 group-hover:opacity-100"></i>
                     </button>
-
                 </div>
             </section>
         </div>
-
-        <!-- Footer -->
-        <footer class="text-center text-slate-400 text-[10px] font-bold tracking-wide uppercase pb-4">
-            <p>Zenith Cell Ecosystem &copy; 2026</p>
-            <p class="mt-1">Developed by <span class="text-slate-600">Ardita Rizki Fauzi</span></p>
-        </footer>
-
+        <footer class="text-center text-slate-400 text-[10px] font-bold pb-4"><p>Zenith Cell Ecosystem &copy; 2026</p></footer>
     </main>
 
-    <!-- ==================== MODAL PIN KEAMANAN ==================== -->
-    <div id="pinModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-[2rem] p-8 max-w-[340px] w-full text-center shadow-2xl transform scale-95 transition-transform duration-300 relative border border-slate-100" id="pinCard">
-            
-            <button onclick="closePin()" class="absolute top-4 right-4 p-2 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200 transition-colors">
-                <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
-
-            <div class="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-5 mt-2 shadow-lg shadow-slate-900/20">
-                <i data-lucide="shield-check" class="w-8 h-8 text-emerald-400"></i>
-            </div>
+    <div id="pinModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity">
+        <div class="bg-white rounded-[2rem] p-8 max-w-[340px] w-full text-center shadow-2xl transform scale-95 transition-transform relative" id="pinCard">
+            <button onclick="closePin()" class="absolute top-4 right-4 p-2 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200"><i data-lucide="x" class="w-4 h-4"></i></button>
+            <div class="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-5 mt-2"><i data-lucide="shield-check" class="w-8 h-8 text-emerald-400"></i></div>
             <h3 class="text-xl font-extrabold text-slate-900 mb-1">Otorisasi Admin</h3>
-            <p class="text-slate-500 text-xs font-medium mb-6">Silakan masukkan PIN untuk mengakses data internal perusahaan.</p>
-
             <form id="pinForm" class="space-y-4">
-                <input type="password" id="pinInput" inputmode="numeric" maxlength="6" placeholder="• • • • • •" required class="w-full text-center px-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl text-slate-900 font-black text-2xl tracking-[0.5em] focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all outline-none">
-                
-                <p id="pinError" class="text-[10px] font-bold text-red-500 hidden mt-1 transition-all">PIN Salah! Akses ditolak.</p>
-
-                <button type="submit" class="w-full bg-slate-900 hover:bg-black text-white font-extrabold py-3.5 px-6 rounded-xl shadow-xl shadow-slate-900/20 active:scale-[0.98] transition-all flex justify-center items-center gap-2 mt-2">
-                    <i data-lucide="key" class="w-4 h-4 text-emerald-400"></i> Konfirmasi PIN
-                </button>
+                <input type="password" id="pinInput" inputmode="numeric" maxlength="6" placeholder="• • • • • •" required class="w-full text-center px-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl font-black text-2xl tracking-[0.5em] outline-none mt-4">
+                <p id="pinError" class="text-[10px] font-bold text-red-500 hidden mt-1">PIN Salah! Akses ditolak.</p>
+                <button type="submit" class="w-full bg-slate-900 text-white font-extrabold py-3.5 px-6 rounded-xl active:scale-95 flex justify-center gap-2 mt-2"><i data-lucide="key" class="w-4 h-4 text-emerald-400"></i> Konfirmasi PIN</button>
             </form>
         </div>
     </div>
 
     <script>
         lucide.createIcons();
-
-        // KONFIGURASI PIN ADMIN (Default: 123456)
-        const PIN_ADMIN = "123456";
-        let pendingUrl = ""; 
-
-        const pinModal = document.getElementById('pinModal');
-        const pinCard = document.getElementById('pinCard');
-        const pinInput = document.getElementById('pinInput');
-        const pinForm = document.getElementById('pinForm');
-        const pinError = document.getElementById('pinError');
-
-        function requestPin(targetUrl) {
-            pendingUrl = targetUrl;
-            pinInput.value = ""; 
-            pinError.classList.add('hidden'); 
-            pinCard.classList.remove('animate-shake');
-
-            pinModal.classList.remove('hidden');
-            pinModal.classList.add('flex');
-            
-            setTimeout(() => {
-                pinModal.classList.remove('opacity-0');
-                pinCard.classList.remove('scale-95');
-                pinInput.focus(); 
-            }, 10);
-        }
-
-        function closePin() {
-            pinModal.classList.add('opacity-0');
-            pinCard.classList.add('scale-95');
-            setTimeout(() => {
-                pinModal.classList.add('hidden');
-                pinModal.classList.remove('flex');
-            }, 300);
-            pendingUrl = "";
-        }
-
+        const PIN_ADMIN = "123456"; let pendingUrl = ""; 
+        const pinModal = document.getElementById('pinModal'), pinCard = document.getElementById('pinCard'), pinInput = document.getElementById('pinInput'), pinForm = document.getElementById('pinForm'), pinError = document.getElementById('pinError');
+        function requestPin(targetUrl) { pendingUrl = targetUrl; pinInput.value = ""; pinError.classList.add('hidden'); pinModal.classList.replace('hidden', 'flex'); setTimeout(() => { pinModal.classList.remove('opacity-0'); pinCard.classList.remove('scale-95'); pinInput.focus(); }, 10); }
+        function closePin() { pinModal.classList.add('opacity-0'); pinCard.classList.add('scale-95'); setTimeout(() => { pinModal.classList.replace('flex', 'hidden'); }, 300); }
         pinForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const inputtedPin = pinInput.value;
-
-            if (inputtedPin === PIN_ADMIN) {
-                pinInput.classList.replace('border-slate-200', 'border-emerald-500');
-                pinInput.classList.replace('text-slate-900', 'text-emerald-600');
-                document.querySelector('#pinCard h3').innerText = "Akses Diberikan";
-                document.querySelector('#pinCard p').innerText = "Mengalihkan halaman...";
-                
+            if (pinInput.value === PIN_ADMIN) {
+                pinInput.classList.replace('border-slate-200', 'border-emerald-500'); document.querySelector('#pinCard h3').innerText = "Akses Diberikan";
                 setTimeout(() => { window.location.href = pendingUrl; }, 400); 
             } else {
-                pinError.classList.remove('hidden');
-                pinInput.classList.replace('border-slate-200', 'border-red-500');
-                pinInput.classList.replace('focus:border-emerald-500', 'focus:border-red-500');
-                
-                pinCard.classList.remove('animate-shake');
-                void pinCard.offsetWidth; 
-                pinCard.classList.add('animate-shake');
-                
-                setTimeout(() => {
-                    pinInput.classList.replace('border-red-500', 'border-slate-200');
-                    pinInput.classList.replace('focus:border-red-500', 'focus:border-emerald-500');
-                    pinInput.value = "";
-                    pinInput.focus();
-                }, 1500);
+                pinError.classList.remove('hidden'); pinInput.classList.replace('border-slate-200', 'border-red-500');
+                pinInput.value = ""; pinInput.focus();
             }
         });
     </script>
