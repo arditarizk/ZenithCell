@@ -114,7 +114,7 @@
                 document.getElementById('searchText').innerText = "Cari Data Saya"; 
                 document.getElementById('searchIcon').outerHTML = `<i data-lucide="search" id="searchIcon" class="w-5 h-5"></i>`; 
                 lucide.createIcons();
-                alert("Koneksi gagal. Pastikan Anda terhubung ke internet.");
+                alert("Error Sistem: " + error.message);
             }
         });
 
