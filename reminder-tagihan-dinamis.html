@@ -51,15 +51,13 @@
         </div>
     </main>
 
-    <div id="accModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0"><div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-6 pb-8 shadow-2xl transform translate-y-full transition-transform" id="accModalContent"><div class="flex justify-between items-center mb-5 border-b pb-3"><h2 class="font-black text-lg text-slate-900"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 inline"></i> Finalisasi Akad</h2><button onclick="closeModalAcc()" class="p-2 bg-slate-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div><div class="space-y-4"><div class="bg-slate-50 p-3 rounded-xl border border-slate-200"><p class="text-[10px] text-slate-500 font-bold uppercase">Pelanggan</p><p class="font-black text-slate-800 text-sm" id="accNama">...</p><p class="text-xs text-slate-600 mt-1" id="accBarang">...</p></div><div><label class="block text-xs font-bold text-slate-500 mb-1.5">Total Harga Jual</label><div class="relative flex items-center"><span class="absolute left-4 text-slate-400 font-bold">Rp</span><input type="text" id="accTotalHutang" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-xl font-bold text-lg outline-none"></div></div><div><label class="block text-xs font-bold text-slate-500 mb-1.5">Cicilan Per Bulan</label><div class="relative flex items-center"><span class="absolute left-4 text-slate-400 font-bold">Rp</span><input type="text" id="accCicilan" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-xl font-bold text-lg outline-none"></div></div></div><button id="btnKonfirmasiAcc" class="w-full mt-6 bg-emerald-500 text-white font-extrabold py-4 px-6 rounded-xl active:scale-95 transition-all flex justify-center gap-2"><i data-lucide="user-check" class="w-5 h-5"></i> ACC & Pindah ke Kasir</button></div></div>
+    <div id="accModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0"><div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-6 pb-8 shadow-2xl transform translate-y-full transition-transform" id="accModalContent"><div class="flex justify-between items-center mb-5 border-b pb-3"><h2 class="font-black text-lg text-slate-900"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 inline"></i> Finalisasi Akad</h2><button onclick="closeModalAcc()" class="p-2 bg-slate-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div><div class="space-y-4"><div class="bg-slate-50 p-3 rounded-xl border border-slate-200"><p class="text-[10px] text-slate-500 font-bold uppercase">Pelanggan</p><p class="font-black text-slate-800 text-sm" id="accNama">...</p><p class="text-xs text-slate-600 mt-1" id="accBarang">...</p></div><div><label class="block text-xs font-bold text-slate-500 mb-1.5">Total Harga Jual (Sudah Termasuk Margin)</label><div class="relative flex items-center"><span class="absolute left-4 text-slate-400 font-bold">Rp</span><input type="text" id="accTotalHutang" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-xl font-bold text-lg outline-none"></div></div><div><label class="block text-xs font-bold text-slate-500 mb-1.5">Cicilan Per Bulan</label><div class="relative flex items-center"><span class="absolute left-4 text-slate-400 font-bold">Rp</span><input type="text" id="accCicilan" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-xl font-bold text-lg outline-none"></div></div></div><button id="btnKonfirmasiAcc" class="w-full mt-6 bg-emerald-500 text-white font-extrabold py-4 px-6 rounded-xl active:scale-95 transition-all flex justify-center gap-2"><i data-lucide="user-check" class="w-5 h-5"></i> ACC & Pindah ke Kasir</button></div></div>
     <div id="waModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0"><div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-6 pb-8 shadow-2xl transform translate-y-full transition-transform" id="waModalContent"><div class="flex justify-between items-center mb-5 border-b pb-3"><h2 class="font-black text-lg text-slate-900"><i data-lucide="send" class="w-5 h-5 text-emerald-500 inline"></i> Pesan WA</h2><button onclick="closeWaModal()" class="p-2 bg-slate-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div><textarea id="pesanWA" rows="8" class="w-full p-4 bg-emerald-50/50 rounded-2xl text-[13px] font-medium outline-none resize-none"></textarea><button id="btnKirimWA" class="w-full mt-5 bg-[#25D366] text-white font-extrabold py-4 rounded-xl active:scale-95 flex justify-center gap-2"><i data-lucide="message-circle" class="w-5 h-5"></i> Buka & Kirim WA</button></div></div>
 
     <script>
         lucide.createIcons();
         
-        // ==========================================
-        // TARUH LINK URL API KAMU LANGSUNG DI SINI!
-        // ==========================================
+        // URL API DITANAM LANGSUNG
         const API_URL = "https://script.google.com/macros/s/AKfycbxHjPjVfzD2QYpxGgZLAC0jhBReN4nFFw-Yi1vfY4rG_BgF6zTxr0_J0IwFR7WDyH3T/exec"; 
         
         const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num);
@@ -82,14 +80,24 @@
         async function fetchAntrean() {
             const container = document.getElementById('pendingList');
             document.querySelector('#btnRefresh i').classList.add('animate-spin');
-            container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-xs font-bold text-slate-500">Menarik data langsung dari server...</p></div>`;
+            container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-xs font-bold text-slate-500">Mencari Data Antrean...</p></div>`;
 
             try {
-                // KITA TEMBAK LANGSUNG KE URL, NO CACHE!
                 const res = await fetch(API_URL + "?action=getPending&nocache=" + Date.now());
-                const result = await res.json();
-                const data = result.data || [];
                 
+                // DETEKTIF 1: Cek apakah diblokir/dilempar ke halaman login Google
+                if (res.redirected && res.url.includes('accounts.google.com')) {
+                    throw new Error("🚨 DIBLOKIR GOOGLE: Pengaturan Deploy salah! Pilih 'Siapa saja' (Anyone), BUKAN akun Google.");
+                }
+
+                const textData = await res.text();
+                let result;
+                
+                // DETEKTIF 2: Cek apakah responsnya gagal jadi JSON
+                try { result = JSON.parse(textData); } 
+                catch(err) { throw new Error("🚨 ERROR DATA: Server tidak mengirim JSON. Pastikan Link API sudah URL Deploy yang terbaru."); }
+
+                const data = result.data || [];
                 document.getElementById('countPending').innerText = `${data.length} Menunggu`;
                 container.innerHTML = '';
                 
@@ -97,7 +105,11 @@
                     container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-slate-400">Belum ada pengajuan masuk.</p></div>`; 
                 } else {
                     data.forEach((p) => {
-                        let hargaBersih = parseRupiah(p.harga.toString()) - parseRupiah(p.dp.toString());
+                        // DETEKTIF 3: Cegah kode crash jika ada kolom yang kosong di Sheet
+                        let p_harga = (p.harga !== undefined && p.harga !== null) ? p.harga.toString() : "0";
+                        let p_dp = (p.dp !== undefined && p.dp !== null) ? p.dp.toString() : "0";
+                        
+                        let hargaBersih = parseRupiah(p_harga) - parseRupiah(p_dp);
                         let rekTotal = hargaBersih + (hargaBersih * 0.25);
                         let tenorAngka = parseInt(p.tenor) || 6;
                         let rekBulan = Math.round(rekTotal / tenorAngka);
@@ -118,7 +130,12 @@
                 }
                 lucide.createIcons();
             } catch(e) { 
-                container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-red-200 bg-red-50"><p class="text-sm font-bold text-red-500">Gagal terhubung ke API. Pastikan internet lancar.</p></div>`; 
+                // DETEKTIF 4: Menangkap error utama
+                let errorMsg = e.message;
+                if(e.name === 'TypeError' && e.message.includes('fetch')) {
+                    errorMsg = "🚨 CORS ERROR (DIBLOKIR): 100% karena Deploy di Google Script belum di-set 'Siapa saja' (Anyone).";
+                }
+                container.innerHTML = `<div class="text-center py-6 bg-red-50 rounded-3xl border border-red-200 shadow-sm"><p class="text-xs font-extrabold text-red-600 px-4 leading-relaxed">${errorMsg}</p></div>`; 
             }
             document.querySelector('#btnRefresh i').classList.remove('animate-spin');
         }
@@ -161,7 +178,15 @@
 
             try {
                 const res = await fetch(API_URL + "?action=getAll&nocache=" + Date.now());
-                const result = await res.json();
+                
+                if (res.redirected && res.url.includes('accounts.google.com')) {
+                    throw new Error("🚨 DIBLOKIR GOOGLE: Pengaturan Deploy salah! Pilih 'Siapa saja' (Anyone), BUKAN akun Google.");
+                }
+
+                const textData = await res.text();
+                let result;
+                try { result = JSON.parse(textData); } 
+                catch(err) { throw new Error("🚨 ERROR DATA: Server tidak mengirim JSON. Cek ulang link API-mu."); }
                 
                 if (result.status === "error") {
                     container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-amber-500">${result.message || "Belum ada data."}</p></div>`;
@@ -202,7 +227,13 @@
                     });
                 }
                 lucide.createIcons();
-            } catch(e) { container.innerHTML = `<p class="text-center text-red-500 text-xs">Gagal internet.</p>`; }
+            } catch(e) { 
+                let errorMsg = e.message;
+                if(e.name === 'TypeError' && e.message.includes('fetch')) {
+                    errorMsg = "🚨 CORS ERROR (DIBLOKIR): 100% karena Deploy di Google Script belum di-set 'Siapa saja' (Anyone).";
+                }
+                container.innerHTML = `<div class="text-center py-6 bg-red-50 rounded-3xl border border-red-200 shadow-sm"><p class="text-xs font-extrabold text-red-600 px-4 leading-relaxed">${errorMsg}</p></div>`;  
+            }
             document.querySelector('#btnRefresh i').classList.remove('animate-spin');
         }
 
