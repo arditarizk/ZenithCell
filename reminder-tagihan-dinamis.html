@@ -135,7 +135,8 @@
             container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-xs font-bold text-slate-500">Mencari Antrean...</p></div>`;
 
             try {
-                const res = await fetch(CONFIG.API_URL + "?action=getPending");
+                // UPDATE PENTING: Penambahan nocache agar selalu dapat data terbaru
+                const res = await fetch(CONFIG.API_URL + "?action=getPending&nocache=" + Date.now());
                 const result = await res.json();
                 const data = result.data || [];
                 
@@ -189,7 +190,6 @@
 
             btn.disabled = true; btn.innerHTML = "Memproses...";
             try {
-                // Tembak Data Langsung (No Cors)
                 fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                 closeModalAcc(); setTimeout(() => { fetchAntrean(); alert("Sukses di-ACC dan dipindah ke Kasir POS!"); }, 800);
             } catch(e) { alert("Gagal koneksi."); }
@@ -209,10 +209,10 @@
             container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-xs font-bold text-slate-500">Membaca Tagihan...</p></div>`;
 
             try {
-                const res = await fetch(CONFIG.API_URL + "?action=getAll");
+                // UPDATE PENTING: Penambahan nocache agar selalu dapat data terbaru
+                const res = await fetch(CONFIG.API_URL + "?action=getAll&nocache=" + Date.now());
                 const result = await res.json();
                 
-                // PERBAIKAN: Cek jika terjadi error dari server
                 if (result.status === "error") {
                     container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-amber-500">${result.message || "Belum ada data."}</p></div>`;
                     document.querySelector('#btnRefresh i').classList.remove('animate-spin');

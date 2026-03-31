@@ -82,17 +82,16 @@
             grid.innerHTML = `<div class="col-span-3 text-center py-4 text-emerald-600 text-xs font-bold flex justify-center"><div class="spinner"></div> Menarik data...</div>`;
             
             try {
-                const res = await fetch(CONFIG.API_URL + "?action=getAll");
+                // UPDATE PENTING: Penambahan nocache agar selalu dapat data terbaru
+                const res = await fetch(CONFIG.API_URL + "?action=getAll&nocache=" + Date.now());
                 const result = await res.json();
 
-                // PERBAIKAN: Cek jika terjadi error dari server (misal tab belum ada)
                 if (result.status === "error") {
                     grid.innerHTML = `<div class="col-span-3 text-center py-2 text-slate-400 text-xs">${result.message || "Belum ada data."}</div>`;
                     document.querySelector('#btnRefresh i').classList.remove('animate-spin');
                     return;
                 }
 
-                // Amankan pembacaan data jika null/undefined
                 dbCustomers = (result.data || []).filter(c => c.nama && c.wa && (c.hutang - c.terbayar) > 0); 
                 
                 grid.innerHTML = '';
@@ -145,14 +144,11 @@
 
             const payloadKasir = { tipe: "KAS_MASUK_CICILAN", waktu: new Date().toLocaleString('id-ID'), nama: data.custData.nama, whatsapp: data.custData.wa, cicilanKe: data.cicilan, nominalMasuk: data.nominalVal, catatan: "Sisa: Rp " + formatRupiah(data.sisaBaru) };
 
-            // TEMBAK DATA KE SERVER
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payloadKasir) });
 
-            // BUKA WA LANGSUNG AGAR TIDAK DIBLOKIR BROWSER
             const waLink = `https://api.whatsapp.com/send?phone=${data.custData.wa}&text=${encodeURIComponent(data.pesan)}`;
             window.open(waLink, '_blank');
 
-            // Reset UI
             fetchCustomersFromCloud(); 
             document.getElementById('nominal').value = '';
             document.getElementById('previewContainer').classList.add('opacity-0');
