@@ -35,7 +35,6 @@
             <button onclick="switchTab('tagihan')" id="tab-tagihan" class="flex-1 py-2.5 rounded-xl text-xs tab-inactive transition-all">Tagihan Aktif</button>
         </div>
 
-        <!-- VIEW: ANTREAN -->
         <div id="viewAntrean" class="flex-col flex-grow flex">
             <div class="flex justify-between items-end mb-2 px-2">
                 <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Pengajuan Baru</span>
@@ -44,7 +43,6 @@
             <div id="pendingList" class="space-y-3 flex-grow overflow-y-auto no-scrollbar pb-10"></div>
         </div>
 
-        <!-- VIEW: TAGIHAN -->
         <div id="viewTagihan" class="flex-col flex-grow hidden">
             <div class="flex justify-between items-end mb-2 px-2">
                 <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Tagihan Berjalan</span>
@@ -54,7 +52,6 @@
         </div>
     </main>
 
-    <!-- MODAL: ACC -->
     <div id="accModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0">
         <div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-6 pb-8 shadow-2xl transform translate-y-full transition-transform" id="accModalContent">
             <div class="flex justify-between items-center mb-5 border-b pb-3">
@@ -90,7 +87,6 @@
         </div>
     </div>
 
-    <!-- MODAL: WA -->
     <div id="waModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0">
         <div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-6 pb-8 shadow-2xl transform translate-y-full transition-transform" id="waModalContent">
             <div class="flex justify-between items-center mb-5 border-b pb-3">
@@ -141,12 +137,12 @@
             try {
                 const res = await fetch(CONFIG.API_URL + "?action=getPending");
                 const result = await res.json();
-                const data = result.data;
+                const data = result.data || [];
                 
                 document.getElementById('countPending').innerText = `${data.length} Menunggu`;
                 container.innerHTML = '';
                 
-                if(data.length === 0) { container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-slate-400">Tidak ada pengajuan baru.</p></div>`; return; }
+                if(data.length === 0) { container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-slate-400">Tidak ada pengajuan baru.</p></div>`; document.querySelector('#btnRefresh i').classList.remove('animate-spin'); return; }
 
                 data.forEach((p) => {
                     let hargaBersih = parseRupiah(p.harga.toString()) - parseRupiah(p.dp.toString());
@@ -216,9 +212,21 @@
                 const res = await fetch(CONFIG.API_URL + "?action=getAll");
                 const result = await res.json();
                 
-                let aktifCustomers = result.data.filter(c => (c.hutang - c.terbayar) > 0);
+                // PERBAIKAN: Cek jika terjadi error dari server
+                if (result.status === "error") {
+                    container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-amber-500">${result.message || "Belum ada data."}</p></div>`;
+                    document.querySelector('#btnRefresh i').classList.remove('animate-spin');
+                    return;
+                }
+
+                let aktifCustomers = (result.data || []).filter(c => (c.hutang - c.terbayar) > 0);
                 container.innerHTML = '';
-                if(aktifCustomers.length === 0) { container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-emerald-500">Semua pelanggan Lunas!</p></div>`; return; }
+                
+                if(aktifCustomers.length === 0) { 
+                    container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-emerald-500">Semua pelanggan Lunas atau belum ada tagihan!</p></div>`; 
+                    document.querySelector('#btnRefresh i').classList.remove('animate-spin');
+                    return; 
+                }
 
                 aktifCustomers.forEach(p => {
                     let angkaTanggal = 1;
@@ -271,5 +279,3 @@
     </script>
 </body>
 </html>
-
-

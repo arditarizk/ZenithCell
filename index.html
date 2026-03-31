@@ -27,7 +27,6 @@
         </header>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 w-full mb-10 flex-grow">
-            <!-- ZONA 1: PUBLIK -->
             <section class="bg-white/40 p-6 sm:p-8 rounded-[2.5rem] border border-white shadow-sm">
                 <h2 class="text-xs font-extrabold text-slate-400 uppercase mb-5 ml-2 flex items-center gap-2"><span class="p-1.5 bg-slate-200/50 rounded-lg"><i data-lucide="users" class="w-4 h-4 text-slate-500"></i></span> Layanan Pelanggan</h2>
                 <div class="space-y-4">
@@ -37,7 +36,6 @@
                 </div>
             </section>
 
-            <!-- ZONA 2: ADMIN -->
             <section class="bg-slate-900 p-6 sm:p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
                 <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-emerald-500/20 rounded-full blur-[80px] pointer-events-none"></div>
                 <h2 class="text-xs font-extrabold text-slate-400 uppercase mb-5 ml-2 flex items-center gap-2 relative z-10"><span class="p-1.5 bg-slate-800 rounded-lg"><i data-lucide="lock" class="w-4 h-4 text-slate-300"></i></span> Otoritas Internal</h2>
@@ -59,7 +57,6 @@
         <footer class="text-center text-slate-400 text-[10px] font-bold pb-4"><p>Zenith Cell Ecosystem &copy; 2026</p></footer>
     </main>
 
-    <!-- Modal PIN -->
     <div id="pinModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity">
         <div class="bg-white rounded-[2rem] p-8 max-w-[340px] w-full text-center shadow-2xl transform scale-95 transition-transform relative" id="pinCard">
             <button onclick="closePin()" class="absolute top-4 right-4 p-2 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -75,7 +72,11 @@
 
     <script>
         lucide.createIcons();
-        const PIN_ADMIN = "123456"; let pendingUrl = ""; 
+        
+        // UBAH PIN ADMIN DI SINI JIKA DIPERLUKAN
+        const PIN_ADMIN = "123456"; 
+        
+        let pendingUrl = ""; 
         const pinModal = document.getElementById('pinModal'), pinCard = document.getElementById('pinCard'), pinInput = document.getElementById('pinInput'), pinForm = document.getElementById('pinForm'), pinError = document.getElementById('pinError');
         function requestPin(targetUrl) { pendingUrl = targetUrl; pinInput.value = ""; pinError.classList.add('hidden'); pinModal.classList.replace('hidden', 'flex'); setTimeout(() => { pinModal.classList.remove('opacity-0'); pinCard.classList.remove('scale-95'); pinInput.focus(); }, 10); }
         function closePin() { pinModal.classList.add('opacity-0'); pinCard.classList.add('scale-95'); setTimeout(() => { pinModal.classList.replace('flex', 'hidden'); }, 300); }
@@ -91,5 +92,3 @@
     </script>
 </body>
 </html>
-
-

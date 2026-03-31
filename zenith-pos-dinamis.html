@@ -84,15 +84,28 @@
             try {
                 const res = await fetch(CONFIG.API_URL + "?action=getAll");
                 const result = await res.json();
-                dbCustomers = result.data.filter(c => c.nama && c.wa && (c.hutang - c.terbayar) > 0); 
+
+                // PERBAIKAN: Cek jika terjadi error dari server (misal tab belum ada)
+                if (result.status === "error") {
+                    grid.innerHTML = `<div class="col-span-3 text-center py-2 text-slate-400 text-xs">${result.message || "Belum ada data."}</div>`;
+                    document.querySelector('#btnRefresh i').classList.remove('animate-spin');
+                    return;
+                }
+
+                // Amankan pembacaan data jika null/undefined
+                dbCustomers = (result.data || []).filter(c => c.nama && c.wa && (c.hutang - c.terbayar) > 0); 
                 
                 grid.innerHTML = '';
-                if(dbCustomers.length === 0) grid.innerHTML = `<div class="col-span-3 text-center py-2 text-slate-400 text-xs">Semua pelanggan Lunas.</div>`;
-                
-                dbCustomers.forEach(cust => {
-                    grid.innerHTML += `<label class="cursor-pointer relative"><input type="radio" name="pelanggan" value="${cust.wa}" class="radio-peer sr-only" onchange="selectCustomer('${cust.wa}')"><div class="w-full py-3 px-2 rounded-xl bg-slate-50 border-2 border-slate-100 text-slate-600 font-bold text-sm text-center truncate">${cust.nama}</div></label>`;
-                });
-            } catch(e) { grid.innerHTML = `<div class="col-span-3 text-center py-2 text-red-500 text-xs">Gagal memuat API.</div>`; }
+                if(dbCustomers.length === 0) {
+                    grid.innerHTML = `<div class="col-span-3 text-center py-2 text-slate-400 text-xs">Semua pelanggan Lunas atau data kosong.</div>`;
+                } else {
+                    dbCustomers.forEach(cust => {
+                        grid.innerHTML += `<label class="cursor-pointer relative"><input type="radio" name="pelanggan" value="${cust.wa}" class="radio-peer sr-only" onchange="selectCustomer('${cust.wa}')"><div class="w-full py-3 px-2 rounded-xl bg-slate-50 border-2 border-slate-100 text-slate-600 font-bold text-sm text-center truncate">${cust.nama}</div></label>`;
+                    });
+                }
+            } catch(e) { 
+                grid.innerHTML = `<div class="col-span-3 text-center py-2 text-red-500 text-xs">Gagal memuat API.</div>`; 
+            }
             document.querySelector('#btnRefresh i').classList.remove('animate-spin');
         }
 
@@ -122,7 +135,7 @@
             let sisaBaru = custData.hutang - terbayarBaru; if(sisaBaru < 0) sisaBaru = 0;
             
             const tgl = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-            const pesan = `*KUITANSI RESMI - ZENITH CELL* 📱\n-----------------------------------\n📅 Tgl : ${tgl}\n👤 Dari : *${custData.nama}*\n-----------------------------------\n*PEMBAYARAN:*\n📌 Cicilan : *${cicilanEl.value}*\n💵 Nominal : *Rp ${formatRupiah(nominalVal)}*\n-----------------------------------\n📊 *SISA TAGIHAN:*\nTotal Terbayar: Rp ${formatRupiah(terbayarBaru)}\n*Sisa Hutang : Rp ${formatRupiah(sisaBaru)}*\n-----------------------------------\n_Terima kasih!_`;
+            const pesan = `*KUITANSI RESMI - ZENITH CELL* 🧾\n-----------------------------------\n🗓 Tgl : ${tgl}\n👤 Dari : *${custData.nama}*\n-----------------------------------\n*PEMBAYARAN:*\n🏷 Cicilan : *${cicilanEl.value}*\n💰 Nominal : *Rp ${formatRupiah(nominalVal)}*\n-----------------------------------\n📊 *SISA TAGIHAN:*\nTotal Terbayar: Rp ${formatRupiah(terbayarBaru)}\n*Sisa Hutang : Rp ${formatRupiah(sisaBaru)}*\n-----------------------------------\n_Terima kasih!_`;
             document.getElementById('previewText').innerText = pesan;
             return { pesan, custData, cicilan: cicilanEl.value, nominalVal, sisaBaru };
         };
@@ -149,5 +162,3 @@
     </script>
 </body>
 </html>
-
-
