@@ -1,4 +1,4 @@
 const CONFIG = {
-    API_URL: "https://script.google.com/macros/s/AKfycbz1aIuxRtfzT04vrhMlQ2DOXxRXFSq3uY6XqFAZh5fiwe20uFCnm9FS8SsjKCIHzLE/exec",
+    API_URL: "https://script.google.com/macros/s/AKfycbwylEJunNAEBK6L909JJ6ASADFwe9HlOlPLFyrH9-VRQtmvGI58aC9k8jUEawOteo-5/exec",
     WA_ADMIN: "62895410571547" 
 };
