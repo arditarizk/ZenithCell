@@ -8,11 +8,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="config.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; -webkit-tap-highlight-color: transparent; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); }
         .menu-card { transition: all 0.3s ease; } .menu-card:hover { transform: translateY(-4px); }
-        input[type=password]::-webkit-inner-spin-button, input[type=password]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body class="text-slate-800 pb-10 pt-6 px-4 sm:px-8 flex justify-center selection:bg-emerald-200 min-h-screen">
@@ -62,9 +62,9 @@
             <div class="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-5 mt-2"><i data-lucide="shield-check" class="w-8 h-8 text-emerald-400"></i></div>
             <h3 class="text-xl font-extrabold text-slate-900 mb-1">Otorisasi Admin</h3>
             <form id="pinForm" class="space-y-4">
-                <input type="password" id="pinInput" inputmode="numeric" maxlength="6" placeholder="• • • • • •" required class="w-full text-center px-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl font-black text-2xl tracking-[0.5em] outline-none mt-4">
-                <p id="pinError" class="text-[10px] font-bold text-red-500 hidden mt-1">PIN Salah! Akses ditolak.</p>
-                <button type="submit" class="w-full bg-slate-900 text-white font-extrabold py-3.5 px-6 rounded-xl active:scale-95 flex justify-center gap-2 mt-2"><i data-lucide="key" class="w-4 h-4 text-emerald-400"></i> Konfirmasi PIN</button>
+                <input type="password" id="pinInput" placeholder="Masukkan Kata Sandi" required class="w-full text-center px-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl font-bold text-xl tracking-widest outline-none mt-4 focus:border-emerald-500 transition-colors">
+                <p id="pinError" class="text-[10px] font-bold text-red-500 hidden mt-1">Sandi Salah! Akses ditolak.</p>
+                <button type="submit" class="w-full bg-slate-900 text-white font-extrabold py-3.5 px-6 rounded-xl active:scale-95 flex justify-center gap-2 mt-2"><i data-lucide="key" class="w-4 h-4 text-emerald-400"></i> Konfirmasi Akses</button>
             </form>
         </div>
     </div>
@@ -73,17 +73,35 @@
         lucide.createIcons();
         if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
         
-        const PIN_ADMIN = "123456"; let pendingUrl = ""; 
+        let pendingUrl = ""; 
         const pinModal = document.getElementById('pinModal'), pinCard = document.getElementById('pinCard'), pinInput = document.getElementById('pinInput'), pinForm = document.getElementById('pinForm'), pinError = document.getElementById('pinError');
-        function requestPin(targetUrl) { pendingUrl = targetUrl; pinInput.value = ""; pinError.classList.add('hidden'); pinModal.classList.replace('hidden', 'flex'); setTimeout(() => { pinModal.classList.remove('opacity-0'); pinCard.classList.remove('scale-95'); pinInput.focus(); }, 10); }
-        function closePin() { pinModal.classList.add('opacity-0'); pinCard.classList.add('scale-95'); setTimeout(() => { pinModal.classList.replace('flex', 'hidden'); }, 300); }
+        
+        function requestPin(targetUrl) { 
+            pendingUrl = targetUrl; 
+            pinInput.value = ""; 
+            pinError.classList.add('hidden'); 
+            pinModal.classList.replace('hidden', 'flex'); 
+            setTimeout(() => { pinModal.classList.remove('opacity-0'); pinCard.classList.remove('scale-95'); pinInput.focus(); }, 10); 
+        }
+        
+        function closePin() { 
+            pinModal.classList.add('opacity-0'); 
+            pinCard.classList.add('scale-95'); 
+            setTimeout(() => { pinModal.classList.replace('flex', 'hidden'); }, 300); 
+        }
+        
         pinForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            if (pinInput.value === PIN_ADMIN) {
-                pinInput.classList.replace('border-slate-200', 'border-emerald-500'); document.querySelector('#pinCard h3').innerText = "Akses Diberikan";
+            // Mengecek nilai PIN dengan konfigurasi di config.js
+            if (pinInput.value === CONFIG.PIN_ADMIN) {
+                pinInput.classList.replace('border-slate-200', 'border-emerald-500'); 
+                document.querySelector('#pinCard h3').innerText = "Akses Diberikan";
                 setTimeout(() => { window.location.href = pendingUrl; }, 400); 
             } else {
-                pinError.classList.remove('hidden'); pinInput.classList.replace('border-slate-200', 'border-red-500'); pinInput.value = ""; pinInput.focus();
+                pinError.classList.remove('hidden'); 
+                pinInput.classList.replace('border-slate-200', 'border-red-500'); 
+                pinInput.value = ""; 
+                pinInput.focus();
             }
         });
     </script>
