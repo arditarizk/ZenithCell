@@ -49,7 +49,7 @@
                 <span class="text-[10px] font-bold bg-white px-2 py-1 rounded-md text-slate-400 shadow-sm" id="bulanIni">Bulan Ini</span>
             </div>
             
-            <button onclick="bukaModalMigrasi()" class="w-full mb-4 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-3.5 rounded-2xl flex justify-center items-center gap-2 shadow-sm"><i data-lucide="database" class="w-4 h-4"></i> Migrasi Data Manual (Pelanggan Lama)</button>
+            <button onclick="bukaModalMigrasi()" class="w-full mb-4 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-3.5 rounded-2xl flex justify-center items-center gap-2 shadow-sm"><i data-lucide="database" class="w-4 h-4"></i> Migrasi Data Manual</button>
             
             <div id="customerList" class="space-y-3 flex-grow overflow-y-auto no-scrollbar pb-10"></div>
         </div>
@@ -142,7 +142,7 @@
         const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num);
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
         const tglSekarang = new Date().getDate();
-        const bulanSekarang = new Date().getMonth() + 1; // Untuk mengecek apakah lunas bulan ini
+        const bulanSekarang = new Date().getMonth() + 1; 
         document.getElementById('bulanIni').innerText = `Tgl Hari Ini: ${tglSekarang}`;
 
         let currentTab = 'antrean'; let targetWaLink = ""; let currentActiveData = null;
@@ -214,7 +214,6 @@
             const btn = document.getElementById('btnKonfirmasiAcc');
             const finalTotal = parseRupiah(document.getElementById('accTotalHutang').value);
             const finalCicilan = parseRupiah(document.getElementById('accCicilan').value);
-            
             if(finalTotal === 0 || finalCicilan === 0) return alert("Nominal tidak boleh 0!");
             
             const payload = { tipe: "ACC_PENGAJUAN", idKontrak: currentActiveData.idKontrak, wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: currentActiveData.jatuhTempo, totalHutang: finalTotal, cicilanBulan: finalCicilan };
@@ -238,7 +237,7 @@
             }
         };
 
-        // --- SISTEM TAGIHAN & SMART LUNAS BULAN INI ---
+        // --- SISTEM TAGIHAN TANGGAL LENGKAP ---
         async function fetchTagihan() {
             const container = document.getElementById('customerList');
             toggleLoading(true);
@@ -260,20 +259,27 @@
                     container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-emerald-500">Semua pelanggan Lunas!</p></div>`; 
                 } else {
                     aktifCustomers.forEach(p => {
-                        let angkaTanggal = p.jatuhTempo ? (parseInt(p.jatuhTempo.toString().split('-')[0]) || 1) : 1;
                         let sisaBulanIni = p.cicilanPerBulan > 0 ? p.cicilanPerBulan : Math.round(p.hutang / 6); 
                         
-                        // LOGIKA BARU: Cek apakah sudah bayar bulan ini
+                        let angkaTanggal = p.jatuhTempo ? (parseInt(p.jatuhTempo.toString().split('-')[0]) || 1) : 1;
+                        let bulanTerakhir = p.bulanTerakhirBayar || 0;
+                        
+                        const namaBulan = ["", "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
+                        let targetBulan = bulanTerakhir === 0 ? (new Date().getMonth() + 1) : bulanTerakhir + 1;
+                        let targetTahun = new Date().getFullYear();
+                        if (targetBulan > 12) { targetBulan = 1; targetTahun += 1; }
+                        
+                        let tglLengkap = `${angkaTanggal} ${namaBulan[targetBulan]} ${targetTahun}`;
+
                         const isSudahBayarBulanIni = p.bulanTerakhirBayar === bulanSekarang;
                         const isTelat = !isSudahBayarBulanIni && (tglSekarang >= angkaTanggal);
                         
                         let badgeColor = isSudahBayarBulanIni ? "bg-emerald-100 text-emerald-700 border border-emerald-200" : (isTelat ? "bg-red-100 text-red-600 border border-red-200" : "bg-slate-100 text-slate-600");
-                        let badgeText = isSudahBayarBulanIni ? "✔ LUNAS BULAN INI" : `Tempo: Tgl ${angkaTanggal}`;
+                        let badgeText = isSudahBayarBulanIni ? "✔ LUNAS BULAN INI" : `Tempo: ${tglLengkap}`;
 
-                        // Tombol WA berubah kalau sudah bayar
                         let tombolAksi = isSudahBayarBulanIni 
                             ? `<button disabled class="py-2.5 bg-slate-50 text-slate-400 rounded-xl text-[11px] font-bold w-full"><i data-lucide="check-circle-2" class="w-3.5 h-3.5 inline"></i> Aman Terkendali</button>`
-                            : `<button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${angkaTanggal}')" class="py-2.5 bg-amber-50 text-amber-700 rounded-xl text-[11px] font-bold w-full flex justify-center items-center gap-1.5 border border-amber-100"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> ${isTelat ? 'Tegur Keterlambatan (WA)' : 'Kirim WA Pengingat'}</button>`;
+                            : `<button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${tglLengkap}', '${namaBulan[targetBulan]}')" class="py-2.5 bg-amber-50 text-amber-700 rounded-xl text-[11px] font-bold w-full flex justify-center items-center gap-1.5 border border-amber-100"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> ${isTelat ? 'Tegur Keterlambatan (WA)' : 'Kirim WA Pengingat'}</button>`;
 
                         container.innerHTML += `
                             <div class="bg-white p-4 rounded-3xl shadow-sm border flex flex-col gap-3 relative hover:border-amber-200">
@@ -297,55 +303,35 @@
         }
 
         const modalWa = document.getElementById('waModal'), modalWaContent = document.getElementById('waModalContent');
-        window.bukaPesanWA = function(nama, wa, cicilanKe, nominal, tgl) {
-            document.getElementById('pesanWA').value = `Assalamu'alaikum Kak ${nama} 🙏\n\nSekadar mengingatkan dari *Zenith Cell*, untuk cicilan gadget (Bulan Ke-${cicilanKe}) senilai *Rp ${formatRupiah(nominal)}* sudah memasuki jadwal pembayaran (Tgl ${tgl}).\n\nKarena kami menggunakan sistem syariah (Tanpa Denda), mohon kerja sama dan amanahnya. 😊\n\nJika sudah ditransfer, mohon fotokan buktinya ke chat ini ya Kak. Terima kasih banyak! ✨`;
+        window.bukaPesanWA = function(nama, wa, cicilanKe, nominal, tglLengkap, namaBulanTarget) {
+            document.getElementById('pesanWA').value = `Assalamu'alaikum Kak ${nama} 🙏\n\nSekadar mengingatkan dari *Zenith Cell*, untuk cicilan gadget (Bulan Ke-${cicilanKe}) senilai *Rp ${formatRupiah(nominal)}* untuk tagihan bulan *${namaBulanTarget}* sudah memasuki jadwal pembayaran (${tglLengkap}).\n\nKarena kami menggunakan sistem syariah (Tanpa Denda), mohon kerja sama dan amanahnya. 😊\n\nJika sudah ditransfer, mohon fotokan buktinya ke chat ini ya Kak. Terima kasih banyak! ✨`;
             targetWaLink = `https://api.whatsapp.com/send?phone=${wa}`;
             modalWa.classList.replace('hidden', 'flex'); setTimeout(() => { modalWa.classList.remove('opacity-0'); modalWaContent.classList.remove('translate-y-full'); }, 10);
         };
         window.closeWaModal = function() { modalWa.classList.add('opacity-0'); modalWaContent.classList.add('translate-y-full'); setTimeout(() => modalWa.classList.replace('flex', 'hidden'), 300); };
         document.getElementById('btnKirimWA').addEventListener('click', () => { window.open(`${targetWaLink}&text=${encodeURIComponent(document.getElementById('pesanWA').value)}`, '_blank'); closeWaModal(); });
 
-        // --- SISTEM MIGRASI DATA MANUAL ---
         const modalMigrasi = document.getElementById('migrasiModal'), migrasiContent = document.getElementById('migrasiModalContent');
-        window.bukaModalMigrasi = function() {
-            modalMigrasi.classList.replace('hidden', 'flex'); setTimeout(() => { modalMigrasi.classList.remove('opacity-0'); migrasiContent.classList.remove('translate-y-full'); }, 10);
-        };
-        window.closeModalMigrasi = function() {
-            modalMigrasi.classList.add('opacity-0'); migrasiContent.classList.add('translate-y-full'); setTimeout(() => modalMigrasi.classList.replace('flex', 'hidden'), 300);
-        };
+        window.bukaModalMigrasi = function() { modalMigrasi.classList.replace('hidden', 'flex'); setTimeout(() => { modalMigrasi.classList.remove('opacity-0'); migrasiContent.classList.remove('translate-y-full'); }, 10); };
+        window.closeModalMigrasi = function() { modalMigrasi.classList.add('opacity-0'); migrasiContent.classList.add('translate-y-full'); setTimeout(() => modalMigrasi.classList.replace('flex', 'hidden'), 300); };
         
-        ['migHutang', 'migTerbayar', 'migCicilan'].forEach(id => { document.getElementById(id).addEventListener('input', (e) => { e.target.value = formatRupiah(parseRupiah(e.target.value)); }); });
-        // PEMBERSIH WA OTOMATIS SAAT MIGRASI
-document.getElementById('migWa').addEventListener('input', function() {
-    let val = this.value.replace(/[^0-9]/g, '');
-    if (val.startsWith('62')) val = '0' + val.substring(2);
-    this.value = val;
-});
+        document.getElementById('migWa').addEventListener('input', function() {
+            let val = this.value.replace(/[^0-9]/g, ''); if (val.startsWith('62')) val = '0' + val.substring(2); this.value = val;
+        });
 
+        ['migHutang', 'migTerbayar', 'migCicilan'].forEach(id => { document.getElementById(id).addEventListener('input', (e) => { e.target.value = formatRupiah(parseRupiah(e.target.value)); }); });
 
         window.prosesMigrasi = function() {
             const btn = document.getElementById('btnSubmitMigrasi');
             const payload = {
-                tipe: "MIGRASI_PELANGGAN",
-                nama: document.getElementById('migNama').value,
-                wa: document.getElementById('migWa').value,
-                barang: document.getElementById('migBarang').value,
-                totalHutang: parseRupiah(document.getElementById('migHutang').value),
-                sudahTerbayar: parseRupiah(document.getElementById('migTerbayar').value),
-                cicilanBulan: parseRupiah(document.getElementById('migCicilan').value),
-                jatuhTempo: document.getElementById('migTempo').value,
-                cicilanKe: document.getElementById('migKe').value
+                tipe: "MIGRASI_PELANGGAN", nama: document.getElementById('migNama').value, wa: document.getElementById('migWa').value, barang: document.getElementById('migBarang').value,
+                totalHutang: parseRupiah(document.getElementById('migHutang').value), sudahTerbayar: parseRupiah(document.getElementById('migTerbayar').value),
+                cicilanBulan: parseRupiah(document.getElementById('migCicilan').value), jatuhTempo: document.getElementById('migTempo').value, cicilanKe: document.getElementById('migKe').value
             };
-            
             btn.disabled = true; btn.innerHTML = "Menyimpan ke Server...";
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            setTimeout(() => { 
-                closeModalMigrasi(); document.getElementById('formMigrasi').reset();
-                fetchTagihan(); alert("Data Migrasi Berhasil Ditambahkan!"); 
-                btn.disabled = false; btn.innerHTML = `<i data-lucide="save" class="w-5 h-5"></i> Simpan Data Langsung`;
-            }, 2000);
+            setTimeout(() => { closeModalMigrasi(); document.getElementById('formMigrasi').reset(); fetchTagihan(); alert("Data Migrasi Berhasil Ditambahkan!"); btn.disabled = false; btn.innerHTML = `<i data-lucide="save" class="w-5 h-5"></i> Simpan Data Langsung`; }, 2000);
         };
-
         fetchAntrean(); 
     </script>
 </body>
