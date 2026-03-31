@@ -69,9 +69,16 @@
         lucide.createIcons();
         const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num);
 
+        // PEMBERSIH NOMOR WA CERDAS (+62 / 62 OTOMATIS JADI 0)
+        document.getElementById('waInput').addEventListener('input', function() {
+            let val = this.value.replace(/[^0-9]/g, '');
+            if (val.startsWith('62')) val = '0' + val.substring(2);
+            this.value = val;
+        });
+
         document.getElementById('searchForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            let inputStr = document.getElementById('waInput').value.replace(/[^0-9]/g, '');
+            let inputStr = document.getElementById('waInput').value;
             if(inputStr === "") return;
             
             const btn = document.getElementById('btnSearch');
@@ -97,8 +104,7 @@
                     document.getElementById('pendNama').innerText = result.data.nama; 
                     document.getElementById('pendBarang').innerText = result.data.barang;
                     const c = document.getElementById('pendingContainer'); 
-                    c.classList.remove('hidden'); 
-                    void c.offsetWidth; // Memicu reflow
+                    c.classList.remove('hidden'); void c.offsetWidth;
                     c.classList.remove('opacity-0', 'translate-y-4');
                 } else {
                     alert(result.message || "Nomor Anda tidak terdaftar di sistem kami.");

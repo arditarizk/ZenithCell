@@ -1,5 +1,5 @@
 // ==========================================
-// MASTER API ZENITH CELL (FINAL ID KONTRAK & ANTI DUPLIKAT)
+// MASTER API ZENITH CELL (V6 - SMART MIGRASI & LUNAS BULANAN)
 // ==========================================
 
 function getOrCreateSheet(ss, sheetName) {
@@ -13,6 +13,7 @@ function doPost(e) {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var payload = JSON.parse(e.postData.contents);
     
+    // 1. PENGAJUAN BARU
     if (payload.tipe === "PENGAJUAN_BARU") {
       var s = getOrCreateSheet(ss, "Pengajuan");
       if (s.getLastRow() === 0) {
@@ -23,6 +24,7 @@ function doPost(e) {
       return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
     }
 
+    // 2. ACC PENGAJUAN (DITAMBAH BULAN TERAKHIR BAYAR)
     if (payload.tipe === "ACC_PENGAJUAN") {
       var sP = ss.getSheetByName("Pengajuan");
       var sL = getOrCreateSheet(ss, "Pelanggan");
@@ -33,13 +35,15 @@ function doPost(e) {
         }
       }
       if (sL.getLastRow() === 0) {
-        sL.appendRow(["ID Kontrak", "Nama Pelanggan", "No WA", "Barang", "Total Hutang", "Sudah Terbayar", "Cicilan Per Bulan", "Tgl Jatuh Tempo", "Cicilan Ke"]);
-        sL.getRange("A1:I1").setFontWeight("bold").setBackground("#e0e7ff");
+        sL.appendRow(["ID Kontrak", "Nama Pelanggan", "No WA", "Barang", "Total Hutang", "Sudah Terbayar", "Cicilan Per Bulan", "Tgl Jatuh Tempo", "Cicilan Ke", "Bulan Terakhir Bayar"]);
+        sL.getRange("A1:J1").setFontWeight("bold").setBackground("#e0e7ff");
       }
-      sL.appendRow([payload.idKontrak, payload.nama, "'"+payload.wa, payload.barang, payload.totalHutang, 0, payload.cicilanBulan, payload.jatuhTempo, 1]);
+      // Index 9 (Kolom J) diisi 0 sebagai default belum bayar
+      sL.appendRow([payload.idKontrak, payload.nama, "'"+payload.wa, payload.barang, payload.totalHutang, 0, payload.cicilanBulan, payload.jatuhTempo, 1, 0]);
       return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
     }
 
+    // 3. TOLAK PENGAJUAN
     if (payload.tipe === "TOLAK_PENGAJUAN") {
       var sP = ss.getSheetByName("Pengajuan");
       if (sP) {
@@ -51,10 +55,12 @@ function doPost(e) {
       return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
     }
     
+    // 4. KAS MASUK (UPDATE BULAN TERAKHIR BAYAR)
     if (payload.tipe === "KAS_MASUK_CICILAN") {
       var sT = getOrCreateSheet(ss, "Transaksi");
       if (sT.getLastRow() === 0) { sT.appendRow(["Waktu", "ID Kontrak", "Nama", "WA", "Ke", "Nominal", "Catatan"]); }
       sT.appendRow([payload.waktu, payload.idKontrak, payload.nama, "'"+payload.whatsapp, payload.cicilanKe, payload.nominalMasuk, payload.catatan]);
+      
       var sL = ss.getSheetByName("Pelanggan");
       if (sL) {
         var dL = sL.getDataRange().getValues();
@@ -62,12 +68,25 @@ function doPost(e) {
           if (dL[i][0] === payload.idKontrak) {
             sL.getRange(i+1, 6).setValue((parseInt(dL[i][5])||0) + parseInt(payload.nominalMasuk));
             sL.getRange(i+1, 9).setValue((parseInt(dL[i][8])||0) + 1);
+            sL.getRange(i+1, 10).setValue(payload.bulanIni); // Catat bulan dia bayar
             break;
           }
         }
       }
       return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
     }
+
+    // 5. MIGRASI DATA MANUAL (LANGSUNG JADI PELANGGAN)
+    if (payload.tipe === "MIGRASI_PELANGGAN") {
+      var sL = getOrCreateSheet(ss, "Pelanggan");
+      if (sL.getLastRow() === 0) {
+        sL.appendRow(["ID Kontrak", "Nama Pelanggan", "No WA", "Barang", "Total Hutang", "Sudah Terbayar", "Cicilan Per Bulan", "Tgl Jatuh Tempo", "Cicilan Ke", "Bulan Terakhir Bayar"]);
+        sL.getRange("A1:J1").setFontWeight("bold").setBackground("#e0e7ff");
+      }
+      sL.appendRow(["ZNTH-M-" + Date.now(), payload.nama, "'"+payload.wa, payload.barang, payload.totalHutang, payload.sudahTerbayar, payload.cicilanBulan, payload.jatuhTempo, payload.cicilanKe, 0]);
+      return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
+    }
+
   } catch (e) { return ContentService.createTextOutput(JSON.stringify({status: "error", msg: e.toString()})).setMimeType(ContentService.MimeType.JSON); }
 }
 
@@ -83,7 +102,7 @@ function doGet(e) {
       var dP = sP.getDataRange().getValues();
       for (var i = 1; i < dP.length; i++) {
         if (dP[i][4].toString().replace(/[^0-9]/g,'') === w || dP[i][3].toString().replace(/[^0-9]/g,'') === n) 
-          return ContentService.createTextOutput(JSON.stringify({isDuplicate: true, message: "NIK/WA sudah ada dalam antrean pengajuan!"})).setMimeType(ContentService.MimeType.JSON);
+          return ContentService.createTextOutput(JSON.stringify({isDuplicate: true, message: "NIK/WA sudah ada dalam antrean!"})).setMimeType(ContentService.MimeType.JSON);
       }
     }
     var sL = ss.getSheetByName("Pelanggan");
@@ -91,7 +110,7 @@ function doGet(e) {
       var dL = sL.getDataRange().getValues();
       for (var i = 1; i < dL.length; i++) {
         if (dL[i][2].toString().replace(/[^0-9]/g,'') === w && (parseInt(dL[i][4]) - parseInt(dL[i][5]) > 0))
-          return ContentService.createTextOutput(JSON.stringify({isDuplicate: true, message: "Anda memiliki cicilan aktif yang belum lunas!"})).setMimeType(ContentService.MimeType.JSON);
+          return ContentService.createTextOutput(JSON.stringify({isDuplicate: true, message: "Anda memiliki cicilan aktif!"})).setMimeType(ContentService.MimeType.JSON);
       }
     }
     return ContentService.createTextOutput(JSON.stringify({isDuplicate: false})).setMimeType(ContentService.MimeType.JSON);
@@ -114,32 +133,12 @@ function doGet(e) {
     var d = s.getDataRange().getValues();
     var res = [];
     for (var i = 1; i < d.length; i++) {
-      res.push({ idKontrak: d[i][0], nama: d[i][1], wa: d[i][2].toString().replace(/[^0-9]/g, ''), barang: d[i][3], hutang: parseInt(d[i][4])||0, terbayar: parseInt(d[i][5])||0, cicilanPerBulan: parseInt(d[i][6])||0, jatuhTempo: d[i][7], cicilanKe: parseInt(d[i][8])||1 });
+      res.push({ 
+        idKontrak: d[i][0], nama: d[i][1], wa: d[i][2].toString().replace(/[^0-9]/g, ''), barang: d[i][3], 
+        hutang: parseInt(d[i][4])||0, terbayar: parseInt(d[i][5])||0, cicilanPerBulan: parseInt(d[i][6])||0, 
+        jatuhTempo: d[i][7], cicilanKe: parseInt(d[i][8])||1, bulanTerakhirBayar: parseInt(d[i][9])||0 
+      });
     }
     return ContentService.createTextOutput(JSON.stringify({status: "success", data: res})).setMimeType(ContentService.MimeType.JSON);
-  }
-  
-  // Fitur Cek Tagihan Live
-  if (e.parameter.wa) {
-    var sw = e.parameter.wa.replace(/[^0-9]/g, '');
-    var s = ss.getSheetByName("Pelanggan");
-    if (s) {
-      var d = s.getDataRange().getValues();
-      for (var i = 1; i < d.length; i++) {
-        if (d[i][2].toString().replace(/[^0-9]/g, '') === sw) {
-          return ContentService.createTextOutput(JSON.stringify({status: "success", data: { nama: d[i][1], wa: sw, barang: d[i][3], totalHutang: parseInt(d[i][4])||0, terbayar: parseInt(d[i][5])||0, cicilanPerBulan: parseInt(d[i][6])||0, jatuhTempo: d[i][7], cicilanKe: parseInt(d[i][8])||1 }})).setMimeType(ContentService.MimeType.JSON);
-        }
-      }
-    }
-    var sP = ss.getSheetByName("Pengajuan");
-    if(sP) {
-        var dP = sP.getDataRange().getValues();
-        for (var i = 1; i < dP.length; i++) {
-          if (dP[i][4].toString().replace(/[^0-9]/g, '') === sw) {
-            return ContentService.createTextOutput(JSON.stringify({status: "pending", data: {nama: dP[i][2], barang: dP[i][10]}})).setMimeType(ContentService.MimeType.JSON);
-          }
-        }
-    }
-    return ContentService.createTextOutput(JSON.stringify({status: "error", message: "Nomor tidak ditemukan"})).setMimeType(ContentService.MimeType.JSON);
   }
 }

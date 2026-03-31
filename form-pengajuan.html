@@ -35,8 +35,8 @@
                         <div class="space-y-4">
                             <input type="text" id="nama" pattern="^[a-zA-Z\s.,']{3,50}$" placeholder="Nama Lengkap KTP" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <input type="text" inputmode="numeric" id="nik" pattern="^\d{16}$" maxlength="16" placeholder="NIK KTP (16 Digit)" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none">
-                                <input type="tel" id="wa" pattern="^(08|628|\+628)\d{8,11}$" maxlength="14" placeholder="No. WA Aktif" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none">
+                                <input type="text" inputmode="numeric" id="nik" maxlength="20" placeholder="NIK KTP (Cth: 357-301-...)" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none tracking-wide text-sm">
+                                <input type="tel" id="wa" maxlength="30" placeholder="No. WA Aktif" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none">
                             </div>
                             <textarea id="alamat" rows="2" minlength="10" placeholder="Alamat Domisili Sekarang" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-medium outline-none resize-none"></textarea>
                         </div>
@@ -62,7 +62,7 @@
                                 </div>
                                 <div class="grid grid-cols-2 gap-3">
                                     <input type="text" id="daruratNama" minlength="3" placeholder="Nama Kerabat" required class="w-full p-3 bg-white border rounded-lg text-sm font-bold outline-none">
-                                    <input type="tel" id="daruratWa" placeholder="No. HP" required class="w-full p-3 bg-white border rounded-lg text-sm font-bold outline-none">
+                                    <input type="tel" id="daruratWa" maxlength="30" placeholder="No. HP" required class="w-full p-3 bg-white border rounded-lg text-sm font-bold outline-none">
                                 </div>
                             </div>
                         </div>
@@ -100,10 +100,19 @@
                                 </div>
                             </div>
 
-                            <select id="jaminan" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none cursor-pointer">
-                                <option value="" disabled selected>-- Jaminan Fisik --</option>
-                                <option value="BPKB Motor">BPKB Motor</option><option value="Ijazah Asli">Ijazah Asli</option><option value="Logam Mulia">Logam Mulia</option>
-                            </select>
+                            <div>
+                                <select id="jaminan" required onchange="toggleJaminanLainnya()" class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none cursor-pointer">
+                                    <option value="" disabled selected>-- Pilih Jaminan Fisik --</option>
+                                    <option value="BPKB Motor">BPKB Motor</option>
+                                    <option value="Ijazah Asli">Ijazah Asli</option>
+                                    <option value="Logam Mulia">Logam Mulia (Emas)</option>
+                                    <option value="Sertifikat Tanah">Sertifikat Rumah / Tanah</option>
+                                    <option value="Barang Elektronik">Barang Elektronik (Laptop, dll)</option>
+                                    <option value="Lainnya">Lainnya (Sebutkan Sendiri)</option>
+                                </select>
+                                <input type="text" id="jaminanLainnya" placeholder="Ketik jenis jaminan di sini..." class="w-full px-4 py-3.5 bg-white border rounded-xl font-bold outline-none mt-3 hidden">
+                            </div>
+
                         </div>
                     </section>
                 </div>
@@ -132,6 +141,53 @@
         const formatRupiah = (num) => (num === 0 || isNaN(num)) ? "" : new Intl.NumberFormat('id-ID').format(num);
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
 
+        // ==========================================
+        // AUTO-FORMAT NIK KTP (3-3-6-3-1)
+        // ==========================================
+        document.getElementById('nik').addEventListener('input', function(e) {
+            let val = this.value.replace(/[^0-9]/g, '');
+            let formatted = '';
+            
+            if (val.length > 0) formatted += val.substring(0, 3);
+            if (val.length > 3) formatted += '-' + val.substring(3, 6);
+            if (val.length > 6) formatted += '-' + val.substring(6, 12);
+            if (val.length > 12) formatted += '-' + val.substring(12, 15);
+            if (val.length > 15) formatted += '-' + val.substring(15, 16);
+            
+            this.value = formatted;
+        });
+
+        // ==========================================
+        // PEMBERSIH NOMOR WA CERDAS (+62 / 62 JADI 0)
+        // ==========================================
+        function bersihkanNomorWA(inputElement) {
+            inputElement.addEventListener('input', function() {
+                // Bersihkan karakter aneh dulu
+                let val = this.value.replace(/[^0-9]/g, ''); 
+                // Ubah 62 menjadi 0
+                if (val.startsWith('62')) {
+                    val = '0' + val.substring(2); 
+                }
+                // Batasi maksimal 15 digit setelah dibersihkan
+                if (val.length > 15) {
+                    val = val.substring(0, 15);
+                }
+                this.value = val;
+            });
+        }
+        bersihkanNomorWA(document.getElementById('wa'));
+        bersihkanNomorWA(document.getElementById('daruratWa'));
+
+        function toggleJaminanLainnya() {
+            const select = document.getElementById('jaminan');
+            const inputLain = document.getElementById('jaminanLainnya');
+            if (select.value === 'Lainnya') {
+                inputLain.classList.remove('hidden'); inputLain.required = true;
+            } else {
+                inputLain.classList.add('hidden'); inputLain.required = false; inputLain.value = '';
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.has('harga')) document.getElementById('hargaBarang').value = formatRupiah(parseInt(urlParams.get('harga')));
@@ -149,9 +205,8 @@
                 const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
                 if (contacts.length > 0) {
                     document.getElementById('daruratNama').value = contacts[0].name[0] || '';
-                    let phone = contacts[0].tel[0].replace(/[^0-9+]/g, '');
-                    if(phone.startsWith('+62')) phone = '0' + phone.slice(3);
-                    if(phone.startsWith('62')) phone = '0' + phone.slice(2);
+                    let phone = contacts[0].tel[0].replace(/[^0-9]/g, '');
+                    if (phone.startsWith('62')) phone = '0' + phone.substring(2);
                     document.getElementById('daruratWa').value = phone;
                 }
             } catch (ex) { console.log(ex); }
@@ -167,57 +222,66 @@
             const nama = document.getElementById('nama').value;
             if (nama.length < 3 || /\d/.test(nama)) { alert("Nama tidak valid!"); return; }
 
+            // KEMBALIKAN NIK KE 16 DIGIT MURNI SEBELUM DIKIRIM (Hapus tanda -)
+            const nikClean = document.getElementById('nik').value.replace(/[^0-9]/g, '');
+            if (nikClean.length !== 16) { alert("NIK KTP harus pas 16 digit angka!"); return; }
+
+            let jaminanFinal = document.getElementById('jaminan').value;
+            if (jaminanFinal === 'Lainnya') jaminanFinal = document.getElementById('jaminanLainnya').value;
+
             const btnSubmit = document.getElementById('btnSubmitForm'), txtBtn = document.getElementById('txtBtnSubmit');
+            
             const data = {
-                nama: nama, nik: document.getElementById('nik').value, wa: document.getElementById('wa').value,
-                alamat: document.getElementById('alamat').value, pekerjaan: document.getElementById('pekerjaan').value, gaji: document.getElementById('gaji').value,
-                daruratNama: document.getElementById('daruratNama').value, daruratWa: document.getElementById('daruratWa').value,
-                barang: document.getElementById('barang').value, harga: document.getElementById('hargaBarang').value, dp: document.getElementById('dpBarang').value || "0",
-                tenor: document.querySelector('input[name="tenor"]:checked').value, jaminan: document.getElementById('jaminan').value, 
+                nama: nama, 
+                nik: nikClean, // NIK TANPA STRIP
+                wa: document.getElementById('wa').value,
+                alamat: document.getElementById('alamat').value, 
+                pekerjaan: document.getElementById('pekerjaan').value, 
+                gaji: document.getElementById('gaji').value,
+                daruratNama: document.getElementById('daruratNama').value, 
+                daruratWa: document.getElementById('daruratWa').value,
+                barang: document.getElementById('barang').value, 
+                harga: document.getElementById('hargaBarang').value, 
+                dp: document.getElementById('dpBarang').value || "0",
+                tenor: document.querySelector('input[name="tenor"]:checked').value, 
+                jaminan: jaminanFinal, 
                 jatuhTempo: document.getElementById('jatuhTempo').value 
             };
 
-            btnSubmit.disabled = true; 
-            txtBtn.innerText = "Memverifikasi Identitas...";
+            btnSubmit.disabled = true; txtBtn.innerText = "Memverifikasi Identitas...";
 
             try {
-                // 1. CEK DUPLIKAT DULU KE SERVER
                 const checkRes = await fetch(`${CONFIG.API_URL}?action=checkDuplicate&wa=${data.wa}&nik=${data.nik}&nocache=${Date.now()}`);
                 const checkResult = await checkRes.json();
 
                 if (checkResult.isDuplicate) {
                     alert(checkResult.message);
-                    btnSubmit.disabled = false; 
-                    txtBtn.innerText = "Ajukan Pembiayaan Sekarang";
-                    return; 
+                    btnSubmit.disabled = false; txtBtn.innerText = "Ajukan Pembiayaan Sekarang"; return; 
                 }
 
-                // 2. JIKA LOLOS, BUAT ID KONTRAK & KIRIM DATA
                 txtBtn.innerText = "Mengirim Data...";
                 const idKontrakBaru = "ZNTH-" + Date.now();
                 const payloadSheet = { tipe: "PENGAJUAN_BARU", idKontrak: idKontrakBaru, timestamp: new Date().toLocaleString('id-ID'), ...data };
                 
                 fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payloadSheet) });
                     
-                const teksPesan = `*PENGAJUAN SYARIAH ZENITH CELL* 📝\nID Kontrak: ${idKontrakBaru}\nNama: ${data.nama}\nNIK: ${data.nik}\nBarang: *${data.barang}*\nHarga: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor}\nJatuh Tempo: *Tgl ${data.jatuhTempo} Tiap Bulan*\n\n_Mohon dilanjut Min. Berikut saya lampirkan KTP & Jaminan:_`;
+                const teksPesan = `*PENGAJUAN SYARIAH ZENITH CELL* 📝\nID Kontrak: ${idKontrakBaru}\nNama: ${data.nama}\nNIK: ${data.nik}\nBarang: *${data.barang}*\nHarga: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor}\nJatuh Tempo: *Tgl ${data.jatuhTempo} Tiap Bulan*\nJaminan: ${data.jaminan}\n\n_Mohon dilanjut Min. Berikut saya lampirkan KTP & Jaminan:_`;
                 const waLink = `https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(teksPesan)}`;
                 window.open(waLink, '_blank');
 
-                btnSubmit.disabled = false; 
-                txtBtn.innerText = "Ajukan Pembiayaan";
+                btnSubmit.disabled = false; txtBtn.innerText = "Ajukan Pembiayaan Sekarang";
                 modal.classList.remove('hidden'); modal.classList.add('flex');
                 setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
 
             } catch(e) {
                 alert("Gagal terhubung ke server. Pastikan koneksi internet lancar.");
-                btnSubmit.disabled = false; 
-                txtBtn.innerText = "Ajukan Pembiayaan Sekarang";
+                btnSubmit.disabled = false; txtBtn.innerText = "Ajukan Pembiayaan Sekarang";
             }
         });
 
         function tutupModal() {
             modal.classList.add('opacity-0'); setTimeout(() => modal.classList.replace('flex','hidden'), 300);
-            document.getElementById('pengajuanForm').reset(); 
+            document.getElementById('pengajuanForm').reset(); toggleJaminanLainnya(); 
         }
     </script>
 </body>

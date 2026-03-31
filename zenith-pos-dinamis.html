@@ -94,7 +94,6 @@
                 if(dbCustomers.length === 0) { grid.innerHTML = `<div class="col-span-3 text-center py-2 text-slate-400 text-xs">Semua pelanggan Lunas!</div>`; } 
                 else {
                     dbCustomers.forEach(cust => {
-                        // Gunakan ID Kontrak sebagai value radio button agar unik dan pasti
                         grid.innerHTML += `<label class="cursor-pointer relative"><input type="radio" name="pelanggan" value="${cust.idKontrak}" class="radio-peer sr-only" onchange="selectCustomer('${cust.idKontrak}')"><div class="w-full py-3 px-2 rounded-xl bg-slate-50 border-2 border-slate-100 text-slate-600 font-bold text-sm text-center truncate">${cust.nama}</div></label>`;
                     });
                 }
@@ -140,6 +139,7 @@
                 tipe: "KAS_MASUK_CICILAN", 
                 idKontrak: data.custData.idKontrak, 
                 waktu: new Date().toLocaleString('id-ID'), 
+                bulanIni: new Date().getMonth() + 1, // MENGIRIM DATA BULAN SAAT INI
                 nama: data.custData.nama, 
                 whatsapp: data.custData.wa, 
                 cicilanKe: data.cicilan, 

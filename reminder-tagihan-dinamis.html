@@ -48,6 +48,9 @@
                 <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Tagihan Berjalan</span>
                 <span class="text-[10px] font-bold bg-white px-2 py-1 rounded-md text-slate-400 shadow-sm" id="bulanIni">Bulan Ini</span>
             </div>
+            
+            <button onclick="bukaModalMigrasi()" class="w-full mb-4 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-3.5 rounded-2xl flex justify-center items-center gap-2 shadow-sm"><i data-lucide="database" class="w-4 h-4"></i> Migrasi Data Manual (Pelanggan Lama)</button>
+            
             <div id="customerList" class="space-y-3 flex-grow overflow-y-auto no-scrollbar pb-10"></div>
         </div>
     </main>
@@ -89,6 +92,45 @@
         </div>
     </div>
 
+    <div id="migrasiModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0">
+        <div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-6 pb-8 shadow-2xl transform translate-y-full transition-transform max-h-[85vh] overflow-y-auto no-scrollbar" id="migrasiModalContent">
+            <div class="flex justify-between items-center mb-5 border-b pb-3">
+                <h2 class="font-black text-lg text-slate-900"><i data-lucide="database" class="w-5 h-5 text-emerald-500 inline"></i> Migrasi Data Manual</h2>
+                <button onclick="closeModalMigrasi()" class="p-2 bg-slate-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <form id="formMigrasi" class="space-y-4" onsubmit="event.preventDefault(); prosesMigrasi();">
+                <input type="text" id="migNama" placeholder="Nama Pelanggan" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
+                <input type="tel" id="migWa" placeholder="No WhatsApp" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
+                <input type="text" id="migBarang" placeholder="Nama Barang" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Total Hutang</label>
+                        <input type="text" id="migHutang" required class="w-full px-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Sudah Terbayar</label>
+                        <input type="text" id="migTerbayar" required class="w-full px-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Cicilan / Bulan</label>
+                        <input type="text" id="migCicilan" required class="w-full px-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Lanjut Cicilan Ke</label>
+                        <input type="number" id="migKe" min="1" placeholder="Mulai Ke-" required class="w-full px-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Tanggal Jatuh Tempo (Tiap Bulan)</label>
+                    <input type="number" id="migTempo" min="1" max="31" placeholder="Misal: 25" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
+                </div>
+                
+                <button type="submit" id="btnSubmitMigrasi" class="w-full mt-6 bg-slate-900 text-white font-extrabold py-4 px-6 rounded-xl active:scale-95 transition-all flex justify-center gap-2"><i data-lucide="save" class="w-5 h-5"></i> Simpan Data Langsung</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         lucide.createIcons();
         
@@ -100,6 +142,7 @@
         const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num);
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
         const tglSekarang = new Date().getDate();
+        const bulanSekarang = new Date().getMonth() + 1; // Untuk mengecek apakah lunas bulan ini
         document.getElementById('bulanIni').innerText = `Tgl Hari Ini: ${tglSekarang}`;
 
         let currentTab = 'antrean'; let targetWaLink = ""; let currentActiveData = null;
@@ -175,16 +218,13 @@
             if(finalTotal === 0 || finalCicilan === 0) return alert("Nominal tidak boleh 0!");
             
             const payload = { tipe: "ACC_PENGAJUAN", idKontrak: currentActiveData.idKontrak, wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: currentActiveData.jatuhTempo, totalHutang: finalTotal, cicilanBulan: finalCicilan };
-            
             btn.disabled = true; btn.innerHTML = "Memproses...";
             try {
                 const card = document.getElementById(`card-${currentActiveData.idKontrak}`);
                 if (card) card.style.display = 'none';
-
                 fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                 closeModalAcc(); 
-                
-                setTimeout(() => { fetchAntrean(); alert("Sukses di-ACC dan dipindah ke Kasir POS!"); }, 3000); 
+                setTimeout(() => { fetchAntrean(); alert("Sukses di-ACC dan dipindah ke Kasir POS!"); }, 2000); 
             } catch(e) { alert("Gagal koneksi."); }
             btn.disabled = false; btn.innerHTML = `<i data-lucide="user-check" class="w-5 h-5"></i> ACC & Pindah ke Kasir`;
         });
@@ -193,12 +233,12 @@
             if(confirm("Yakin ingin menghapus permanen pengajuan ini?")) {
                 const card = document.getElementById(`card-${idKontrak}`);
                 if (card) card.style.display = 'none';
-
                 fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", idKontrak: idKontrak }) });
-                setTimeout(() => fetchAntrean(), 3000);
+                setTimeout(() => fetchAntrean(), 2000);
             }
         };
 
+        // --- SISTEM TAGIHAN & SMART LUNAS BULAN INI ---
         async function fetchTagihan() {
             const container = document.getElementById('customerList');
             toggleLoading(true);
@@ -221,9 +261,19 @@
                 } else {
                     aktifCustomers.forEach(p => {
                         let angkaTanggal = p.jatuhTempo ? (parseInt(p.jatuhTempo.toString().split('-')[0]) || 1) : 1;
-                        const isTelat = tglSekarang >= angkaTanggal;
-                        let badgeColor = isTelat ? "bg-red-100 text-red-600 border border-red-200" : "bg-slate-100 text-slate-600";
                         let sisaBulanIni = p.cicilanPerBulan > 0 ? p.cicilanPerBulan : Math.round(p.hutang / 6); 
+                        
+                        // LOGIKA BARU: Cek apakah sudah bayar bulan ini
+                        const isSudahBayarBulanIni = p.bulanTerakhirBayar === bulanSekarang;
+                        const isTelat = !isSudahBayarBulanIni && (tglSekarang >= angkaTanggal);
+                        
+                        let badgeColor = isSudahBayarBulanIni ? "bg-emerald-100 text-emerald-700 border border-emerald-200" : (isTelat ? "bg-red-100 text-red-600 border border-red-200" : "bg-slate-100 text-slate-600");
+                        let badgeText = isSudahBayarBulanIni ? "✔ LUNAS BULAN INI" : `Tempo: Tgl ${angkaTanggal}`;
+
+                        // Tombol WA berubah kalau sudah bayar
+                        let tombolAksi = isSudahBayarBulanIni 
+                            ? `<button disabled class="py-2.5 bg-slate-50 text-slate-400 rounded-xl text-[11px] font-bold w-full"><i data-lucide="check-circle-2" class="w-3.5 h-3.5 inline"></i> Aman Terkendali</button>`
+                            : `<button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${angkaTanggal}')" class="py-2.5 bg-amber-50 text-amber-700 rounded-xl text-[11px] font-bold w-full flex justify-center items-center gap-1.5 border border-amber-100"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> ${isTelat ? 'Tegur Keterlambatan (WA)' : 'Kirim WA Pengingat'}</button>`;
 
                         container.innerHTML += `
                             <div class="bg-white p-4 rounded-3xl shadow-sm border flex flex-col gap-3 relative hover:border-amber-200">
@@ -232,16 +282,12 @@
                                         <h3 class="font-extrabold text-slate-800 text-sm">${p.nama}</h3>
                                         <div class="flex items-center gap-2 mt-1">
                                             <span class="text-[10px] font-bold text-slate-500">Bulan Ke-${p.cicilanKe}</span>
-                                            <span class="text-[9px] font-bold ${badgeColor} px-1.5 py-0.5 rounded uppercase">Jatuh Tempo: Tgl ${angkaTanggal}</span>
+                                            <span class="text-[9px] font-bold ${badgeColor} px-1.5 py-0.5 rounded uppercase">${badgeText}</span>
                                         </div>
                                     </div>
                                     <div class="text-right"><p class="text-[10px] font-bold text-slate-400">Tagihan Bulanan</p><p class="font-black text-slate-900">Rp ${formatRupiah(sisaBulanIni)}</p></div>
                                 </div>
-                                <div class="grid grid-cols-1 mt-1">
-                                    <button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${angkaTanggal}')" class="py-2.5 bg-amber-50 text-amber-700 rounded-xl text-[11px] font-bold flex justify-center items-center gap-1.5 border border-amber-100">
-                                        <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> ${isTelat ? 'Tegur Keterlambatan (WA)' : 'Kirim WA Pengingat'}
-                                    </button>
-                                </div>
+                                <div class="mt-1">${tombolAksi}</div>
                             </div>`;
                     });
                 }
@@ -258,6 +304,47 @@
         };
         window.closeWaModal = function() { modalWa.classList.add('opacity-0'); modalWaContent.classList.add('translate-y-full'); setTimeout(() => modalWa.classList.replace('flex', 'hidden'), 300); };
         document.getElementById('btnKirimWA').addEventListener('click', () => { window.open(`${targetWaLink}&text=${encodeURIComponent(document.getElementById('pesanWA').value)}`, '_blank'); closeWaModal(); });
+
+        // --- SISTEM MIGRASI DATA MANUAL ---
+        const modalMigrasi = document.getElementById('migrasiModal'), migrasiContent = document.getElementById('migrasiModalContent');
+        window.bukaModalMigrasi = function() {
+            modalMigrasi.classList.replace('hidden', 'flex'); setTimeout(() => { modalMigrasi.classList.remove('opacity-0'); migrasiContent.classList.remove('translate-y-full'); }, 10);
+        };
+        window.closeModalMigrasi = function() {
+            modalMigrasi.classList.add('opacity-0'); migrasiContent.classList.add('translate-y-full'); setTimeout(() => modalMigrasi.classList.replace('flex', 'hidden'), 300);
+        };
+        
+        ['migHutang', 'migTerbayar', 'migCicilan'].forEach(id => { document.getElementById(id).addEventListener('input', (e) => { e.target.value = formatRupiah(parseRupiah(e.target.value)); }); });
+        // PEMBERSIH WA OTOMATIS SAAT MIGRASI
+document.getElementById('migWa').addEventListener('input', function() {
+    let val = this.value.replace(/[^0-9]/g, '');
+    if (val.startsWith('62')) val = '0' + val.substring(2);
+    this.value = val;
+});
+
+
+        window.prosesMigrasi = function() {
+            const btn = document.getElementById('btnSubmitMigrasi');
+            const payload = {
+                tipe: "MIGRASI_PELANGGAN",
+                nama: document.getElementById('migNama').value,
+                wa: document.getElementById('migWa').value,
+                barang: document.getElementById('migBarang').value,
+                totalHutang: parseRupiah(document.getElementById('migHutang').value),
+                sudahTerbayar: parseRupiah(document.getElementById('migTerbayar').value),
+                cicilanBulan: parseRupiah(document.getElementById('migCicilan').value),
+                jatuhTempo: document.getElementById('migTempo').value,
+                cicilanKe: document.getElementById('migKe').value
+            };
+            
+            btn.disabled = true; btn.innerHTML = "Menyimpan ke Server...";
+            fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            setTimeout(() => { 
+                closeModalMigrasi(); document.getElementById('formMigrasi').reset();
+                fetchTagihan(); alert("Data Migrasi Berhasil Ditambahkan!"); 
+                btn.disabled = false; btn.innerHTML = `<i data-lucide="save" class="w-5 h-5"></i> Simpan Data Langsung`;
+            }, 2000);
+        };
 
         fetchAntrean(); 
     </script>
