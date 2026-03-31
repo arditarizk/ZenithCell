@@ -20,6 +20,8 @@
 </head>
 <body class="text-slate-800 pb-24 pt-4 px-4 flex justify-center selection:bg-amber-200">
 
+    <div id="toastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 pointer-events-none w-full max-w-sm px-4"></div>
+
     <main class="w-full max-w-md relative z-10 flex flex-col min-h-[90vh]">
         <header class="mb-5 flex items-center justify-between bg-white p-4 rounded-[2rem] shadow-sm border relative">
             <a href="index.html" class="p-2 bg-slate-50 rounded-full text-slate-500 mr-2"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
@@ -44,6 +46,11 @@
         </div>
 
         <div id="viewTagihan" class="flex-col flex-grow hidden">
+            <div class="mb-4 relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i></div>
+                <input type="text" id="searchAdmin" placeholder="Cari nama pelanggan..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold shadow-sm outline-none focus:border-amber-400 transition-colors">
+            </div>
+
             <div class="flex justify-between items-end mb-2 px-2">
                 <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Tagihan Berjalan</span>
                 <span class="text-[10px] font-bold bg-white px-2 py-1 rounded-md text-slate-400 shadow-sm" id="bulanIni">Bulan Ini</span>
@@ -71,24 +78,15 @@
                 
                 <div>
                     <label class="block text-[11px] font-extrabold text-emerald-600 mb-1.5 uppercase">Tgl Jatuh Tempo <span class="text-slate-400 font-medium normal-case">(Bisa Diedit)</span></label>
-                    <div class="relative flex items-center">
-                        <span class="absolute left-4 text-slate-400 font-bold">Tgl</span>
-                        <input type="number" id="accJatuhTempo" min="1" max="31" class="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-emerald-100 rounded-xl font-bold text-lg outline-none focus:border-emerald-500 transition-colors">
-                    </div>
+                    <div class="relative flex items-center"><span class="absolute left-4 text-slate-400 font-bold">Tgl</span><input type="number" id="accJatuhTempo" min="1" max="31" class="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-emerald-100 rounded-xl font-bold text-lg outline-none focus:border-emerald-500 transition-colors"></div>
                 </div>
                 <div>
                     <label class="block text-[11px] font-extrabold text-emerald-600 mb-1.5 uppercase">Total Harga Jual <span class="text-slate-400 font-medium normal-case">(Bisa Diedit)</span></label>
-                    <div class="relative flex items-center">
-                        <span class="absolute left-4 text-slate-400 font-bold">Rp</span>
-                        <input type="text" id="accTotalHutang" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-emerald-100 rounded-xl font-bold text-lg outline-none focus:border-emerald-500 transition-colors">
-                    </div>
+                    <div class="relative flex items-center"><span class="absolute left-4 text-slate-400 font-bold">Rp</span><input type="text" id="accTotalHutang" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-emerald-100 rounded-xl font-bold text-lg outline-none focus:border-emerald-500 transition-colors"></div>
                 </div>
                 <div>
                     <label class="block text-[11px] font-extrabold text-emerald-600 mb-1.5 uppercase">Cicilan Per Bulan <span class="text-slate-400 font-medium normal-case">(Bisa Diedit)</span></label>
-                    <div class="relative flex items-center">
-                        <span class="absolute left-4 text-slate-400 font-bold">Rp</span>
-                        <input type="text" id="accCicilan" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-emerald-100 rounded-xl font-bold text-lg outline-none focus:border-emerald-500 transition-colors">
-                    </div>
+                    <div class="relative flex items-center"><span class="absolute left-4 text-slate-400 font-bold">Rp</span><input type="text" id="accCicilan" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-emerald-100 rounded-xl font-bold text-lg outline-none focus:border-emerald-500 transition-colors"></div>
                 </div>
             </div>
             <button id="btnKonfirmasiAcc" class="w-full mt-6 bg-emerald-500 text-white font-extrabold py-4 px-6 rounded-xl active:scale-95 transition-all flex justify-center gap-2"><i data-lucide="user-check" class="w-5 h-5"></i> ACC & Pindah ke Kasir</button>
@@ -118,27 +116,12 @@
                 <input type="text" id="migBarang" placeholder="Nama Barang" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
                 
                 <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Total Hutang</label>
-                        <input type="text" id="migHutang" required class="w-full px-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Sudah Terbayar</label>
-                        <input type="text" id="migTerbayar" required class="w-full px-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Cicilan / Bulan</label>
-                        <input type="text" id="migCicilan" required class="w-full px-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Lanjut Cicilan Ke</label>
-                        <input type="number" id="migKe" min="1" placeholder="Mulai Ke-" required class="w-full px-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
-                    </div>
+                    <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Total Hutang</label><input type="text" id="migHutang" required class="w-full px-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Sudah Terbayar</label><input type="text" id="migTerbayar" required class="w-full px-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Cicilan / Bulan</label><input type="text" id="migCicilan" required class="w-full px-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Lanjut Ke-</label><input type="number" id="migKe" min="1" placeholder="Mulai Ke-" required class="w-full px-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm"></div>
                 </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 mb-1">Tanggal Jatuh Tempo (Tiap Bulan)</label>
-                    <input type="number" id="migTempo" min="1" max="31" placeholder="Misal: 25" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
-                </div>
+                <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Tanggal Jatuh Tempo</label><input type="number" id="migTempo" min="1" max="31" placeholder="Misal: 25" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none text-sm"></div>
                 
                 <button type="submit" id="btnSubmitMigrasi" class="w-full mt-6 bg-slate-900 text-white font-extrabold py-4 px-6 rounded-xl active:scale-95 transition-all flex justify-center gap-2"><i data-lucide="save" class="w-5 h-5"></i> Simpan Data Langsung</button>
             </form>
@@ -148,6 +131,18 @@
     <script>
         lucide.createIcons();
         
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-emerald-500' : (type === 'info' ? 'bg-blue-500' : 'bg-red-500');
+            const icon = type === 'success' ? 'check-circle' : (type === 'info' ? 'info' : 'alert-circle');
+            toast.className = `${bgColor} text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 transform -translate-y-10 opacity-0 transition-all duration-300 w-full`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 shrink-0"></i><span class="text-sm font-bold">${message}</span>`;
+            document.getElementById('toastContainer').appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => { toast.classList.remove('-translate-y-10', 'opacity-0'); }, 10);
+            setTimeout(() => { toast.classList.add('-translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
         function toggleLoading(isLoading) {
             const icon = document.querySelector('#btnRefresh svg') || document.querySelector('#btnRefresh i');
             if (icon) { if (isLoading) icon.classList.add('animate-spin'); else icon.classList.remove('animate-spin'); }
@@ -160,6 +155,18 @@
         document.getElementById('bulanIni').innerText = `Tgl Hari Ini: ${tglSekarang}`;
 
         let currentTab = 'antrean'; let targetWaLink = ""; let currentActiveData = null;
+        let marginStandar = CONFIG.MARGIN_DEFAULT || 25; 
+
+        // FITUR LIVE SEARCH
+        document.getElementById('searchAdmin').addEventListener('input', function(e) {
+            const keyword = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.customer-card');
+            cards.forEach(card => {
+                const nama = card.getAttribute('data-nama').toLowerCase();
+                if (nama.includes(keyword)) card.style.display = 'flex';
+                else card.style.display = 'none';
+            });
+        });
 
         function switchTab(tab) {
             currentTab = tab;
@@ -172,9 +179,8 @@
         function refreshData() { if(currentTab === 'antrean') fetchAntrean(); else fetchTagihan(); }
 
         async function fetchAntrean() {
-            const container = document.getElementById('pendingList');
-            toggleLoading(true);
-            container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-xs font-bold text-slate-500">Menarik data server...</p></div>`;
+            const container = document.getElementById('pendingList'); toggleLoading(true);
+            container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-xs font-bold text-slate-500">Menarik data...</p></div>`;
 
             try {
                 const res = await fetch(CONFIG.API_URL + "?action=getPending&nocache=" + Date.now());
@@ -188,7 +194,7 @@
                 else {
                     data.forEach((p) => {
                         let hargaBersih = parseRupiah(p.harga.toString()) - parseRupiah(p.dp.toString());
-                        let rekTotal = hargaBersih + (hargaBersih * 0.25); // Default hitungan awal
+                        let rekTotal = hargaBersih + (hargaBersih * (marginStandar / 100)); 
                         let tenorAngka = parseInt(p.tenor) || 6;
                         let rekBulan = Math.round(rekTotal / tenorAngka);
                         
@@ -216,10 +222,8 @@
         window.bukaModalAcc = function(encodedData) {
             const data = JSON.parse(decodeURIComponent(encodedData)); currentActiveData = data;
             document.getElementById('accIdKontrak').innerText = data.idKontrak; 
-            document.getElementById('accNama').innerText = data.nama; 
-            document.getElementById('accBarang').innerText = data.barang;
+            document.getElementById('accNama').innerText = data.nama; document.getElementById('accBarang').innerText = data.barang;
             
-            // Isi form yang bisa diedit Admin
             document.getElementById('accJatuhTempo').value = data.jatuhTempo; 
             document.getElementById('accTotalHutang').value = formatRupiah(data.rekTotal); 
             document.getElementById('accCicilan').value = formatRupiah(data.rekBulan);
@@ -232,13 +236,11 @@
 
         document.getElementById('btnKonfirmasiAcc').addEventListener('click', async () => {
             const btn = document.getElementById('btnKonfirmasiAcc');
-            
-            // Ambil semua data yang mungkin DIEDIT oleh Admin
             const finalTempo = document.getElementById('accJatuhTempo').value;
             const finalTotal = parseRupiah(document.getElementById('accTotalHutang').value);
             const finalCicilan = parseRupiah(document.getElementById('accCicilan').value);
             
-            if(finalTotal === 0 || finalCicilan === 0 || finalTempo === "") return alert("Data tidak boleh kosong!");
+            if(finalTotal === 0 || finalCicilan === 0 || finalTempo === "") return showToast("Data tidak boleh kosong!", "error");
             
             const payload = { tipe: "ACC_PENGAJUAN", idKontrak: currentActiveData.idKontrak, wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: finalTempo, totalHutang: finalTotal, cicilanBulan: finalCicilan };
             btn.disabled = true; btn.innerHTML = "Memproses...";
@@ -247,8 +249,8 @@
                 if (card) card.style.display = 'none';
                 fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                 closeModalAcc(); 
-                setTimeout(() => { fetchAntrean(); alert("Sukses di-ACC dan dipindah ke Kasir POS!"); }, 2000); 
-            } catch(e) { alert("Gagal koneksi."); }
+                setTimeout(() => { fetchAntrean(); showToast("Sukses di-ACC dan masuk ke Kasir!", "success"); }, 2000); 
+            } catch(e) { showToast("Gagal koneksi.", "error"); }
             btn.disabled = false; btn.innerHTML = `<i data-lucide="user-check" class="w-5 h-5"></i> ACC & Pindah ke Kasir`;
         });
 
@@ -261,10 +263,8 @@
             }
         };
 
-        // --- SISTEM TAGIHAN TANGGAL LENGKAP (UPDATE) ---
         async function fetchTagihan() {
-            const container = document.getElementById('customerList');
-            toggleLoading(true);
+            const container = document.getElementById('customerList'); toggleLoading(true);
             container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-xs font-bold text-slate-500">Membaca Tagihan...</p></div>`;
 
             try {
@@ -272,7 +272,7 @@
                 const result = await res.json();
                 
                 if (result.status === "error") {
-                    container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-amber-500">${result.message || "Belum ada data."}</p></div>`;
+                    container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-amber-500">${result.message}</p></div>`;
                     toggleLoading(false); return;
                 }
 
@@ -284,17 +284,11 @@
                 } else {
                     aktifCustomers.forEach(p => {
                         let sisaBulanIni = p.cicilanPerBulan > 0 ? p.cicilanPerBulan : Math.round(p.hutang / 6); 
-                        
                         let angkaTanggal = p.jatuhTempo ? (parseInt(p.jatuhTempo.toString().split('-')[0]) || 1) : 1;
                         let bulanTerakhir = p.bulanTerakhirBayar || 0;
                         
-                        // Perbaikan Kalender Pintar: Jika hari ini melewati/sama dengan tgl jatuh tempo 
-                        // dan belum pernah bayar, maka tagihan mulai di bulan DEPAN.
                         let targetBulan = bulanTerakhir === 0 ? bulanSekarang : bulanTerakhir + 1;
-                        if (bulanTerakhir === 0 && tglSekarang >= angkaTanggal) {
-                            targetBulan = bulanSekarang + 1;
-                        }
-                        
+                        if (bulanTerakhir === 0 && tglSekarang >= angkaTanggal) { targetBulan = bulanSekarang + 1; }
                         let targetTahun = new Date().getFullYear();
                         if (targetBulan > 12) { targetBulan = 1; targetTahun += 1; }
                         
@@ -311,16 +305,11 @@
                             ? `<button disabled class="py-2.5 bg-slate-50 text-slate-400 rounded-xl text-[11px] font-bold w-full"><i data-lucide="check-circle-2" class="w-3.5 h-3.5 inline"></i> Aman Terkendali</button>`
                             : `<button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${tglLengkap}', '${namaBulan[targetBulan]}')" class="py-2.5 bg-amber-50 text-amber-700 rounded-xl text-[11px] font-bold w-full flex justify-center items-center gap-1.5 border border-amber-100"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> ${isTelat ? 'Tegur Keterlambatan (WA)' : 'Kirim WA Pengingat'}</button>`;
 
+                        // Class customer-card ditambahkan untuk fitur Live Search
                         container.innerHTML += `
-                            <div class="bg-white p-4 rounded-3xl shadow-sm border flex flex-col gap-3 relative hover:border-amber-200">
+                            <div data-nama="${p.nama}" class="customer-card bg-white p-4 rounded-3xl shadow-sm border flex flex-col gap-3 relative hover:border-amber-200 transition-colors">
                                 <div class="flex justify-between items-start">
-                                    <div>
-                                        <h3 class="font-extrabold text-slate-800 text-sm">${p.nama}</h3>
-                                        <div class="flex items-center gap-2 mt-1">
-                                            <span class="text-[10px] font-bold text-slate-500">Bulan Ke-${p.cicilanKe}</span>
-                                            <span class="text-[9px] font-bold ${badgeColor} px-1.5 py-0.5 rounded uppercase">${badgeText}</span>
-                                        </div>
-                                    </div>
+                                    <div><h3 class="font-extrabold text-slate-800 text-sm">${p.nama}</h3><div class="flex items-center gap-2 mt-1"><span class="text-[10px] font-bold text-slate-500">Bulan Ke-${p.cicilanKe}</span><span class="text-[9px] font-bold ${badgeColor} px-1.5 py-0.5 rounded uppercase">${badgeText}</span></div></div>
                                     <div class="text-right"><p class="text-[10px] font-bold text-slate-400">Tagihan Bulanan</p><p class="font-black text-slate-900">Rp ${formatRupiah(sisaBulanIni)}</p></div>
                                 </div>
                                 <div class="mt-1">${tombolAksi}</div>
@@ -360,7 +349,7 @@
             };
             btn.disabled = true; btn.innerHTML = "Menyimpan ke Server...";
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            setTimeout(() => { closeModalMigrasi(); document.getElementById('formMigrasi').reset(); fetchTagihan(); alert("Data Migrasi Berhasil Ditambahkan!"); btn.disabled = false; btn.innerHTML = `<i data-lucide="save" class="w-5 h-5"></i> Simpan Data Langsung`; }, 2000);
+            setTimeout(() => { closeModalMigrasi(); document.getElementById('formMigrasi').reset(); fetchTagihan(); showToast("Data Migrasi Berhasil Ditambahkan!", "success"); btn.disabled = false; btn.innerHTML = `<i data-lucide="save" class="w-5 h-5"></i> Simpan Data Langsung`; }, 2000);
         };
         fetchAntrean(); 
     </script>

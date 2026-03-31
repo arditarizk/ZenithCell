@@ -107,7 +107,9 @@
         lucide.createIcons();
         const priceInput = document.getElementById('price'), dpInput = document.getElementById('dp');
         const resPokok = document.getElementById('resPokok'), resMargin = document.getElementById('resMargin'), resTotal = document.getElementById('resTotal'), resCicilan = document.getElementById('resCicilan');
-        let currentMargin = 25; let isVoucherClaimed = false;
+        
+        let currentMargin = CONFIG.MARGIN_DEFAULT || 25; 
+        let isVoucherClaimed = false;
 
         function klaimVoucher() {
             if (isVoucherClaimed) return;
@@ -118,14 +120,22 @@
             
             setTimeout(() => {
                 let pesanBerhasil = ""; let isDiskon = true;
-                if (kodeVal === 'dulurdewe22') { currentMargin = 22; pesanBerhasil = `Kode valid! Margin layanan turun jadi <b class="text-emerald-700 bg-emerald-100 px-1 rounded">22%</b> 🎉`; } 
-                else if (kodeVal === 'nawakewed') { currentMargin = 20; pesanBerhasil = `Kode valid! Margin VVIP <b class="text-emerald-700 bg-emerald-100 px-1 rounded">20%</b> 🔥`; } 
-                else {
-                    const gachaPool = [25,25,25,25,25,24,24,24,24,24,23,23,23,23,23,22,22,21,21,20];
+
+                if (CONFIG.VOUCHERS && CONFIG.VOUCHERS[kodeVal]) {
+                    currentMargin = CONFIG.VOUCHERS[kodeVal].margin;
+                    pesanBerhasil = CONFIG.VOUCHERS[kodeVal].pesan;
+                } else if (kodeVal !== "") {
+                    currentMargin = CONFIG.MARGIN_DEFAULT;
+                    isDiskon = false;
+                    pesanBerhasil = `Kode tidak valid. Menggunakan margin standar <b class="text-blue-700 bg-blue-100 px-1 rounded">${currentMargin}%</b>.`;
+                } else {
+                    const gachaPool = [CONFIG.MARGIN_DEFAULT, CONFIG.MARGIN_DEFAULT, 24, 23, 22]; 
                     currentMargin = gachaPool[Math.floor(Math.random() * gachaPool.length)];
-                    if (currentMargin === 25) { isDiskon = false; pesanBerhasil = `Margin normal OJK <b class="text-blue-700 bg-blue-100 px-1 rounded">25%</b>. Transaksi aman! 🛡️`; } 
-                    else if (kodeVal !== "") { pesanBerhasil = `Kode hangus, tapi undian hoki memotong margin menjadi <b class="text-emerald-700 bg-emerald-100 px-1 rounded">${currentMargin}%</b> 🥳`; } 
-                    else { pesanBerhasil = `Hoki! Hasil undian otomatis memotong margin layanan menjadi <b class="text-emerald-700 bg-emerald-100 px-1 rounded">${currentMargin}%</b> 🎉`; }
+                    if (currentMargin === CONFIG.MARGIN_DEFAULT) { 
+                        isDiskon = false; pesanBerhasil = `Biaya normal OJK <b class="text-blue-700 bg-blue-100 px-1 rounded">${currentMargin}%</b>. Transaksi aman! 🛡️`; 
+                    } else { 
+                        pesanBerhasil = `Hoki! Hasil undian memotong margin layanan menjadi <b class="text-emerald-700 bg-emerald-100 px-1 rounded">${currentMargin}%</b> 🎉`; 
+                    }
                 }
                 
                 isVoucherClaimed = true; btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> Selesai`; btn.classList.remove('cursor-wait');
@@ -154,7 +164,7 @@
             const tenor = parseInt(document.querySelector('input[name="tenor"]:checked').value);
             
             const marginBadge = document.getElementById('resMarginText');
-            if (currentMargin < 25) {
+            if (currentMargin < CONFIG.MARGIN_DEFAULT) {
                 marginBadge.innerText = `Promo (${currentMargin}%)`;
                 marginBadge.className = "text-[9px] font-bold bg-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-400 uppercase";
             } else {

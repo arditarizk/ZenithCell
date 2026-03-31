@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Portal Resmi - Zenith Cell</title>
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -11,8 +12,6 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; -webkit-tap-highlight-color: transparent; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); }
         .menu-card { transition: all 0.3s ease; } .menu-card:hover { transform: translateY(-4px); }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
-        .animate-shake { animation: shake 0.4s ease-in-out; }
         input[type=password]::-webkit-inner-spin-button, input[type=password]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
@@ -72,6 +71,8 @@
 
     <script>
         lucide.createIcons();
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+        
         const PIN_ADMIN = "123456"; let pendingUrl = ""; 
         const pinModal = document.getElementById('pinModal'), pinCard = document.getElementById('pinCard'), pinInput = document.getElementById('pinInput'), pinForm = document.getElementById('pinForm'), pinError = document.getElementById('pinError');
         function requestPin(targetUrl) { pendingUrl = targetUrl; pinInput.value = ""; pinError.classList.add('hidden'); pinModal.classList.replace('hidden', 'flex'); setTimeout(() => { pinModal.classList.remove('opacity-0'); pinCard.classList.remove('scale-95'); pinInput.focus(); }, 10); }
