@@ -118,14 +118,14 @@
             
             setTimeout(() => {
                 let pesanBerhasil = ""; let isDiskon = true;
-                if (kodeVal === 'dulurdewe22') { currentMargin = 22; pesanBerhasil = `Kode valid! Biaya layanan <b class="text-emerald-700 bg-emerald-100 px-1 rounded">22%</b> 🎉`; } 
-                else if (kodeVal === 'nawakewed') { currentMargin = 20; pesanBerhasil = `Kode valid! Biaya VVIP <b class="text-emerald-700 bg-emerald-100 px-1 rounded">20%</b> 🔥`; } 
+                if (kodeVal === 'dulurdewe22') { currentMargin = 22; pesanBerhasil = `Kode valid! Margin layanan turun jadi <b class="text-emerald-700 bg-emerald-100 px-1 rounded">22%</b> 🎉`; } 
+                else if (kodeVal === 'nawakewed') { currentMargin = 20; pesanBerhasil = `Kode valid! Margin VVIP <b class="text-emerald-700 bg-emerald-100 px-1 rounded">20%</b> 🔥`; } 
                 else {
                     const gachaPool = [25,25,25,25,25,24,24,24,24,24,23,23,23,23,23,22,22,21,21,20];
                     currentMargin = gachaPool[Math.floor(Math.random() * gachaPool.length)];
-                    if (currentMargin === 25) { isDiskon = false; pesanBerhasil = `Biaya normal OJK <b class="text-blue-700 bg-blue-100 px-1 rounded">25%</b>. Transaksi aman! 🛡️`; } 
-                    else if (kodeVal !== "") { pesanBerhasil = `Kode hangus, tapi undian hoki memotong biaya menjadi <b class="text-emerald-700 bg-emerald-100 px-1 rounded">${currentMargin}%</b> 🥳`; } 
-                    else { pesanBerhasil = `Hoki! Hasil undian otomatis memotong biaya layanan menjadi <b class="text-emerald-700 bg-emerald-100 px-1 rounded">${currentMargin}%</b> 🎉`; }
+                    if (currentMargin === 25) { isDiskon = false; pesanBerhasil = `Margin normal OJK <b class="text-blue-700 bg-blue-100 px-1 rounded">25%</b>. Transaksi aman! 🛡️`; } 
+                    else if (kodeVal !== "") { pesanBerhasil = `Kode hangus, tapi undian hoki memotong margin menjadi <b class="text-emerald-700 bg-emerald-100 px-1 rounded">${currentMargin}%</b> 🥳`; } 
+                    else { pesanBerhasil = `Hoki! Hasil undian otomatis memotong margin layanan menjadi <b class="text-emerald-700 bg-emerald-100 px-1 rounded">${currentMargin}%</b> 🎉`; }
                 }
                 
                 isVoucherClaimed = true; btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> Selesai`; btn.classList.remove('cursor-wait');

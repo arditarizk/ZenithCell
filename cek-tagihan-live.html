@@ -30,7 +30,6 @@
             <form id="searchForm" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide text-center">Masukkan Nomor WhatsApp Anda</label>
-                    
                     <div class="relative flex items-center">
                         <input type="tel" id="waInput" placeholder="Contoh: 081234567890" required class="w-full text-center pl-12 pr-12 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-slate-900 font-bold text-lg outline-none focus:border-emerald-500 transition-all">
                         <button type="button" onclick="pasteDariClipboard()" class="absolute right-2 p-2.5 bg-slate-200/70 text-slate-600 rounded-xl hover:bg-emerald-100 hover:text-emerald-700 transition-colors active:scale-95 flex items-center justify-center" title="Paste Nomor">
@@ -38,7 +37,6 @@
                         </button>
                     </div>
                 </div>
-                
                 <button type="submit" id="btnSearch" class="w-full bg-slate-900 text-white font-extrabold py-4 rounded-2xl active:scale-95 transition-all flex justify-center gap-2"><i data-lucide="search" id="searchIcon" class="w-5 h-5"></i> <span id="searchText">Cari Data Saya</span></button>
             </form>
         </section>
@@ -83,24 +81,22 @@
     <script>
         lucide.createIcons();
         const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num);
+        const tglSekarang = new Date().getDate();
+        const bulanSekarang = new Date().getMonth() + 1; 
 
         const waInput = document.getElementById('waInput');
 
-        // PEMBERSIH NOMOR WA CERDAS (+62 / 62 OTOMATIS JADI 0)
         waInput.addEventListener('input', function() {
             let val = this.value.replace(/[^0-9]/g, '');
             if (val.startsWith('62')) val = '0' + val.substring(2);
             this.value = val;
         });
 
-        // FUNGSI TOMBOL PASTE
         async function pasteDariClipboard() {
             try {
-                // Minta izin baca clipboard browser
                 const text = await navigator.clipboard.readText();
                 if (text) {
                     waInput.value = text;
-                    // Memicu event 'input' agar pembersih nomor (62 jadi 0) langsung berjalan
                     waInput.dispatchEvent(new Event('input'));
                 }
             } catch (err) {
@@ -157,18 +153,19 @@
             let persenLunas = hutangVal > 0 ? Math.round((bayarVal / hutangVal) * 100) : 0; 
             if (persenLunas > 100) persenLunas = 100;
 
-            // --- LOGIKA KALENDER PINTAR ---
+            // --- LOGIKA KALENDER PINTAR (SAMA DENGAN ADMIN) ---
             let angkaTgl = data.jatuhTempo ? (parseInt(data.jatuhTempo.toString().split('-')[0]) || 1) : 1;
             let bulanTerakhir = data.bulanTerakhirBayar || 0;
             
-            const namaBulan = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-            let targetBulan = bulanTerakhir === 0 ? (new Date().getMonth() + 1) : bulanTerakhir + 1;
-            let targetTahun = new Date().getFullYear();
-            
-            if (targetBulan > 12) { 
-                targetBulan = 1; 
-                targetTahun += 1; 
+            let targetBulan = bulanTerakhir === 0 ? bulanSekarang : bulanTerakhir + 1;
+            if (bulanTerakhir === 0 && tglSekarang >= angkaTgl) {
+                targetBulan = bulanSekarang + 1;
             }
+            
+            let targetTahun = new Date().getFullYear();
+            if (targetBulan > 12) { targetBulan = 1; targetTahun += 1; }
+            
+            const namaBulan = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
             let teksTanggalLengkap = `${angkaTgl} ${namaBulan[targetBulan]} ${targetTahun}`;
 
             document.getElementById('resNama').innerText = data.nama; 

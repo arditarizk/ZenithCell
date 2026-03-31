@@ -56,7 +56,7 @@
     </main>
 
     <div id="accModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0">
-        <div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-6 pb-8 shadow-2xl transform translate-y-full transition-transform" id="accModalContent">
+        <div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-6 pb-8 shadow-2xl transform translate-y-full transition-transform max-h-[90vh] overflow-y-auto no-scrollbar" id="accModalContent">
             <div class="flex justify-between items-center mb-5 border-b pb-3">
                 <h2 class="font-black text-lg text-slate-900"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 inline"></i> Finalisasi Akad</h2>
                 <button onclick="closeModalAcc()" class="p-2 bg-slate-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -68,13 +68,27 @@
                     <p class="font-black text-slate-800 text-sm mt-1" id="accNama">...</p>
                     <p class="text-xs text-slate-600 mt-1" id="accBarang">...</p>
                 </div>
+                
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5">Total Harga Jual</label>
-                    <div class="relative flex items-center"><span class="absolute left-4 text-slate-400 font-bold">Rp</span><input type="text" id="accTotalHutang" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-xl font-bold text-lg outline-none"></div>
+                    <label class="block text-[11px] font-extrabold text-emerald-600 mb-1.5 uppercase">Tgl Jatuh Tempo <span class="text-slate-400 font-medium normal-case">(Bisa Diedit)</span></label>
+                    <div class="relative flex items-center">
+                        <span class="absolute left-4 text-slate-400 font-bold">Tgl</span>
+                        <input type="number" id="accJatuhTempo" min="1" max="31" class="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-emerald-100 rounded-xl font-bold text-lg outline-none focus:border-emerald-500 transition-colors">
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5">Cicilan Per Bulan</label>
-                    <div class="relative flex items-center"><span class="absolute left-4 text-slate-400 font-bold">Rp</span><input type="text" id="accCicilan" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-xl font-bold text-lg outline-none"></div>
+                    <label class="block text-[11px] font-extrabold text-emerald-600 mb-1.5 uppercase">Total Harga Jual <span class="text-slate-400 font-medium normal-case">(Bisa Diedit)</span></label>
+                    <div class="relative flex items-center">
+                        <span class="absolute left-4 text-slate-400 font-bold">Rp</span>
+                        <input type="text" id="accTotalHutang" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-emerald-100 rounded-xl font-bold text-lg outline-none focus:border-emerald-500 transition-colors">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-extrabold text-emerald-600 mb-1.5 uppercase">Cicilan Per Bulan <span class="text-slate-400 font-medium normal-case">(Bisa Diedit)</span></label>
+                    <div class="relative flex items-center">
+                        <span class="absolute left-4 text-slate-400 font-bold">Rp</span>
+                        <input type="text" id="accCicilan" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-emerald-100 rounded-xl font-bold text-lg outline-none focus:border-emerald-500 transition-colors">
+                    </div>
                 </div>
             </div>
             <button id="btnKonfirmasiAcc" class="w-full mt-6 bg-emerald-500 text-white font-extrabold py-4 px-6 rounded-xl active:scale-95 transition-all flex justify-center gap-2"><i data-lucide="user-check" class="w-5 h-5"></i> ACC & Pindah ke Kasir</button>
@@ -174,7 +188,7 @@
                 else {
                     data.forEach((p) => {
                         let hargaBersih = parseRupiah(p.harga.toString()) - parseRupiah(p.dp.toString());
-                        let rekTotal = hargaBersih + (hargaBersih * 0.25);
+                        let rekTotal = hargaBersih + (hargaBersih * 0.25); // Default hitungan awal
                         let tenorAngka = parseInt(p.tenor) || 6;
                         let rekBulan = Math.round(rekTotal / tenorAngka);
                         
@@ -202,8 +216,14 @@
         window.bukaModalAcc = function(encodedData) {
             const data = JSON.parse(decodeURIComponent(encodedData)); currentActiveData = data;
             document.getElementById('accIdKontrak').innerText = data.idKontrak; 
-            document.getElementById('accNama').innerText = data.nama; document.getElementById('accBarang').innerText = data.barang;
-            document.getElementById('accTotalHutang').value = formatRupiah(data.rekTotal); document.getElementById('accCicilan').value = formatRupiah(data.rekBulan);
+            document.getElementById('accNama').innerText = data.nama; 
+            document.getElementById('accBarang').innerText = data.barang;
+            
+            // Isi form yang bisa diedit Admin
+            document.getElementById('accJatuhTempo').value = data.jatuhTempo; 
+            document.getElementById('accTotalHutang').value = formatRupiah(data.rekTotal); 
+            document.getElementById('accCicilan').value = formatRupiah(data.rekBulan);
+            
             modalAcc.classList.replace('hidden', 'flex'); setTimeout(() => { modalAcc.classList.remove('opacity-0'); modalAccContent.classList.remove('translate-y-full'); }, 10);
         };
         window.closeModalAcc = function() { modalAcc.classList.add('opacity-0'); modalAccContent.classList.add('translate-y-full'); setTimeout(() => modalAcc.classList.replace('flex', 'hidden'), 300); };
@@ -212,11 +232,15 @@
 
         document.getElementById('btnKonfirmasiAcc').addEventListener('click', async () => {
             const btn = document.getElementById('btnKonfirmasiAcc');
+            
+            // Ambil semua data yang mungkin DIEDIT oleh Admin
+            const finalTempo = document.getElementById('accJatuhTempo').value;
             const finalTotal = parseRupiah(document.getElementById('accTotalHutang').value);
             const finalCicilan = parseRupiah(document.getElementById('accCicilan').value);
-            if(finalTotal === 0 || finalCicilan === 0) return alert("Nominal tidak boleh 0!");
             
-            const payload = { tipe: "ACC_PENGAJUAN", idKontrak: currentActiveData.idKontrak, wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: currentActiveData.jatuhTempo, totalHutang: finalTotal, cicilanBulan: finalCicilan };
+            if(finalTotal === 0 || finalCicilan === 0 || finalTempo === "") return alert("Data tidak boleh kosong!");
+            
+            const payload = { tipe: "ACC_PENGAJUAN", idKontrak: currentActiveData.idKontrak, wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: finalTempo, totalHutang: finalTotal, cicilanBulan: finalCicilan };
             btn.disabled = true; btn.innerHTML = "Memproses...";
             try {
                 const card = document.getElementById(`card-${currentActiveData.idKontrak}`);
@@ -237,7 +261,7 @@
             }
         };
 
-        // --- SISTEM TAGIHAN TANGGAL LENGKAP ---
+        // --- SISTEM TAGIHAN TANGGAL LENGKAP (UPDATE) ---
         async function fetchTagihan() {
             const container = document.getElementById('customerList');
             toggleLoading(true);
@@ -264,15 +288,21 @@
                         let angkaTanggal = p.jatuhTempo ? (parseInt(p.jatuhTempo.toString().split('-')[0]) || 1) : 1;
                         let bulanTerakhir = p.bulanTerakhirBayar || 0;
                         
-                        const namaBulan = ["", "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
-                        let targetBulan = bulanTerakhir === 0 ? (new Date().getMonth() + 1) : bulanTerakhir + 1;
+                        // Perbaikan Kalender Pintar: Jika hari ini melewati/sama dengan tgl jatuh tempo 
+                        // dan belum pernah bayar, maka tagihan mulai di bulan DEPAN.
+                        let targetBulan = bulanTerakhir === 0 ? bulanSekarang : bulanTerakhir + 1;
+                        if (bulanTerakhir === 0 && tglSekarang >= angkaTanggal) {
+                            targetBulan = bulanSekarang + 1;
+                        }
+                        
                         let targetTahun = new Date().getFullYear();
                         if (targetBulan > 12) { targetBulan = 1; targetTahun += 1; }
                         
+                        const namaBulan = ["", "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agt", "Sep", "Okt", "Nov", "Des"];
                         let tglLengkap = `${angkaTanggal} ${namaBulan[targetBulan]} ${targetTahun}`;
 
                         const isSudahBayarBulanIni = p.bulanTerakhirBayar === bulanSekarang;
-                        const isTelat = !isSudahBayarBulanIni && (tglSekarang >= angkaTanggal);
+                        const isTelat = !isSudahBayarBulanIni && (tglSekarang >= angkaTanggal && bulanSekarang >= targetBulan);
                         
                         let badgeColor = isSudahBayarBulanIni ? "bg-emerald-100 text-emerald-700 border border-emerald-200" : (isTelat ? "bg-red-100 text-red-600 border border-red-200" : "bg-slate-100 text-slate-600");
                         let badgeText = isSudahBayarBulanIni ? "✔ LUNAS BULAN INI" : `Tempo: ${tglLengkap}`;
