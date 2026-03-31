@@ -145,7 +145,7 @@
                                 </div>
                                 <div class="grid grid-cols-2 gap-2 mt-1">
                                     <button onclick="tolakPengajuan('${p.idKontrak}')" class="py-2.5 bg-red-50 text-red-600 rounded-xl text-[11px] font-bold flex justify-center items-center">Tolak</button>
-                                    <button onclick="bukaModalAcc('${dataJson}')" class="py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-[11px] font-bold flex justify-center items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> ACC</button>
+                                    <button onclick="bukaModalAcc('${dataJson}')" class="py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-[11px] font-bold flex justify-center items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> ACC Kredit</button>
                                 </div>
                             </div>`;
                     });
@@ -169,16 +169,21 @@
 
         document.getElementById('btnKonfirmasiAcc').addEventListener('click', async () => {
             const btn = document.getElementById('btnKonfirmasiAcc');
-            const finalTotal = parseRupiah(document.getElementById('accTotalHutang').value), finalCicilan = parseRupiah(document.getElementById('accCicilan').value);
+            const finalTotal = parseRupiah(document.getElementById('accTotalHutang').value);
+            const finalCicilan = parseRupiah(document.getElementById('accCicilan').value);
+            
             if(finalTotal === 0 || finalCicilan === 0) return alert("Nominal tidak boleh 0!");
             
             const payload = { tipe: "ACC_PENGAJUAN", idKontrak: currentActiveData.idKontrak, wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: currentActiveData.jatuhTempo, totalHutang: finalTotal, cicilanBulan: finalCicilan };
+            
             btn.disabled = true; btn.innerHTML = "Memproses...";
             try {
                 const card = document.getElementById(`card-${currentActiveData.idKontrak}`);
                 if (card) card.style.display = 'none';
+
                 fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                 closeModalAcc(); 
+                
                 setTimeout(() => { fetchAntrean(); alert("Sukses di-ACC dan dipindah ke Kasir POS!"); }, 3000); 
             } catch(e) { alert("Gagal koneksi."); }
             btn.disabled = false; btn.innerHTML = `<i data-lucide="user-check" class="w-5 h-5"></i> ACC & Pindah ke Kasir`;
@@ -188,34 +193,55 @@
             if(confirm("Yakin ingin menghapus permanen pengajuan ini?")) {
                 const card = document.getElementById(`card-${idKontrak}`);
                 if (card) card.style.display = 'none';
+
                 fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", idKontrak: idKontrak }) });
                 setTimeout(() => fetchAntrean(), 3000);
             }
         };
 
         async function fetchTagihan() {
-            const container = document.getElementById('customerList'); toggleLoading(true);
+            const container = document.getElementById('customerList');
+            toggleLoading(true);
             container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-xs font-bold text-slate-500">Membaca Tagihan...</p></div>`;
+
             try {
                 const res = await fetch(CONFIG.API_URL + "?action=getAll&nocache=" + Date.now());
                 const result = await res.json();
-                if (result.status === "error") { container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-amber-500">${result.message}</p></div>`; toggleLoading(false); return; }
+                
+                if (result.status === "error") {
+                    container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-amber-500">${result.message || "Belum ada data."}</p></div>`;
+                    toggleLoading(false); return;
+                }
+
                 let aktifCustomers = (result.data || []).filter(c => (c.hutang - c.terbayar) > 0);
                 container.innerHTML = '';
-                if(aktifCustomers.length === 0) { container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-emerald-500">Semua pelanggan Lunas!</p></div>`; } 
-                else {
+                
+                if(aktifCustomers.length === 0) { 
+                    container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-emerald-500">Semua pelanggan Lunas!</p></div>`; 
+                } else {
                     aktifCustomers.forEach(p => {
                         let angkaTanggal = p.jatuhTempo ? (parseInt(p.jatuhTempo.toString().split('-')[0]) || 1) : 1;
                         const isTelat = tglSekarang >= angkaTanggal;
                         let badgeColor = isTelat ? "bg-red-100 text-red-600 border border-red-200" : "bg-slate-100 text-slate-600";
                         let sisaBulanIni = p.cicilanPerBulan > 0 ? p.cicilanPerBulan : Math.round(p.hutang / 6); 
+
                         container.innerHTML += `
                             <div class="bg-white p-4 rounded-3xl shadow-sm border flex flex-col gap-3 relative hover:border-amber-200">
                                 <div class="flex justify-between items-start">
-                                    <div><h3 class="font-extrabold text-slate-800 text-sm">${p.nama}</h3><div class="flex items-center gap-2 mt-1"><span class="text-[10px] font-bold text-slate-500">Bulan Ke-${p.cicilanKe}</span><span class="text-[9px] font-bold ${badgeColor} px-1.5 py-0.5 rounded uppercase">Tempo: Tgl ${angkaTanggal}</span></div></div>
+                                    <div>
+                                        <h3 class="font-extrabold text-slate-800 text-sm">${p.nama}</h3>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <span class="text-[10px] font-bold text-slate-500">Bulan Ke-${p.cicilanKe}</span>
+                                            <span class="text-[9px] font-bold ${badgeColor} px-1.5 py-0.5 rounded uppercase">Jatuh Tempo: Tgl ${angkaTanggal}</span>
+                                        </div>
+                                    </div>
                                     <div class="text-right"><p class="text-[10px] font-bold text-slate-400">Tagihan Bulanan</p><p class="font-black text-slate-900">Rp ${formatRupiah(sisaBulanIni)}</p></div>
                                 </div>
-                                <div class="grid grid-cols-1 mt-1"><button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${angkaTanggal}')" class="py-2.5 bg-amber-50 text-amber-700 rounded-xl text-[11px] font-bold flex justify-center items-center gap-1.5 border border-amber-100"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> ${isTelat ? 'Tegur Keterlambatan (WA)' : 'Kirim WA Pengingat'}</button></div>
+                                <div class="grid grid-cols-1 mt-1">
+                                    <button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${angkaTanggal}')" class="py-2.5 bg-amber-50 text-amber-700 rounded-xl text-[11px] font-bold flex justify-center items-center gap-1.5 border border-amber-100">
+                                        <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> ${isTelat ? 'Tegur Keterlambatan (WA)' : 'Kirim WA Pengingat'}
+                                    </button>
+                                </div>
                             </div>`;
                     });
                 }

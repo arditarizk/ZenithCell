@@ -72,11 +72,7 @@
 
     <script>
         lucide.createIcons();
-        
-        // UBAH PIN ADMIN DI SINI JIKA DIPERLUKAN
-        const PIN_ADMIN = "123456"; 
-        
-        let pendingUrl = ""; 
+        const PIN_ADMIN = "123456"; let pendingUrl = ""; 
         const pinModal = document.getElementById('pinModal'), pinCard = document.getElementById('pinCard'), pinInput = document.getElementById('pinInput'), pinForm = document.getElementById('pinForm'), pinError = document.getElementById('pinError');
         function requestPin(targetUrl) { pendingUrl = targetUrl; pinInput.value = ""; pinError.classList.add('hidden'); pinModal.classList.replace('hidden', 'flex'); setTimeout(() => { pinModal.classList.remove('opacity-0'); pinCard.classList.remove('scale-95'); pinInput.focus(); }, 10); }
         function closePin() { pinModal.classList.add('opacity-0'); pinCard.classList.add('scale-95'); setTimeout(() => { pinModal.classList.replace('flex', 'hidden'); }, 300); }

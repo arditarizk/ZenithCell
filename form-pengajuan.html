@@ -29,7 +29,6 @@
 
         <form id="pengajuanForm">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-8">
-                
                 <div class="space-y-6 lg:space-y-8">
                     <section class="glass-panel p-6 sm:p-8 rounded-[2rem]">
                         <h2 class="text-base font-extrabold mb-5 border-b pb-3">1. Identitas Pribadi</h2>
@@ -133,7 +132,6 @@
         const formatRupiah = (num) => (num === 0 || isNaN(num)) ? "" : new Intl.NumberFormat('id-ID').format(num);
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
 
-        // TANGKAP DATA DARI URL (VIA NETLIFY)
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.has('harga')) document.getElementById('hargaBarang').value = formatRupiah(parseInt(urlParams.get('harga')));
@@ -163,7 +161,7 @@
 
         const modal = document.getElementById('instruksiModal');
 
-        document.getElementById('pengajuanForm').addEventListener('submit', (e) => {
+        document.getElementById('pengajuanForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const nama = document.getElementById('nama').value;
@@ -179,22 +177,42 @@
                 jatuhTempo: document.getElementById('jatuhTempo').value 
             };
 
-            const payloadSheet = { tipe: "PENGAJUAN_BARU", timestamp: new Date().toLocaleString('id-ID'), ...data };
+            btnSubmit.disabled = true; 
+            txtBtn.innerText = "Memverifikasi Identitas...";
 
-            btnSubmit.disabled = true; txtBtn.innerText = "Mengirim Data...";
+            try {
+                // 1. CEK DUPLIKAT DULU KE SERVER
+                const checkRes = await fetch(`${CONFIG.API_URL}?action=checkDuplicate&wa=${data.wa}&nik=${data.nik}&nocache=${Date.now()}`);
+                const checkResult = await checkRes.json();
 
-            // TEMBAK DATA KE GOOGLE SHEET
-            fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payloadSheet) });
+                if (checkResult.isDuplicate) {
+                    alert(checkResult.message);
+                    btnSubmit.disabled = false; 
+                    txtBtn.innerText = "Ajukan Pembiayaan Sekarang";
+                    return; 
+                }
+
+                // 2. JIKA LOLOS, BUAT ID KONTRAK & KIRIM DATA
+                txtBtn.innerText = "Mengirim Data...";
+                const idKontrakBaru = "ZNTH-" + Date.now();
+                const payloadSheet = { tipe: "PENGAJUAN_BARU", idKontrak: idKontrakBaru, timestamp: new Date().toLocaleString('id-ID'), ...data };
                 
-            // BUKA WHATSAPP LANGSUNG (ANTI-BLOCKER)
-            const teksPesan = `*PENGAJUAN SYARIAH ZENITH CELL* 📝\nNama: ${data.nama}\nNIK: ${data.nik}\nBarang: *${data.barang}*\nHarga: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor}\nJatuh Tempo: *Tgl ${data.jatuhTempo} Tiap Bulan*\n\n_Mohon dilanjut Min. Berikut saya lampirkan KTP & Jaminan:_`;
-            const waLink = `https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(teksPesan)}`;
-            window.open(waLink, '_blank');
+                fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payloadSheet) });
+                    
+                const teksPesan = `*PENGAJUAN SYARIAH ZENITH CELL* 📝\nID Kontrak: ${idKontrakBaru}\nNama: ${data.nama}\nNIK: ${data.nik}\nBarang: *${data.barang}*\nHarga: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor}\nJatuh Tempo: *Tgl ${data.jatuhTempo} Tiap Bulan*\n\n_Mohon dilanjut Min. Berikut saya lampirkan KTP & Jaminan:_`;
+                const waLink = `https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(teksPesan)}`;
+                window.open(waLink, '_blank');
 
-            // Tampilkan Sukses
-            btnSubmit.disabled = false; txtBtn.innerText = "Ajukan Pembiayaan";
-            modal.classList.remove('hidden'); modal.classList.add('flex');
-            setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
+                btnSubmit.disabled = false; 
+                txtBtn.innerText = "Ajukan Pembiayaan";
+                modal.classList.remove('hidden'); modal.classList.add('flex');
+                setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
+
+            } catch(e) {
+                alert("Gagal terhubung ke server. Pastikan koneksi internet lancar.");
+                btnSubmit.disabled = false; 
+                txtBtn.innerText = "Ajukan Pembiayaan Sekarang";
+            }
         });
 
         function tutupModal() {

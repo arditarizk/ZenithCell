@@ -13,7 +13,6 @@ function doPost(e) {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var payload = JSON.parse(e.postData.contents);
     
-    // 1. PENGAJUAN BARU (SIMPAN ID KONTRAK)
     if (payload.tipe === "PENGAJUAN_BARU") {
       var s = getOrCreateSheet(ss, "Pengajuan");
       if (s.getLastRow() === 0) {
@@ -24,7 +23,6 @@ function doPost(e) {
       return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
     }
 
-    // 2. ACC PENGAJUAN (HAPUS DARI ANTREAN BERDASARKAN ID)
     if (payload.tipe === "ACC_PENGAJUAN") {
       var sP = ss.getSheetByName("Pengajuan");
       var sL = getOrCreateSheet(ss, "Pelanggan");
@@ -42,7 +40,6 @@ function doPost(e) {
       return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
     }
 
-    // 3. TOLAK PENGAJUAN (HAPUS PERMANEN)
     if (payload.tipe === "TOLAK_PENGAJUAN") {
       var sP = ss.getSheetByName("Pengajuan");
       if (sP) {
@@ -54,7 +51,6 @@ function doPost(e) {
       return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
     }
     
-    // 4. KAS MASUK (BERDASARKAN ID KONTRAK)
     if (payload.tipe === "KAS_MASUK_CICILAN") {
       var sT = getOrCreateSheet(ss, "Transaksi");
       if (sT.getLastRow() === 0) { sT.appendRow(["Waktu", "ID Kontrak", "Nama", "WA", "Ke", "Nominal", "Catatan"]); }
@@ -87,7 +83,7 @@ function doGet(e) {
       var dP = sP.getDataRange().getValues();
       for (var i = 1; i < dP.length; i++) {
         if (dP[i][4].toString().replace(/[^0-9]/g,'') === w || dP[i][3].toString().replace(/[^0-9]/g,'') === n) 
-          return ContentService.createTextOutput(JSON.stringify({isDuplicate: true, message: "NIK/WA sudah ada dalam antrean!"})).setMimeType(ContentService.MimeType.JSON);
+          return ContentService.createTextOutput(JSON.stringify({isDuplicate: true, message: "NIK/WA sudah ada dalam antrean pengajuan!"})).setMimeType(ContentService.MimeType.JSON);
       }
     }
     var sL = ss.getSheetByName("Pelanggan");
@@ -95,7 +91,7 @@ function doGet(e) {
       var dL = sL.getDataRange().getValues();
       for (var i = 1; i < dL.length; i++) {
         if (dL[i][2].toString().replace(/[^0-9]/g,'') === w && (parseInt(dL[i][4]) - parseInt(dL[i][5]) > 0))
-          return ContentService.createTextOutput(JSON.stringify({isDuplicate: true, message: "Anda memiliki cicilan aktif!"})).setMimeType(ContentService.MimeType.JSON);
+          return ContentService.createTextOutput(JSON.stringify({isDuplicate: true, message: "Anda memiliki cicilan aktif yang belum lunas!"})).setMimeType(ContentService.MimeType.JSON);
       }
     }
     return ContentService.createTextOutput(JSON.stringify({isDuplicate: false})).setMimeType(ContentService.MimeType.JSON);
@@ -121,5 +117,29 @@ function doGet(e) {
       res.push({ idKontrak: d[i][0], nama: d[i][1], wa: d[i][2].toString().replace(/[^0-9]/g, ''), barang: d[i][3], hutang: parseInt(d[i][4])||0, terbayar: parseInt(d[i][5])||0, cicilanPerBulan: parseInt(d[i][6])||0, jatuhTempo: d[i][7], cicilanKe: parseInt(d[i][8])||1 });
     }
     return ContentService.createTextOutput(JSON.stringify({status: "success", data: res})).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // Fitur Cek Tagihan Live
+  if (e.parameter.wa) {
+    var sw = e.parameter.wa.replace(/[^0-9]/g, '');
+    var s = ss.getSheetByName("Pelanggan");
+    if (s) {
+      var d = s.getDataRange().getValues();
+      for (var i = 1; i < d.length; i++) {
+        if (d[i][2].toString().replace(/[^0-9]/g, '') === sw) {
+          return ContentService.createTextOutput(JSON.stringify({status: "success", data: { nama: d[i][1], wa: sw, barang: d[i][3], totalHutang: parseInt(d[i][4])||0, terbayar: parseInt(d[i][5])||0, cicilanPerBulan: parseInt(d[i][6])||0, jatuhTempo: d[i][7], cicilanKe: parseInt(d[i][8])||1 }})).setMimeType(ContentService.MimeType.JSON);
+        }
+      }
+    }
+    var sP = ss.getSheetByName("Pengajuan");
+    if(sP) {
+        var dP = sP.getDataRange().getValues();
+        for (var i = 1; i < dP.length; i++) {
+          if (dP[i][4].toString().replace(/[^0-9]/g, '') === sw) {
+            return ContentService.createTextOutput(JSON.stringify({status: "pending", data: {nama: dP[i][2], barang: dP[i][10]}})).setMimeType(ContentService.MimeType.JSON);
+          }
+        }
+    }
+    return ContentService.createTextOutput(JSON.stringify({status: "error", message: "Nomor tidak ditemukan"})).setMimeType(ContentService.MimeType.JSON);
   }
 }
