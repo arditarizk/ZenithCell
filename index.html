@@ -3,106 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Portal Resmi - Zenith Cell</title>
+    <title>Zenith Cell - Gadget Syariah Kota Malang</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="config.js"></script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; -webkit-tap-highlight-color: transparent; }
-        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); }
-        .menu-card { transition: all 0.3s ease; } .menu-card:hover { transform: translateY(-4px); }
+        /* MINIMALIST SETUP */
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
+        .clean-card { background: #ffffff; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px -5px rgba(0,0,0,0.03); }
+        
+        /* ZERO-FLASH FAQ & DROPDOWN */
+        .faq-content { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease; }
+        .faq-item.active .faq-content { max-height: 300px; opacity: 1; padding-top: 12px; }
+        .faq-item.active i.chevron { transform: rotate(180deg); color: #10b981; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="text-slate-800 pb-10 pt-6 px-4 sm:px-8 flex justify-center selection:bg-emerald-200 min-h-screen">
+<body class="text-slate-800 flex justify-center selection:bg-emerald-200">
 
-    <main class="w-full max-w-5xl relative z-10 flex flex-col">
-        <header class="mb-10 flex flex-col items-center text-center mt-4 relative">
-            <div class="absolute top-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] -z-10"></div>
-            <div class="w-24 h-24 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-3xl shadow-xl flex items-center justify-center mb-5 transform -rotate-3 hover:rotate-0 transition-transform"><i data-lucide="smartphone" class="w-12 h-12 text-white"></i></div>
-            <h1 class="font-extrabold text-slate-900 text-4xl sm:text-5xl tracking-tight mb-2">Zenith Cell</h1>
-            <p class="text-sm font-bold text-emerald-600 uppercase tracking-widest bg-white/60 backdrop-blur-md px-4 py-1.5 rounded-full border border-emerald-100">Ekosistem Pembiayaan Syariah</p>
+    <main class="w-full max-w-md px-5 pt-8 relative z-10 flex flex-col min-h-screen">
+        
+        <header class="mb-6 text-center flex flex-col items-center relative">
+            
+            <button onclick="bukaSidebar()" class="absolute top-0 right-0 p-2.5 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-emerald-500 active:scale-95 transition-all">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+            </button>
+
+            <div class="w-24 h-24 bg-white p-1.5 rounded-[1.5rem] shadow-sm border border-slate-100 flex items-center justify-center mb-5 mt-2">
+                <img src="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/5daa1530-3351-436c-abc0-38c81c73669f.png" 
+                     alt="Logo Zenith" 
+                     class="w-full h-full object-contain rounded-[1.25rem]">
+            </div>
+
+            <h1 class="font-extrabold text-3xl text-slate-900 tracking-tight leading-none mb-2">Zenith Cell</h1>
+            <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 inline-block px-3 py-1.5 rounded-lg border border-emerald-100">Gadget Syariah</p>
+            
+            <a href="https://goo.gl/maps/VEiZSuUpKaf3tkip6" target="_blank" class="flex items-center justify-center gap-1.5 text-slate-500 text-[10px] font-medium mt-4 bg-white px-3 py-2 rounded-xl shadow-sm border border-slate-100 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer w-full max-w-[280px]">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-500 shrink-0"></i>
+                <p class="truncate">Jl. Sanan 5a, Purwantoro, Kota Malang 65122</p>
+                <i data-lucide="external-link" class="w-3 h-3 text-slate-300 ml-auto shrink-0"></i>
+            </a>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 w-full mb-10 flex-grow">
-            <section class="bg-white/40 p-6 sm:p-8 rounded-[2.5rem] border border-white shadow-sm">
-                <h2 class="text-xs font-extrabold text-slate-400 uppercase mb-5 ml-2 flex items-center gap-2"><span class="p-1.5 bg-slate-200/50 rounded-lg"><i data-lucide="users" class="w-4 h-4 text-slate-500"></i></span> Layanan Pelanggan</h2>
-                <div class="space-y-4">
-                    <a href="Kalkulator Cicilan.html" class="menu-card glass-panel p-5 rounded-3xl flex items-center gap-5 group hover:border-emerald-300"><div class="w-14 h-14 bg-emerald-50 rounded-[1.25rem] flex items-center justify-center text-emerald-600 shrink-0"><i data-lucide="calculator" class="w-6 h-6"></i></div><div class="flex-grow"><h3 class="font-bold text-slate-800 text-base mb-1">Kalkulator Simulasi</h3><p class="text-xs text-slate-500">Cek estimasi budget dan cicilan.</p></div><i data-lucide="arrow-right" class="w-5 h-5 text-slate-300"></i></a>
-                    <a href="form-pengajuan.html" class="menu-card glass-panel p-5 rounded-3xl flex items-center gap-5 group hover:border-teal-300"><div class="w-14 h-14 bg-teal-50 rounded-[1.25rem] flex items-center justify-center text-teal-600 shrink-0"><i data-lucide="file-check-2" class="w-6 h-6"></i></div><div class="flex-grow"><h3 class="font-bold text-slate-800 text-base mb-1">Form Pengajuan Resmi</h3><p class="text-xs text-slate-500">Isi data diri untuk disurvei Admin.</p></div><i data-lucide="arrow-right" class="w-5 h-5 text-slate-300"></i></a>
-                    <a href="cek-tagihan-live.html" class="menu-card glass-panel p-5 rounded-3xl flex items-center gap-5 group hover:border-blue-300"><div class="w-14 h-14 bg-blue-50 rounded-[1.25rem] flex items-center justify-center text-blue-600 shrink-0"><i data-lucide="search" class="w-6 h-6"></i></div><div class="flex-grow"><h3 class="font-bold text-slate-800 text-base mb-1">Cek Sisa Tagihan</h3><p class="text-xs text-slate-500">Pantau cicilan Anda via WhatsApp.</p></div><i data-lucide="arrow-right" class="w-5 h-5 text-slate-300"></i></a>
+        <div class="space-y-3 mb-3">
+            <section class="clean-card p-4 rounded-2xl flex items-center gap-3">
+                <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 shrink-0"><i data-lucide="file-text" class="w-6 h-6"></i></div>
+                <div class="flex-grow">
+                    <h3 class="font-bold text-xs text-slate-800">Perjanjian Akad (PDF)</h3>
+                    <p class="text-[9px] text-slate-500 mt-0.5">Unduh form persyaratan kredit.</p>
                 </div>
+                <a href="ZENITH CELL – MALANG-1.pdf" download class="bg-emerald-500 hover:bg-emerald-600 text-white p-3 rounded-xl transition-colors active:scale-95 shadow-sm"><i data-lucide="download" class="w-4 h-4"></i></a>
             </section>
 
-            <section class="bg-slate-900 p-6 sm:p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-                <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-emerald-500/20 rounded-full blur-[80px] pointer-events-none"></div>
-                <h2 class="text-xs font-extrabold text-slate-400 uppercase mb-5 ml-2 flex items-center gap-2 relative z-10"><span class="p-1.5 bg-slate-800 rounded-lg"><i data-lucide="lock" class="w-4 h-4 text-slate-300"></i></span> Otoritas Internal</h2>
-                
-                <div class="space-y-4 relative z-10">
-                    <button onclick="requestPin('zenith-pos-dinamis.html')" class="menu-card w-full text-left bg-slate-800/80 border border-slate-700 p-5 rounded-3xl flex items-center gap-5 group hover:border-emerald-500/50">
-                        <div class="w-14 h-14 bg-slate-700 rounded-[1.25rem] flex items-center justify-center text-slate-300 shrink-0 group-hover:bg-emerald-500 group-hover:text-white"><i data-lucide="smartphone-charging" class="w-6 h-6"></i></div>
-                        <div class="flex-grow"><h3 class="font-bold text-white text-base mb-1">Kasir POS (Penerimaan)</h3><p class="text-xs text-slate-400">Catat setoran cicilan masuk.</p></div>
-                        <i data-lucide="unlock" class="w-4 h-4 text-slate-500 opacity-0 group-hover:opacity-100"></i>
-                    </button>
-                    <button onclick="requestPin('reminder-tagihan-dinamis.html')" class="menu-card w-full text-left bg-slate-800/80 border border-slate-700 p-5 rounded-3xl flex items-center gap-5 group hover:border-amber-500/50">
-                        <div class="w-14 h-14 bg-slate-700 rounded-[1.25rem] flex items-center justify-center text-slate-300 shrink-0 group-hover:bg-amber-500 group-hover:text-white"><i data-lucide="clipboard-check" class="w-6 h-6"></i></div>
-                        <div class="flex-grow"><h3 class="font-bold text-white text-base mb-1">Dashboard Admin Server</h3><p class="text-xs text-slate-400">ACC Pengajuan & Reminder Tagihan.</p></div>
-                        <i data-lucide="unlock" class="w-4 h-4 text-slate-500 opacity-0 group-hover:opacity-100"></i>
-                    </button>
+            <a href="cek-tagihan-live.html" class="clean-card p-4 rounded-2xl flex items-center gap-3 hover:border-blue-200 active:scale-95 transition-all cursor-pointer group">
+                <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 shrink-0 group-hover:bg-blue-500 group-hover:text-white transition-colors"><i data-lucide="search" class="w-6 h-6"></i></div>
+                <div class="flex-grow">
+                    <h3 class="font-bold text-xs text-slate-800">Cek Sisa Tagihan</h3>
+                    <p class="text-[9px] text-slate-500 mt-0.5">Pantau tagihan aktif & jatuh tempo.</p>
                 </div>
-            </section>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
+            </a>
         </div>
-        <footer class="text-center text-slate-400 text-[10px] font-bold pb-4"><p>Zenith Cell Ecosystem &copy; 2026</p></footer>
+
+        <div class="grid grid-cols-2 gap-3 mb-8">
+            <a href="Kalkulator Cicilan.html" class="clean-card p-4 rounded-2xl flex flex-col items-center text-center gap-2 hover:border-emerald-200 active:scale-95 transition-all group">
+                <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-colors"><i data-lucide="calculator" class="w-5 h-5"></i></div>
+                <div><h3 class="font-bold text-[11px] text-slate-800">Simulasi Kredit</h3></div>
+            </a>
+            <a href="form-pengajuan.html" class="clean-card p-4 rounded-2xl flex flex-col items-center text-center gap-2 hover:border-teal-200 active:scale-95 transition-all group">
+                <div class="w-12 h-12 bg-teal-50 rounded-xl flex items-center justify-center text-teal-600 group-hover:bg-teal-500 group-hover:text-white transition-colors"><i data-lucide="clipboard-list" class="w-5 h-5"></i></div>
+                <div><h3 class="font-bold text-[11px] text-slate-800">Ajukan Sekarang</h3></div>
+            </a>
+        </div>
+
+        <section class="mb-8">
+            <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1 flex items-center gap-1.5"><i data-lucide="message-circle-question" class="w-3.5 h-3.5"></i> FAQ & Bantuan</h2>
+            <div class="space-y-2.5">
+                <div class="faq-item clean-card p-4 rounded-2xl cursor-pointer" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center"><h3 class="font-bold text-[11px] text-slate-700">Apakah ini pinjaman uang?</h3><i data-lucide="chevron-down" class="chevron w-4 h-4 text-slate-300 transition-transform"></i></div>
+                    <div class="faq-content text-[10px] text-slate-500 leading-relaxed border-t border-slate-100 mt-2">Bukan. Ini adalah transaksi <b>Murabahah</b> (Jual Beli). Kami membelikan barangnya, lalu menjualnya kembali kepada Anda dengan margin tetap yang disepakati di awal.</div>
+                </div>
+                <div class="faq-item clean-card p-4 rounded-2xl cursor-pointer" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center"><h3 class="font-bold text-[11px] text-slate-700">Terlambat bayar kena denda?</h3><i data-lucide="chevron-down" class="chevron w-4 h-4 text-slate-300 transition-transform"></i></div>
+                    <div class="faq-content text-[10px] text-slate-500 leading-relaxed border-t border-slate-100 mt-2">Sistem kami murni syariah <b>Tanpa Denda</b>. Harga jual awal tidak berubah karena keterlambatan. Namun, mohon amanah dalam menjaga jadwal pembayaran.</div>
+                </div>
+                
+                <div class="faq-item clean-card p-4 rounded-2xl cursor-pointer border-emerald-100 bg-emerald-50/30" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center"><h3 class="font-bold text-[11px] text-emerald-700 flex items-center gap-1.5"><i data-lucide="headphones" class="w-3.5 h-3.5"></i> Butuh Bantuan?</h3><i data-lucide="chevron-down" class="chevron w-4 h-4 text-emerald-400 transition-transform"></i></div>
+                    <div class="faq-content text-[10px] text-slate-600 leading-relaxed border-t border-emerald-100 mt-2">
+                        Ada pertanyaan seputar unit, spesifikasi, atau kendala pembayaran? Silakan hubungi tim kami.<br><br>
+                        <a href="https://wa.me/62895410571547" target="_blank" class="inline-flex items-center justify-center gap-1.5 bg-emerald-500 text-white font-bold w-full py-2.5 rounded-xl shadow-md active:scale-95 transition-transform text-[11px]">
+                            <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Hubungi Admin
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center mt-auto pb-4 pt-6 border-t border-slate-100">
+            <button onclick="bukaModalHukum()" class="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 mb-4 inline-flex items-center justify-center gap-1"><i data-lucide="shield-check" class="w-3 h-3"></i> Kebijakan Privasi & Akad Syariah</button>
+            <div class="text-[9px] font-medium text-slate-400 leading-relaxed mb-4">
+                &copy; 2026 Zenith Cell Ecosystem.<br>
+                <span class="text-slate-300 flex items-center justify-center gap-1 mt-1">Developed with <i data-lucide="heart" class="w-2.5 h-2.5 text-red-400 fill-current"></i> by <span class="font-bold text-slate-500">Ardita Rizki Fauzi</span></span>
+            </div>
+        </footer>
+
+        <div class="w-full h-32 shrink-0"></div>
+
     </main>
 
-    <div id="pinModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity">
-        <div class="bg-white rounded-[2rem] p-8 max-w-[340px] w-full text-center shadow-2xl transform scale-95 transition-transform relative" id="pinCard">
-            <button onclick="closePin()" class="absolute top-4 right-4 p-2 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200"><i data-lucide="x" class="w-4 h-4"></i></button>
-            <div class="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-5 mt-2"><i data-lucide="shield-check" class="w-8 h-8 text-emerald-400"></i></div>
-            <h3 class="text-xl font-extrabold text-slate-900 mb-1">Otorisasi Admin</h3>
-            <form id="pinForm" class="space-y-4">
-                <input type="password" id="pinInput" placeholder="Masukkan Kata Sandi" required class="w-full text-center px-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl font-bold text-xl tracking-widest outline-none mt-4 focus:border-emerald-500 transition-colors">
-                <p id="pinError" class="text-[10px] font-bold text-red-500 hidden mt-1">Sandi Salah! Akses ditolak.</p>
-                <button type="submit" class="w-full bg-slate-900 text-white font-extrabold py-3.5 px-6 rounded-xl active:scale-95 flex justify-center gap-2 mt-2"><i data-lucide="key" class="w-4 h-4 text-emerald-400"></i> Konfirmasi Akses</button>
+    <nav class="fixed bottom-5 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-white/95 backdrop-blur-md rounded-3xl p-2 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] z-50 border border-slate-100">
+        <div class="flex justify-around items-center relative">
+            <a href="index.html" class="flex flex-col items-center gap-1 p-2 text-emerald-500"><i data-lucide="home" class="w-5 h-5"></i><span class="text-[8px] font-bold uppercase">Home</span></a>
+            <a href="Kalkulator Cicilan.html" class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-slate-700 transition-colors"><i data-lucide="calculator" class="w-5 h-5"></i><span class="text-[8px] font-bold uppercase">Hitung</span></a>
+            
+            <button onclick="requestPin('zenith-pos-dinamis.html')" class="bg-emerald-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg -mt-12 border-[6px] border-[#f8fafc] active:scale-90 transition-all">
+                <i data-lucide="plus" class="w-6 h-6"></i>
+            </button>
+            
+            <a href="cek-tagihan-live.html" class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-slate-700 transition-colors"><i data-lucide="search" class="w-5 h-5"></i><span class="text-[8px] font-bold uppercase">Cek</span></a>
+            
+            <a href="https://wa.me/62895410571547" target="_blank" class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-slate-700 transition-colors"><i data-lucide="headphones" class="w-5 h-5"></i><span class="text-[8px] font-bold uppercase">Bantuan</span></a>
+        </div>
+    </nav>
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[90] opacity-0 pointer-events-none transition-opacity duration-300" onclick="tutupSidebar()"></div>
+
+    <aside id="sidebarMenu" class="fixed top-0 right-0 h-full w-64 bg-slate-50 shadow-2xl z-[100] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-slate-200">
+        <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white">
+            <h3 class="font-black text-slate-800 flex items-center gap-2"><i data-lucide="settings-2" class="w-4 h-4 text-emerald-500"></i> Pengaturan</h3>
+            <button onclick="tutupSidebar()" class="p-1.5 bg-slate-50 rounded-full text-slate-400 hover:text-red-500 active:scale-95 transition-all"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        
+        <div class="p-4 flex-grow space-y-2">
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-3 px-1 mt-2">Menu Otoritas</p>
+            
+            <button onclick="tutupSidebar(); setTimeout(() => requestPin('reminder-tagihan-dinamis.html'), 300)" class="w-full flex items-center gap-3 p-3 bg-slate-900 text-white rounded-2xl active:scale-95 transition-transform shadow-md">
+                <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i></div>
+                <div class="text-left">
+                    <h4 class="font-bold text-xs">Server Admin</h4>
+                    <p class="text-[9px] text-slate-400">Panel Manajemen</p>
+                </div>
+            </button>
+        </div>
+        
+        <div class="p-5 border-t border-slate-200 text-center bg-white">
+            <p class="text-[9px] font-bold text-slate-400">Zenith Cell Ecosystem v1.5</p>
+        </div>
+    </aside>
+
+    <div id="hukumModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col items-center justify-end px-2 pb-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl transform translate-y-full transition-transform max-h-[85vh] overflow-y-auto no-scrollbar" id="hukumCard">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                <h3 class="text-base font-black text-slate-900">Ketentuan Hukum</h3>
+                <button onclick="tutupModalHukum()" class="p-1.5 bg-slate-100 rounded-full text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="space-y-3 text-[11px] text-slate-600 leading-relaxed font-medium">
+                <p class="font-bold text-emerald-700">1. Prinsip Akad Murabahah</p>
+                <p>Transaksi ini adalah Jual Beli Cicilan. Kami membelikan barang dari supplier, lalu menjualnya kepada Anda dengan harga pokok + margin keuntungan transparan. Ini BUKAN pinjaman uang berbunga.</p>
+                <p class="font-bold text-emerald-700">2. Tanpa Denda</p>
+                <p>Tidak ada denda uang sepeser pun. Namun, jika pelanggan lalai (tanpa konfirmasi) selama 2 bulan berturut-turut, kami berhak menarik barang demi kelancaran usaha bersama.</p>
+                <p class="font-bold text-emerald-700">3. Biaya Administrasi</p>
+                <p>Biaya materai dan administrasi dokumen ditanggung sepenuhnya oleh Pelanggan saat survei.</p>
+            </div>
+            <button onclick="tutupModalHukum()" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl mt-6 active:scale-95">Saya Mengerti</button>
+        </div>
+    </div>
+
+    <div id="pinModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden items-center justify-center p-4 opacity-0 transition-opacity">
+        <div class="bg-white rounded-[2rem] p-6 max-w-[300px] w-full text-center shadow-2xl transform scale-95 transition-transform" id="pinCard">
+            <button onclick="closePin()" class="absolute top-4 right-4 p-1.5 bg-slate-100 rounded-full text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mx-auto mb-3"><i data-lucide="lock" class="w-5 h-5 text-emerald-600"></i></div>
+            <h3 class="text-lg font-extrabold text-slate-900 mb-1">Akses Admin</h3>
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Verifikasi Keamanan</p>
+            <form id="pinForm">
+                <input type="password" id="pinInput" placeholder="Sandi Admin" class="w-full text-center py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-base outline-none mt-5 focus:border-emerald-500 tracking-widest">
+                <button type="submit" class="w-full bg-emerald-500 text-white font-bold py-3.5 rounded-xl mt-4 active:scale-95">Masuk</button>
             </form>
         </div>
     </div>
 
     <script>
         lucide.createIcons();
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
-        
-        let pendingUrl = ""; 
-        const pinModal = document.getElementById('pinModal'), pinCard = document.getElementById('pinCard'), pinInput = document.getElementById('pinInput'), pinForm = document.getElementById('pinForm'), pinError = document.getElementById('pinError');
-        
-        function requestPin(targetUrl) { 
-            pendingUrl = targetUrl; 
-            pinInput.value = ""; 
-            pinError.classList.add('hidden'); 
-            pinModal.classList.replace('hidden', 'flex'); 
-            setTimeout(() => { pinModal.classList.remove('opacity-0'); pinCard.classList.remove('scale-95'); pinInput.focus(); }, 10); 
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg failed', err)); }
+
+        // FUNGSI SIDEBAR
+        const sidebarMenu = document.getElementById('sidebarMenu'), sidebarOverlay = document.getElementById('sidebarOverlay');
+        function bukaSidebar() {
+            sidebarOverlay.classList.remove('opacity-0', 'pointer-events-none');
+            sidebarMenu.classList.remove('translate-x-full');
         }
-        
-        function closePin() { 
-            pinModal.classList.add('opacity-0'); 
-            pinCard.classList.add('scale-95'); 
-            setTimeout(() => { pinModal.classList.replace('flex', 'hidden'); }, 300); 
+        function tutupSidebar() {
+            sidebarOverlay.classList.add('opacity-0', 'pointer-events-none');
+            sidebarMenu.classList.add('translate-x-full');
         }
+
+        // FUNGSI FAQ
+        function toggleFaq(el) {
+            const isActive = el.classList.contains('active');
+            document.querySelectorAll('.faq-item').forEach(item => item.classList.remove('active'));
+            if (!isActive) el.classList.add('active');
+        }
+
+        // FUNGSI MODAL HUKUM
+        const modalHukum = document.getElementById('hukumModal'), cardHukum = document.getElementById('hukumCard');
+        function bukaModalHukum() { modalHukum.classList.replace('hidden', 'flex'); setTimeout(() => { modalHukum.classList.remove('opacity-0'); cardHukum.classList.remove('translate-y-full'); }, 10); }
+        function tutupModalHukum() { modalHukum.classList.add('opacity-0'); cardHukum.classList.add('translate-y-full'); setTimeout(() => { modalHukum.classList.replace('flex', 'hidden'); }, 300); }
         
-        pinForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            // Mengecek nilai PIN dengan konfigurasi di config.js
-            if (pinInput.value === CONFIG.PIN_ADMIN) {
-                pinInput.classList.replace('border-slate-200', 'border-emerald-500'); 
-                document.querySelector('#pinCard h3').innerText = "Akses Diberikan";
-                setTimeout(() => { window.location.href = pendingUrl; }, 400); 
-            } else {
-                pinError.classList.remove('hidden'); 
-                pinInput.classList.replace('border-slate-200', 'border-red-500'); 
-                pinInput.value = ""; 
-                pinInput.focus();
-            }
+        // FUNGSI PIN MODAL
+        let pendingUrl = "";
+        const pinModal = document.getElementById('pinModal'), pinCard = document.getElementById('pinCard'), pinInput = document.getElementById('pinInput');
+        function requestPin(url) { pendingUrl = url; pinInput.value = ""; pinModal.classList.replace('hidden', 'flex'); setTimeout(() => { pinModal.classList.remove('opacity-0'); pinCard.classList.remove('scale-95'); pinInput.focus(); }, 10); }
+        function closePin() { pinModal.classList.add('opacity-0'); pinCard.classList.add('scale-95'); setTimeout(() => { pinModal.classList.replace('flex', 'hidden'); }, 300); }
+        
+        document.getElementById('pinForm').addEventListener('submit', (e) => { 
+            e.preventDefault(); 
+            if (pinInput.value === CONFIG.PIN_ADMIN) { window.location.href = pendingUrl; } 
+            else { alert("Kata Sandi Admin Salah!"); pinInput.value = ""; pinInput.focus(); } 
         });
     </script>
 </body>
