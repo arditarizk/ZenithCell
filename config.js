@@ -1,7 +1,7 @@
 const CONFIG = {
-    // URL Google Apps Script Anda yang sudah sukses
-    API_URL: "https://script.google.com/macros/s/AKfycbxHjPjVfzD2QYpxGgZLAC0jhBReN4nFFw-Yi1vfY4rG_BgF6zTxr0_J0IwFR7WDyH3T/exec",
+    // URL API Google Apps Script (Versi Baru yang Abadi)
+    API_URL: "https://script.google.com/macros/s/AKfycbz1aIuxRtfzT04vrhMlQ2DOXxRXFSq3uY6XqFAZh5fiwe20uFCnm9FS8SsjKCIHzLE/exec",
     
-    // Nomor WA Admin (Penerima Form & Konfirmasi)
+    // Nomor WA Admin Zenith Cell
     WA_ADMIN: "62895410571547" 
 };

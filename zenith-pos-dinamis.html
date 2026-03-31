@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="config.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -71,20 +72,9 @@
 
     <script>
         lucide.createIcons();
-        
-        // KONFIGURASI DITANAM LANGSUNG
-        const CONFIG = {
-            API_URL: "https://script.google.com/macros/s/AKfycbxHjPjVfzD2QYpxGgZLAC0jhBReN4nFFw-Yi1vfY4rG_BgF6zTxr0_J0IwFR7WDyH3T/exec",
-            WA_ADMIN: "62895410571547"
-        };
-        
-        // FUNGSI ANTI-CRASH ANIMASI
         function toggleLoading(isLoading) {
             const icon = document.querySelector('#btnRefresh svg') || document.querySelector('#btnRefresh i');
-            if (icon) {
-                if (isLoading) icon.classList.add('animate-spin');
-                else icon.classList.remove('animate-spin');
-            }
+            if (icon) { if (isLoading) icon.classList.add('animate-spin'); else icon.classList.remove('animate-spin'); }
         }
 
         let dbCustomers = [];
@@ -92,27 +82,20 @@
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
 
         async function fetchCustomersFromCloud() {
-            const grid = document.getElementById('customerGrid');
-            toggleLoading(true);
+            const grid = document.getElementById('customerGrid'); toggleLoading(true);
             grid.innerHTML = `<div class="col-span-3 text-center py-4 text-emerald-600 text-xs font-bold flex justify-center"><div class="spinner"></div> Menarik data...</div>`;
-            
             try {
                 const res = await fetch(CONFIG.API_URL + "?action=getAll&nocache=" + Date.now());
                 const result = await res.json();
-
-                if (result.status === "error") {
-                    grid.innerHTML = `<div class="col-span-3 text-center py-2 text-slate-400 text-xs">${result.message || "Belum ada data."}</div>`;
-                    toggleLoading(false); return;
-                }
+                if (result.status === "error") { grid.innerHTML = `<div class="col-span-3 text-center py-2 text-slate-400 text-xs">${result.message || "Belum ada data."}</div>`; toggleLoading(false); return; }
 
                 dbCustomers = (result.data || []).filter(c => c.nama && c.wa && (c.hutang - c.terbayar) > 0); 
-                
                 grid.innerHTML = '';
-                if(dbCustomers.length === 0) {
-                    grid.innerHTML = `<div class="col-span-3 text-center py-2 text-slate-400 text-xs">Semua pelanggan Lunas atau data kosong.</div>`;
-                } else {
+                if(dbCustomers.length === 0) { grid.innerHTML = `<div class="col-span-3 text-center py-2 text-slate-400 text-xs">Semua pelanggan Lunas!</div>`; } 
+                else {
                     dbCustomers.forEach(cust => {
-                        grid.innerHTML += `<label class="cursor-pointer relative"><input type="radio" name="pelanggan" value="${cust.wa}" class="radio-peer sr-only" onchange="selectCustomer('${cust.wa}')"><div class="w-full py-3 px-2 rounded-xl bg-slate-50 border-2 border-slate-100 text-slate-600 font-bold text-sm text-center truncate">${cust.nama}</div></label>`;
+                        // Gunakan ID Kontrak sebagai value radio button agar unik dan pasti
+                        grid.innerHTML += `<label class="cursor-pointer relative"><input type="radio" name="pelanggan" value="${cust.idKontrak}" class="radio-peer sr-only" onchange="selectCustomer('${cust.idKontrak}')"><div class="w-full py-3 px-2 rounded-xl bg-slate-50 border-2 border-slate-100 text-slate-600 font-bold text-sm text-center truncate">${cust.nama}</div></label>`;
                     });
                 }
             } catch(e) { grid.innerHTML = `<div class="col-span-3 text-center py-2 text-red-500 text-xs">Gagal memuat API.</div>`; }
@@ -121,8 +104,8 @@
 
         document.getElementById('nominal').addEventListener('input', (e) => { e.target.value = formatRupiah(parseRupiah(e.target.value)); renderPreview(); });
 
-        const selectCustomer = (waId) => {
-            const cust = dbCustomers.find(c => c.wa === waId);
+        const selectCustomer = (idKontrak) => {
+            const cust = dbCustomers.find(c => c.idKontrak === idKontrak);
             document.getElementById('customerStats').classList.remove('hidden');
             let sisa = cust.hutang - cust.terbayar; if(sisa < 0) sisa = 0;
             
@@ -140,12 +123,12 @@
             if (!custRadio || !cicilanEl || nominalVal === 0) { document.getElementById('previewContainer').classList.add('opacity-0'); return null; } 
             else { document.getElementById('previewContainer').classList.remove('opacity-0'); }
 
-            const custData = dbCustomers.find(c => c.wa === custRadio.value);
+            const custData = dbCustomers.find(c => c.idKontrak === custRadio.value);
             const terbayarBaru = custData.terbayar + nominalVal;
             let sisaBaru = custData.hutang - terbayarBaru; if(sisaBaru < 0) sisaBaru = 0;
             
             const tgl = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-            const pesan = `*KUITANSI RESMI - ZENITH CELL* 🧾\n-----------------------------------\n🗓 Tgl : ${tgl}\n👤 Dari : *${custData.nama}*\n-----------------------------------\n*PEMBAYARAN:*\n🏷 Cicilan : *${cicilanEl.value}*\n💰 Nominal : *Rp ${formatRupiah(nominalVal)}*\n-----------------------------------\n📊 *SISA TAGIHAN:*\nTotal Terbayar: Rp ${formatRupiah(terbayarBaru)}\n*Sisa Hutang : Rp ${formatRupiah(sisaBaru)}*\n-----------------------------------\n_Terima kasih!_`;
+            const pesan = `*KUITANSI RESMI - ZENITH CELL* 🧾\n-----------------------------------\n🗓 Tgl : ${tgl}\n🆔 Ref : ${custData.idKontrak}\n👤 Dari : *${custData.nama}*\n-----------------------------------\n*PEMBAYARAN:*\n🏷 Cicilan : *${cicilanEl.value}*\n💰 Nominal : *Rp ${formatRupiah(nominalVal)}*\n-----------------------------------\n📊 *SISA TAGIHAN:*\nTotal Terbayar: Rp ${formatRupiah(terbayarBaru)}\n*Sisa Hutang : Rp ${formatRupiah(sisaBaru)}*\n-----------------------------------\n_Terima kasih!_`;
             document.getElementById('previewText').innerText = pesan;
             return { pesan, custData, cicilan: cicilanEl.value, nominalVal, sisaBaru };
         };
@@ -153,16 +136,22 @@
         document.getElementById('btnProses').addEventListener('click', () => {
             const data = renderPreview(); if (!data) { alert("Pilih Pelanggan & Masukkan Nominal!"); return; }
 
-            const payloadKasir = { tipe: "KAS_MASUK_CICILAN", waktu: new Date().toLocaleString('id-ID'), nama: data.custData.nama, whatsapp: data.custData.wa, cicilanKe: data.cicilan, nominalMasuk: data.nominalVal, catatan: "Sisa: Rp " + formatRupiah(data.sisaBaru) };
+            const payloadKasir = { 
+                tipe: "KAS_MASUK_CICILAN", 
+                idKontrak: data.custData.idKontrak, // PERBAIKAN: Gunakan ID Kontrak agar transaksi anti-nyasar
+                waktu: new Date().toLocaleString('id-ID'), 
+                nama: data.custData.nama, 
+                whatsapp: data.custData.wa, 
+                cicilanKe: data.cicilan, 
+                nominalMasuk: data.nominalVal, 
+                catatan: "Sisa: Rp " + formatRupiah(data.sisaBaru) 
+            };
 
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payloadKasir) });
-
             const waLink = `https://api.whatsapp.com/send?phone=${data.custData.wa}&text=${encodeURIComponent(data.pesan)}`;
             window.open(waLink, '_blank');
 
-            fetchCustomersFromCloud(); 
-            document.getElementById('nominal').value = '';
-            document.getElementById('previewContainer').classList.add('opacity-0');
+            fetchCustomersFromCloud(); document.getElementById('nominal').value = ''; document.getElementById('previewContainer').classList.add('opacity-0');
         });
 
         fetchCustomersFromCloud(); 
