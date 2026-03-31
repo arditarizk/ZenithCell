@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="config.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); }
@@ -25,7 +24,7 @@
             <a href="index.html" class="p-2 bg-slate-50 rounded-full text-slate-500 mr-2"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
             <div class="flex items-center gap-3 flex-grow">
                 <div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center"><i data-lucide="layout-dashboard" class="w-6 h-6 text-amber-400"></i></div>
-                <div><h1 class="font-black text-xl leading-none">Server Admin</h1><p class="text-[10px] font-bold text-amber-600 uppercase">Cloud Sync</p></div>
+                <div><h1 class="font-black text-xl leading-none">Server Admin</h1><p class="text-[10px] font-bold text-amber-600 uppercase">Live Sync</p></div>
             </div>
             <button onclick="refreshData()" id="btnRefresh" class="p-2.5 bg-amber-50 rounded-xl text-amber-600"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
         </header>
@@ -52,121 +51,75 @@
         </div>
     </main>
 
-    <div id="accModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0">
-        <div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-6 pb-8 shadow-2xl transform translate-y-full transition-transform" id="accModalContent">
-            <div class="flex justify-between items-center mb-5 border-b pb-3">
-                <h2 class="font-black text-lg text-slate-900"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 inline"></i> Finalisasi Akad</h2>
-                <button onclick="closeModalAcc()" class="p-2 bg-slate-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
-            </div>
-            
-            <div class="space-y-4">
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <p class="text-[10px] text-slate-500 font-bold uppercase">Pelanggan</p>
-                    <p class="font-black text-slate-800 text-sm" id="accNama">...</p>
-                    <p class="text-xs text-slate-600 mt-1" id="accBarang">...</p>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5">Total Harga Jual (Sudah Termasuk Margin)</label>
-                    <div class="relative flex items-center">
-                        <span class="absolute left-4 text-slate-400 font-bold">Rp</span>
-                        <input type="text" id="accTotalHutang" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-xl font-bold text-lg outline-none">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5">Cicilan Per Bulan</label>
-                    <div class="relative flex items-center">
-                        <span class="absolute left-4 text-slate-400 font-bold">Rp</span>
-                        <input type="text" id="accCicilan" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-xl font-bold text-lg outline-none">
-                    </div>
-                </div>
-            </div>
-
-            <button id="btnKonfirmasiAcc" class="w-full mt-6 bg-emerald-500 text-white font-extrabold py-4 px-6 rounded-xl active:scale-95 transition-all flex justify-center gap-2">
-                <i data-lucide="user-check" class="w-5 h-5"></i> ACC & Pindah ke Kasir
-            </button>
-        </div>
-    </div>
-
-    <div id="waModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0">
-        <div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-6 pb-8 shadow-2xl transform translate-y-full transition-transform" id="waModalContent">
-            <div class="flex justify-between items-center mb-5 border-b pb-3">
-                <h2 class="font-black text-lg text-slate-900"><i data-lucide="send" class="w-5 h-5 text-emerald-500 inline"></i> Pesan WA</h2>
-                <button onclick="closeWaModal()" class="p-2 bg-slate-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
-            </div>
-            <textarea id="pesanWA" rows="8" class="w-full p-4 bg-emerald-50/50 rounded-2xl text-[13px] font-medium outline-none resize-none"></textarea>
-            <button id="btnKirimWA" class="w-full mt-5 bg-[#25D366] text-white font-extrabold py-4 rounded-xl active:scale-95 flex justify-center gap-2"><i data-lucide="message-circle" class="w-5 h-5"></i> Buka & Kirim WA</button>
-        </div>
-    </div>
+    <div id="accModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0"><div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-6 pb-8 shadow-2xl transform translate-y-full transition-transform" id="accModalContent"><div class="flex justify-between items-center mb-5 border-b pb-3"><h2 class="font-black text-lg text-slate-900"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 inline"></i> Finalisasi Akad</h2><button onclick="closeModalAcc()" class="p-2 bg-slate-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div><div class="space-y-4"><div class="bg-slate-50 p-3 rounded-xl border border-slate-200"><p class="text-[10px] text-slate-500 font-bold uppercase">Pelanggan</p><p class="font-black text-slate-800 text-sm" id="accNama">...</p><p class="text-xs text-slate-600 mt-1" id="accBarang">...</p></div><div><label class="block text-xs font-bold text-slate-500 mb-1.5">Total Harga Jual</label><div class="relative flex items-center"><span class="absolute left-4 text-slate-400 font-bold">Rp</span><input type="text" id="accTotalHutang" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-xl font-bold text-lg outline-none"></div></div><div><label class="block text-xs font-bold text-slate-500 mb-1.5">Cicilan Per Bulan</label><div class="relative flex items-center"><span class="absolute left-4 text-slate-400 font-bold">Rp</span><input type="text" id="accCicilan" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-xl font-bold text-lg outline-none"></div></div></div><button id="btnKonfirmasiAcc" class="w-full mt-6 bg-emerald-500 text-white font-extrabold py-4 px-6 rounded-xl active:scale-95 transition-all flex justify-center gap-2"><i data-lucide="user-check" class="w-5 h-5"></i> ACC & Pindah ke Kasir</button></div></div>
+    <div id="waModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0"><div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-6 pb-8 shadow-2xl transform translate-y-full transition-transform" id="waModalContent"><div class="flex justify-between items-center mb-5 border-b pb-3"><h2 class="font-black text-lg text-slate-900"><i data-lucide="send" class="w-5 h-5 text-emerald-500 inline"></i> Pesan WA</h2><button onclick="closeWaModal()" class="p-2 bg-slate-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div><textarea id="pesanWA" rows="8" class="w-full p-4 bg-emerald-50/50 rounded-2xl text-[13px] font-medium outline-none resize-none"></textarea><button id="btnKirimWA" class="w-full mt-5 bg-[#25D366] text-white font-extrabold py-4 rounded-xl active:scale-95 flex justify-center gap-2"><i data-lucide="message-circle" class="w-5 h-5"></i> Buka & Kirim WA</button></div></div>
 
     <script>
         lucide.createIcons();
+        
+        // ==========================================
+        // TARUH LINK URL API KAMU LANGSUNG DI SINI!
+        // ==========================================
+        const API_URL = "https://script.google.com/macros/s/AKfycbxHjPjVfzD2QYpxGgZLAC0jhBReN4nFFw-Yi1vfY4rG_BgF6zTxr0_J0IwFR7WDyH3T/exec"; 
+        
         const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num);
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
-        const tglSekarang = new Date().getDate();
-        document.getElementById('bulanIni').innerText = `Tgl Hari Ini: ${tglSekarang}`;
+        document.getElementById('bulanIni').innerText = `Tgl Hari Ini: ${new Date().getDate()}`;
 
-        let currentTab = 'antrean';
-        let targetWaLink = "";
-        let currentActiveData = null;
+        let currentTab = 'antrean'; let targetWaLink = ""; let currentActiveData = null;
 
         function switchTab(tab) {
             currentTab = tab;
             document.getElementById('tab-antrean').className = tab === 'antrean' ? 'flex-1 py-2.5 rounded-xl text-xs tab-active' : 'flex-1 py-2.5 rounded-xl text-xs tab-inactive';
             document.getElementById('tab-tagihan').className = tab === 'tagihan' ? 'flex-1 py-2.5 rounded-xl text-xs tab-active' : 'flex-1 py-2.5 rounded-xl text-xs tab-inactive';
             
-            if (tab === 'antrean') {
-                document.getElementById('viewAntrean').classList.replace('hidden', 'flex');
-                document.getElementById('viewTagihan').classList.replace('flex', 'hidden');
-                fetchAntrean();
-            } else {
-                document.getElementById('viewTagihan').classList.replace('hidden', 'flex');
-                document.getElementById('viewAntrean').classList.replace('flex', 'hidden');
-                fetchTagihan();
-            }
+            if (tab === 'antrean') { document.getElementById('viewAntrean').classList.replace('hidden', 'flex'); document.getElementById('viewTagihan').classList.replace('flex', 'hidden'); fetchAntrean(); } 
+            else { document.getElementById('viewTagihan').classList.replace('hidden', 'flex'); document.getElementById('viewAntrean').classList.replace('flex', 'hidden'); fetchTagihan(); }
         }
 
-        function refreshData() {
-            if(currentTab === 'antrean') fetchAntrean(); else fetchTagihan();
-        }
+        function refreshData() { if(currentTab === 'antrean') fetchAntrean(); else fetchTagihan(); }
 
         async function fetchAntrean() {
             const container = document.getElementById('pendingList');
             document.querySelector('#btnRefresh i').classList.add('animate-spin');
-            container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-xs font-bold text-slate-500">Mencari Antrean...</p></div>`;
+            container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-xs font-bold text-slate-500">Menarik data langsung dari server...</p></div>`;
 
             try {
-                // UPDATE PENTING: Penambahan nocache agar selalu dapat data terbaru
-                const res = await fetch(CONFIG.API_URL + "?action=getPending&nocache=" + Date.now());
+                // KITA TEMBAK LANGSUNG KE URL, NO CACHE!
+                const res = await fetch(API_URL + "?action=getPending&nocache=" + Date.now());
                 const result = await res.json();
                 const data = result.data || [];
                 
                 document.getElementById('countPending').innerText = `${data.length} Menunggu`;
                 container.innerHTML = '';
                 
-                if(data.length === 0) { container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-slate-400">Tidak ada pengajuan baru.</p></div>`; document.querySelector('#btnRefresh i').classList.remove('animate-spin'); return; }
+                if(data.length === 0) { 
+                    container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-slate-400">Belum ada pengajuan masuk.</p></div>`; 
+                } else {
+                    data.forEach((p) => {
+                        let hargaBersih = parseRupiah(p.harga.toString()) - parseRupiah(p.dp.toString());
+                        let rekTotal = hargaBersih + (hargaBersih * 0.25);
+                        let tenorAngka = parseInt(p.tenor) || 6;
+                        let rekBulan = Math.round(rekTotal / tenorAngka);
+                        let dataJson = encodeURIComponent(JSON.stringify({ nama: p.nama, wa: p.wa, barang: p.barang, jatuhTempo: p.jatuhTempo, rekTotal: rekTotal, rekBulan: rekBulan }));
 
-                data.forEach((p) => {
-                    let hargaBersih = parseRupiah(p.harga.toString()) - parseRupiah(p.dp.toString());
-                    let rekTotal = hargaBersih + (hargaBersih * 0.25);
-                    let tenorAngka = parseInt(p.tenor) || 6;
-                    let rekBulan = Math.round(rekTotal / tenorAngka);
-
-                    let dataJson = encodeURIComponent(JSON.stringify({ nama: p.nama, wa: p.wa, barang: p.barang, jatuhTempo: p.jatuhTempo, rekTotal: rekTotal, rekBulan: rekBulan }));
-
-                    container.innerHTML += `
-                        <div class="bg-white p-4 rounded-3xl shadow-sm border flex flex-col gap-3 relative">
-                            <div class="flex justify-between items-start">
-                                <div><h3 class="font-extrabold text-slate-800 text-sm">${p.nama}</h3><p class="text-[10px] font-bold text-slate-500 mt-0.5">${p.barang}</p></div>
-                                <div class="text-right"><p class="text-[10px] font-bold text-slate-400">Tenor</p><p class="font-black text-slate-900">${p.tenor}</p></div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 mt-1">
-                                <button onclick="tolakPengajuan('${p.wa}')" class="py-2.5 bg-red-50 text-red-600 rounded-xl text-[11px] font-bold flex justify-center items-center">Tolak</button>
-                                <button onclick="bukaModalAcc('${dataJson}')" class="py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-[11px] font-bold flex justify-center items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> ACC Kredit</button>
-                            </div>
-                        </div>`;
-                });
+                        container.innerHTML += `
+                            <div class="bg-white p-4 rounded-3xl shadow-sm border flex flex-col gap-3 relative">
+                                <div class="flex justify-between items-start">
+                                    <div><h3 class="font-extrabold text-slate-800 text-sm">${p.nama}</h3><p class="text-[10px] font-bold text-slate-500 mt-0.5">${p.barang}</p></div>
+                                    <div class="text-right"><p class="text-[10px] font-bold text-slate-400">Tenor</p><p class="font-black text-slate-900">${p.tenor}</p></div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 mt-1">
+                                    <button onclick="tolakPengajuan('${p.wa}')" class="py-2.5 bg-red-50 text-red-600 rounded-xl text-[11px] font-bold flex justify-center items-center">Tolak</button>
+                                    <button onclick="bukaModalAcc('${dataJson}')" class="py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-[11px] font-bold flex justify-center items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> ACC Kredit</button>
+                                </div>
+                            </div>`;
+                    });
+                }
                 lucide.createIcons();
-            } catch(e) { container.innerHTML = `<p class="text-center text-red-500 text-xs">Gagal memuat data.</p>`; }
+            } catch(e) { 
+                container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-red-200 bg-red-50"><p class="text-sm font-bold text-red-500">Gagal terhubung ke API. Pastikan internet lancar.</p></div>`; 
+            }
             document.querySelector('#btnRefresh i').classList.remove('animate-spin');
         }
 
@@ -185,12 +138,10 @@
             const btn = document.getElementById('btnKonfirmasiAcc');
             const finalTotal = parseRupiah(document.getElementById('accTotalHutang').value), finalCicilan = parseRupiah(document.getElementById('accCicilan').value);
             if(finalTotal === 0 || finalCicilan === 0) return alert("Nominal tidak boleh 0!");
-
             const payload = { tipe: "ACC_PENGAJUAN", wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: currentActiveData.jatuhTempo, totalHutang: finalTotal, cicilanBulan: finalCicilan };
-
             btn.disabled = true; btn.innerHTML = "Memproses...";
             try {
-                fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                 closeModalAcc(); setTimeout(() => { fetchAntrean(); alert("Sukses di-ACC dan dipindah ke Kasir POS!"); }, 800);
             } catch(e) { alert("Gagal koneksi."); }
             btn.disabled = false; btn.innerHTML = `<i data-lucide="user-check" class="w-5 h-5"></i> ACC & Pindah ke Kasir`;
@@ -198,7 +149,7 @@
 
         window.tolakPengajuan = function(wa) {
             if(confirm("Yakin ingin menolak pengajuan ini?")) {
-                fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", wa: wa }) });
+                fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", wa: wa }) });
                 setTimeout(() => fetchAntrean(), 800);
             }
         };
@@ -209,8 +160,7 @@
             container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-xs font-bold text-slate-500">Membaca Tagihan...</p></div>`;
 
             try {
-                // UPDATE PENTING: Penambahan nocache agar selalu dapat data terbaru
-                const res = await fetch(CONFIG.API_URL + "?action=getAll&nocache=" + Date.now());
+                const res = await fetch(API_URL + "?action=getAll&nocache=" + Date.now());
                 const result = await res.json();
                 
                 if (result.status === "error") {
@@ -223,44 +173,34 @@
                 container.innerHTML = '';
                 
                 if(aktifCustomers.length === 0) { 
-                    container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-emerald-500">Semua pelanggan Lunas atau belum ada tagihan!</p></div>`; 
-                    document.querySelector('#btnRefresh i').classList.remove('animate-spin');
-                    return; 
-                }
+                    container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-emerald-500">Semua pelanggan Lunas!</p></div>`; 
+                } else {
+                    aktifCustomers.forEach(p => {
+                        let angkaTanggal = p.jatuhTempo ? (parseInt(p.jatuhTempo.toString().split('-')[0]) || 1) : 1;
+                        const isTelat = new Date().getDate() >= angkaTanggal;
+                        let badgeColor = isTelat ? "bg-red-100 text-red-600 border border-red-200" : "bg-slate-100 text-slate-600";
+                        let sisaBulanIni = p.cicilanPerBulan > 0 ? p.cicilanPerBulan : Math.round(p.hutang / 6); 
 
-                aktifCustomers.forEach(p => {
-                    let angkaTanggal = 1;
-                    if(p.jatuhTempo) {
-                        const parts = p.jatuhTempo.toString().split('-');
-                        angkaTanggal = parseInt(parts[0]) || 1; 
-                    }
-
-                    const isTelat = tglSekarang >= angkaTanggal;
-                    let badgeColor = isTelat ? "bg-red-100 text-red-600 border border-red-200" : "bg-slate-100 text-slate-600";
-                    let sisaBulanIni = p.cicilanPerBulan > 0 ? p.cicilanPerBulan : Math.round(p.hutang / 6); 
-
-                    container.innerHTML += `
-                        <div class="bg-white p-4 rounded-3xl shadow-sm border flex flex-col gap-3 relative hover:border-amber-200">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-extrabold text-slate-800 text-sm">${p.nama}</h3>
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <span class="text-[10px] font-bold text-slate-500">Bulan Ke-${p.cicilanKe}</span>
-                                        <span class="text-[9px] font-bold ${badgeColor} px-1.5 py-0.5 rounded uppercase">Jatuh Tempo: Tgl ${angkaTanggal}</span>
+                        container.innerHTML += `
+                            <div class="bg-white p-4 rounded-3xl shadow-sm border flex flex-col gap-3 relative hover:border-amber-200">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-extrabold text-slate-800 text-sm">${p.nama}</h3>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <span class="text-[10px] font-bold text-slate-500">Bulan Ke-${p.cicilanKe}</span>
+                                            <span class="text-[9px] font-bold ${badgeColor} px-1.5 py-0.5 rounded uppercase">Jatuh Tempo: Tgl ${angkaTanggal}</span>
+                                        </div>
                                     </div>
+                                    <div class="text-right"><p class="text-[10px] font-bold text-slate-400">Tagihan Bulanan</p><p class="font-black text-slate-900">Rp ${formatRupiah(sisaBulanIni)}</p></div>
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-[10px] font-bold text-slate-400">Tagihan Bulanan</p>
-                                    <p class="font-black text-slate-900">Rp ${formatRupiah(sisaBulanIni)}</p>
+                                <div class="grid grid-cols-1 mt-1">
+                                    <button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${angkaTanggal}')" class="py-2.5 bg-amber-50 text-amber-700 rounded-xl text-[11px] font-bold flex justify-center items-center gap-1.5 border border-amber-100">
+                                        <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> ${isTelat ? 'Tegur Keterlambatan (WA)' : 'Kirim WA Pengingat'}
+                                    </button>
                                 </div>
-                            </div>
-                            <div class="grid grid-cols-1 mt-1">
-                                <button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${angkaTanggal}')" class="py-2.5 bg-amber-50 text-amber-700 rounded-xl text-[11px] font-bold flex justify-center items-center gap-1.5 border border-amber-100">
-                                    <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> ${isTelat ? 'Tegur Keterlambatan (WA)' : 'Kirim WA Pengingat'}
-                                </button>
-                            </div>
-                        </div>`;
-                });
+                            </div>`;
+                    });
+                }
                 lucide.createIcons();
             } catch(e) { container.innerHTML = `<p class="text-center text-red-500 text-xs">Gagal internet.</p>`; }
             document.querySelector('#btnRefresh i').classList.remove('animate-spin');
