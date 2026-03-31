@@ -24,7 +24,7 @@
             <a href="index.html" class="p-2 bg-slate-50 rounded-full text-slate-500 mr-2"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
             <div class="flex items-center gap-3 flex-grow">
                 <div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center"><i data-lucide="layout-dashboard" class="w-6 h-6 text-amber-400"></i></div>
-                <div><h1 class="font-black text-xl leading-none">Server Admin</h1><p class="text-[10px] font-bold text-amber-600 uppercase">Live Sync</p></div>
+                <div><h1 class="font-black text-xl leading-none">Server Admin</h1><p class="text-[10px] font-bold text-emerald-600 uppercase">Live Sync</p></div>
             </div>
             <button onclick="refreshData()" id="btnRefresh" class="p-2.5 bg-amber-50 rounded-xl text-amber-600"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
         </header>
@@ -57,12 +57,25 @@
     <script>
         lucide.createIcons();
         
-        // URL API DITANAM LANGSUNG
-        const API_URL = "https://script.google.com/macros/s/AKfycbxHjPjVfzD2QYpxGgZLAC0jhBReN4nFFw-Yi1vfY4rG_BgF6zTxr0_J0IwFR7WDyH3T/exec"; 
+        // KONFIGURASI DITANAM LANGSUNG DI SINI
+        const CONFIG = {
+            API_URL: "https://script.google.com/macros/s/AKfycbxHjPjVfzD2QYpxGgZLAC0jhBReN4nFFw-Yi1vfY4rG_BgF6zTxr0_J0IwFR7WDyH3T/exec",
+            WA_ADMIN: "62895410571547"
+        };
         
+        // FUNGSI ANTI-CRASH ANIMASI
+        function toggleLoading(isLoading) {
+            const icon = document.querySelector('#btnRefresh svg') || document.querySelector('#btnRefresh i');
+            if (icon) {
+                if (isLoading) icon.classList.add('animate-spin');
+                else icon.classList.remove('animate-spin');
+            }
+        }
+
         const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num);
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
-        document.getElementById('bulanIni').innerText = `Tgl Hari Ini: ${new Date().getDate()}`;
+        const tglSekarang = new Date().getDate();
+        document.getElementById('bulanIni').innerText = `Tgl Hari Ini: ${tglSekarang}`;
 
         let currentTab = 'antrean'; let targetWaLink = ""; let currentActiveData = null;
 
@@ -70,7 +83,6 @@
             currentTab = tab;
             document.getElementById('tab-antrean').className = tab === 'antrean' ? 'flex-1 py-2.5 rounded-xl text-xs tab-active' : 'flex-1 py-2.5 rounded-xl text-xs tab-inactive';
             document.getElementById('tab-tagihan').className = tab === 'tagihan' ? 'flex-1 py-2.5 rounded-xl text-xs tab-active' : 'flex-1 py-2.5 rounded-xl text-xs tab-inactive';
-            
             if (tab === 'antrean') { document.getElementById('viewAntrean').classList.replace('hidden', 'flex'); document.getElementById('viewTagihan').classList.replace('flex', 'hidden'); fetchAntrean(); } 
             else { document.getElementById('viewTagihan').classList.replace('hidden', 'flex'); document.getElementById('viewAntrean').classList.replace('flex', 'hidden'); fetchTagihan(); }
         }
@@ -79,37 +91,21 @@
 
         async function fetchAntrean() {
             const container = document.getElementById('pendingList');
-            document.querySelector('#btnRefresh i').classList.add('animate-spin');
-            container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-xs font-bold text-slate-500">Mencari Data Antrean...</p></div>`;
+            toggleLoading(true);
+            container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-xs font-bold text-slate-500">Menarik data server...</p></div>`;
 
             try {
-                const res = await fetch(API_URL + "?action=getPending&nocache=" + Date.now());
-                
-                // DETEKTIF 1: Cek apakah diblokir/dilempar ke halaman login Google
-                if (res.redirected && res.url.includes('accounts.google.com')) {
-                    throw new Error("🚨 DIBLOKIR GOOGLE: Pengaturan Deploy salah! Pilih 'Siapa saja' (Anyone), BUKAN akun Google.");
-                }
-
-                const textData = await res.text();
-                let result;
-                
-                // DETEKTIF 2: Cek apakah responsnya gagal jadi JSON
-                try { result = JSON.parse(textData); } 
-                catch(err) { throw new Error("🚨 ERROR DATA: Server tidak mengirim JSON. Pastikan Link API sudah URL Deploy yang terbaru."); }
-
+                const res = await fetch(CONFIG.API_URL + "?action=getPending&nocache=" + Date.now());
+                const result = await res.json();
                 const data = result.data || [];
+                
                 document.getElementById('countPending').innerText = `${data.length} Menunggu`;
                 container.innerHTML = '';
                 
-                if(data.length === 0) { 
-                    container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-slate-400">Belum ada pengajuan masuk.</p></div>`; 
-                } else {
+                if(data.length === 0) { container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-slate-400">Belum ada pengajuan masuk.</p></div>`; }
+                else {
                     data.forEach((p) => {
-                        // DETEKTIF 3: Cegah kode crash jika ada kolom yang kosong di Sheet
-                        let p_harga = (p.harga !== undefined && p.harga !== null) ? p.harga.toString() : "0";
-                        let p_dp = (p.dp !== undefined && p.dp !== null) ? p.dp.toString() : "0";
-                        
-                        let hargaBersih = parseRupiah(p_harga) - parseRupiah(p_dp);
+                        let hargaBersih = parseRupiah(p.harga.toString()) - parseRupiah(p.dp.toString());
                         let rekTotal = hargaBersih + (hargaBersih * 0.25);
                         let tenorAngka = parseInt(p.tenor) || 6;
                         let rekBulan = Math.round(rekTotal / tenorAngka);
@@ -129,15 +125,8 @@
                     });
                 }
                 lucide.createIcons();
-            } catch(e) { 
-                // DETEKTIF 4: Menangkap error utama
-                let errorMsg = e.message;
-                if(e.name === 'TypeError' && e.message.includes('fetch')) {
-                    errorMsg = "🚨 CORS ERROR (DIBLOKIR): 100% karena Deploy di Google Script belum di-set 'Siapa saja' (Anyone).";
-                }
-                container.innerHTML = `<div class="text-center py-6 bg-red-50 rounded-3xl border border-red-200 shadow-sm"><p class="text-xs font-extrabold text-red-600 px-4 leading-relaxed">${errorMsg}</p></div>`; 
-            }
-            document.querySelector('#btnRefresh i').classList.remove('animate-spin');
+            } catch(e) { container.innerHTML = `<p class="text-center text-red-500 text-xs mt-10">Gagal internet/Koneksi API.</p>`; }
+            toggleLoading(false);
         }
 
         const modalAcc = document.getElementById('accModal'), modalAccContent = document.getElementById('accModalContent');
@@ -158,7 +147,7 @@
             const payload = { tipe: "ACC_PENGAJUAN", wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: currentActiveData.jatuhTempo, totalHutang: finalTotal, cicilanBulan: finalCicilan };
             btn.disabled = true; btn.innerHTML = "Memproses...";
             try {
-                fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                 closeModalAcc(); setTimeout(() => { fetchAntrean(); alert("Sukses di-ACC dan dipindah ke Kasir POS!"); }, 800);
             } catch(e) { alert("Gagal koneksi."); }
             btn.disabled = false; btn.innerHTML = `<i data-lucide="user-check" class="w-5 h-5"></i> ACC & Pindah ke Kasir`;
@@ -166,32 +155,23 @@
 
         window.tolakPengajuan = function(wa) {
             if(confirm("Yakin ingin menolak pengajuan ini?")) {
-                fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", wa: wa }) });
+                fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", wa: wa }) });
                 setTimeout(() => fetchAntrean(), 800);
             }
         };
 
         async function fetchTagihan() {
             const container = document.getElementById('customerList');
-            document.querySelector('#btnRefresh i').classList.add('animate-spin');
+            toggleLoading(true);
             container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-xs font-bold text-slate-500">Membaca Tagihan...</p></div>`;
 
             try {
-                const res = await fetch(API_URL + "?action=getAll&nocache=" + Date.now());
-                
-                if (res.redirected && res.url.includes('accounts.google.com')) {
-                    throw new Error("🚨 DIBLOKIR GOOGLE: Pengaturan Deploy salah! Pilih 'Siapa saja' (Anyone), BUKAN akun Google.");
-                }
-
-                const textData = await res.text();
-                let result;
-                try { result = JSON.parse(textData); } 
-                catch(err) { throw new Error("🚨 ERROR DATA: Server tidak mengirim JSON. Cek ulang link API-mu."); }
+                const res = await fetch(CONFIG.API_URL + "?action=getAll&nocache=" + Date.now());
+                const result = await res.json();
                 
                 if (result.status === "error") {
                     container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-amber-500">${result.message || "Belum ada data."}</p></div>`;
-                    document.querySelector('#btnRefresh i').classList.remove('animate-spin');
-                    return;
+                    toggleLoading(false); return;
                 }
 
                 let aktifCustomers = (result.data || []).filter(c => (c.hutang - c.terbayar) > 0);
@@ -202,7 +182,7 @@
                 } else {
                     aktifCustomers.forEach(p => {
                         let angkaTanggal = p.jatuhTempo ? (parseInt(p.jatuhTempo.toString().split('-')[0]) || 1) : 1;
-                        const isTelat = new Date().getDate() >= angkaTanggal;
+                        const isTelat = tglSekarang >= angkaTanggal;
                         let badgeColor = isTelat ? "bg-red-100 text-red-600 border border-red-200" : "bg-slate-100 text-slate-600";
                         let sisaBulanIni = p.cicilanPerBulan > 0 ? p.cicilanPerBulan : Math.round(p.hutang / 6); 
 
@@ -227,14 +207,8 @@
                     });
                 }
                 lucide.createIcons();
-            } catch(e) { 
-                let errorMsg = e.message;
-                if(e.name === 'TypeError' && e.message.includes('fetch')) {
-                    errorMsg = "🚨 CORS ERROR (DIBLOKIR): 100% karena Deploy di Google Script belum di-set 'Siapa saja' (Anyone).";
-                }
-                container.innerHTML = `<div class="text-center py-6 bg-red-50 rounded-3xl border border-red-200 shadow-sm"><p class="text-xs font-extrabold text-red-600 px-4 leading-relaxed">${errorMsg}</p></div>`;  
-            }
-            document.querySelector('#btnRefresh i').classList.remove('animate-spin');
+            } catch(e) { container.innerHTML = `<p class="text-center text-red-500 text-xs mt-10">Gagal internet/Koneksi API.</p>`; }
+            toggleLoading(false);
         }
 
         const modalWa = document.getElementById('waModal'), modalWaContent = document.getElementById('waModalContent');

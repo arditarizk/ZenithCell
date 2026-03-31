@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="config.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -26,7 +25,7 @@
             <a href="index.html" class="p-2 bg-slate-50 rounded-full text-slate-500 mr-2"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
             <div class="flex items-center gap-3 flex-grow">
                 <div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shrink-0"><i data-lucide="smartphone-charging" class="w-6 h-6 text-emerald-400"></i></div>
-                <div><h1 class="font-black text-xl leading-none">Kasir POS</h1><p class="text-[10px] font-bold text-emerald-600 uppercase">Cloud Sync</p></div>
+                <div><h1 class="font-black text-xl leading-none">Kasir POS</h1><p class="text-[10px] font-bold text-emerald-600 uppercase">Live Sync</p></div>
             </div>
             <button onclick="fetchCustomersFromCloud()" id="btnRefresh" class="p-2.5 bg-emerald-50 rounded-xl text-emerald-600"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
         </header>
@@ -72,24 +71,38 @@
 
     <script>
         lucide.createIcons();
+        
+        // KONFIGURASI DITANAM LANGSUNG
+        const CONFIG = {
+            API_URL: "https://script.google.com/macros/s/AKfycbxHjPjVfzD2QYpxGgZLAC0jhBReN4nFFw-Yi1vfY4rG_BgF6zTxr0_J0IwFR7WDyH3T/exec",
+            WA_ADMIN: "62895410571547"
+        };
+        
+        // FUNGSI ANTI-CRASH ANIMASI
+        function toggleLoading(isLoading) {
+            const icon = document.querySelector('#btnRefresh svg') || document.querySelector('#btnRefresh i');
+            if (icon) {
+                if (isLoading) icon.classList.add('animate-spin');
+                else icon.classList.remove('animate-spin');
+            }
+        }
+
         let dbCustomers = [];
         const formatRupiah = (num) => (num === 0 || isNaN(num)) ? "0" : new Intl.NumberFormat('id-ID').format(num);
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
 
         async function fetchCustomersFromCloud() {
             const grid = document.getElementById('customerGrid');
-            document.querySelector('#btnRefresh i').classList.add('animate-spin');
+            toggleLoading(true);
             grid.innerHTML = `<div class="col-span-3 text-center py-4 text-emerald-600 text-xs font-bold flex justify-center"><div class="spinner"></div> Menarik data...</div>`;
             
             try {
-                // UPDATE PENTING: Penambahan nocache agar selalu dapat data terbaru
                 const res = await fetch(CONFIG.API_URL + "?action=getAll&nocache=" + Date.now());
                 const result = await res.json();
 
                 if (result.status === "error") {
                     grid.innerHTML = `<div class="col-span-3 text-center py-2 text-slate-400 text-xs">${result.message || "Belum ada data."}</div>`;
-                    document.querySelector('#btnRefresh i').classList.remove('animate-spin');
-                    return;
+                    toggleLoading(false); return;
                 }
 
                 dbCustomers = (result.data || []).filter(c => c.nama && c.wa && (c.hutang - c.terbayar) > 0); 
@@ -102,10 +115,8 @@
                         grid.innerHTML += `<label class="cursor-pointer relative"><input type="radio" name="pelanggan" value="${cust.wa}" class="radio-peer sr-only" onchange="selectCustomer('${cust.wa}')"><div class="w-full py-3 px-2 rounded-xl bg-slate-50 border-2 border-slate-100 text-slate-600 font-bold text-sm text-center truncate">${cust.nama}</div></label>`;
                     });
                 }
-            } catch(e) { 
-                grid.innerHTML = `<div class="col-span-3 text-center py-2 text-red-500 text-xs">Gagal memuat API.</div>`; 
-            }
-            document.querySelector('#btnRefresh i').classList.remove('animate-spin');
+            } catch(e) { grid.innerHTML = `<div class="col-span-3 text-center py-2 text-red-500 text-xs">Gagal memuat API.</div>`; }
+            toggleLoading(false);
         }
 
         document.getElementById('nominal').addEventListener('input', (e) => { e.target.value = formatRupiah(parseRupiah(e.target.value)); renderPreview(); });
