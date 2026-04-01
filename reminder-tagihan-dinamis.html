@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Server Admin - Zenith Cell</title>
+    <link rel="icon" type="image/png" href="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/6f184ccb-599f-4527-b31f-f416b7dc6b8d.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -14,7 +15,6 @@
         .tab-inactive { background-color: transparent; color: #64748b; font-weight: 600; }
         .spinner { border: 3px solid rgba(245, 158, 11, 0.3); border-top: 3px solid #f59e0b; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .glass-blur { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
     </style>
 </head>
 <body class="text-slate-800 pb-24 pt-4 px-4 flex justify-center selection:bg-amber-200">
@@ -23,33 +23,35 @@
 
     <main class="w-full max-w-md relative z-10 flex flex-col min-h-[90vh]">
         <header class="mb-5 flex items-center justify-between bg-white p-3.5 rounded-2xl shadow-sm border relative">
-            <a href="index.html" class="p-2 bg-slate-50 rounded-xl text-slate-500 mr-2"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
+            <a href="index.html" class="p-2 bg-slate-50 rounded-xl text-slate-500 mr-2 active:scale-90 transition-transform"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
             <div class="flex items-center gap-3 flex-grow">
                 <div class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center"><i data-lucide="layout-dashboard" class="w-5 h-5 text-amber-400"></i></div>
-                <div><h1 class="font-black text-base leading-none">Server Admin</h1><p class="text-[9px] font-bold text-amber-600 uppercase mt-0.5 tracking-wider">Early Settlement Ready</p></div>
+                <div><h1 class="font-black text-base leading-none">Server Admin</h1><p class="text-[9px] font-bold text-amber-600 uppercase mt-0.5 tracking-wider">Sync V9 - Final Fix</p></div>
             </div>
-            <button onclick="refreshData()" class="p-2 bg-amber-50 rounded-xl text-amber-600"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
+            <button onclick="refreshData()" class="p-2 bg-amber-50 rounded-xl text-amber-600 active:rotate-180 transition-all duration-500"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
         </header>
 
         <div class="flex gap-2 mb-4 bg-white p-1 rounded-xl shadow-sm border border-slate-100">
-            <button onclick="switchTab('antrean')" id="tab-antrean" class="flex-1 py-2 rounded-lg text-[11px] tab-active">Antrean ACC</button>
-            <button onclick="switchTab('tagihan')" id="tab-tagihan" class="flex-1 py-2 rounded-lg text-[11px] tab-inactive">Tagihan Aktif</button>
+            <button onclick="switchTab('antrean')" id="tab-antrean" class="flex-1 py-2 rounded-lg text-[11px] tab-active transition-all">Antrean ACC</button>
+            <button onclick="switchTab('tagihan')" id="tab-tagihan" class="flex-1 py-2 rounded-lg text-[11px] tab-inactive transition-all">Tagihan Aktif</button>
         </div>
 
+        <!-- View Antrean -->
         <div id="viewAntrean" class="flex flex-col flex-grow">
             <div id="pendingList" class="space-y-3 pb-10"></div>
         </div>
 
+        <!-- View Tagihan -->
         <div id="viewTagihan" class="hidden flex flex-col flex-grow">
             <div class="relative mb-4">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i></div>
-                <input type="text" id="searchInput" oninput="filterTagihan()" placeholder="Cari nama pelanggan..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold outline-none focus:border-amber-400 shadow-sm">
+                <input type="text" id="searchInput" oninput="filterTagihan()" placeholder="Cari nama pelanggan..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold outline-none focus:border-amber-400 transition-all shadow-sm">
             </div>
             <div id="customerList" class="space-y-3 pb-10"></div>
         </div>
     </main>
 
-    <!-- MODAL ACC -->
+    <!-- Modal ACC -->
     <div id="accModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end px-2 pb-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white w-full max-w-md mx-auto rounded-[2rem] p-6 shadow-2xl transform translate-y-full transition-transform" id="accModalContent">
             <div class="flex justify-between items-center mb-5 pb-3 border-b">
@@ -59,51 +61,49 @@
             <div class="space-y-4">
                 <div class="bg-slate-50 p-4 rounded-2xl border">
                     <div class="flex justify-between items-center mb-1">
-                        <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest" id="accIdKontrak">...</p>
-                        <span id="badgeMarginFinal" class="text-[8px] font-black px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">MARGIN: --%</span>
+                        <p class="text-[9px] text-slate-400 font-black uppercase" id="accIdKontrak">...</p>
+                        <span id="badgeMarginFinal" class="text-[8px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 border border-amber-200">MARGIN: --%</span>
                     </div>
                     <p class="font-black text-slate-800 text-base" id="accNama">...</p>
                     <p class="text-[11px] font-semibold text-slate-500" id="accBarang">...</p>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-[10px] font-extrabold text-slate-500 mb-1 uppercase">Tgl Tempo</label><input type="number" id="accJatuhTempo" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div>
-                    <div><label class="block text-[10px] font-extrabold text-slate-500 mb-1 uppercase">Tenor (Bln)</label><input type="number" id="accTenor" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div>
+                    <div><label class="block text-[10px] font-extrabold text-slate-500 mb-1">Tgl Tempo</label><input type="number" id="accJatuhTempo" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div>
+                    <div><label class="block text-[10px] font-extrabold text-slate-500 mb-1">Tenor (Bln)</label><input type="number" id="accTenor" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div>
                 </div>
-                <div><label class="block text-[10px] font-extrabold text-slate-500 mb-1 uppercase">Total Harga Jual</label><input type="text" id="accTotalHutang" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div>
-                <div><label class="block text-[10px] font-extrabold text-slate-500 mb-1 uppercase">Cicilan Per Bulan</label><input type="text" id="accCicilan" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div>
+                <div><label class="block text-[10px] font-extrabold text-slate-500 mb-1">Total Harga Jual</label><input type="text" id="accTotalHutang" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div>
+                <div><label class="block text-[10px] font-extrabold text-slate-500 mb-1">Cicilan Per Bulan</label><input type="text" id="accCicilan" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div>
             </div>
-            <button id="btnKonfirmasiAcc" class="w-full mt-6 bg-emerald-500 text-white font-extrabold py-4 rounded-xl active:scale-95 transition-all">ACC & NOTIFIKASI WA</button>
+            <button id="btnKonfirmasiAcc" class="w-full mt-6 bg-emerald-500 text-white font-extrabold py-4 rounded-xl active:scale-95 transition-all shadow-lg shadow-emerald-500/20">ACC & NOTIFIKASI WA</button>
         </div>
     </div>
 
-    <!-- MODAL PELUNASAN (FITUR BARU) -->
+    <!-- Modal Pelunasan Cepat (Muroqoshoh) -->
     <div id="pelunasanModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[120] hidden flex-col justify-center px-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white w-full max-w-sm mx-auto rounded-[2rem] p-6 shadow-2xl transform scale-95 transition-transform" id="pelunasanContent">
             <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-3"><i data-lucide="hand-coins" class="w-8 h-8 text-amber-500"></i></div>
-                <h2 class="font-black text-lg text-slate-900">Muqassah (Diskon Pelunasan)</h2>
-                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Estimasi Pelunasan Dipercepat</p>
+                <div class="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-3"><i data-lucide="zap" class="w-8 h-8 text-amber-500"></i></div>
+                <h2 class="font-black text-lg text-slate-900">Muroqoshoh</h2>
+                <p class="text-[10px] text-slate-500 font-bold uppercase mt-1">Estimasi Pelunasan Cepat</p>
             </div>
             
-            <div class="space-y-3 bg-slate-50 p-5 rounded-2xl border mb-6">
-                <div class="flex justify-between text-xs font-bold text-slate-500"><span>Sisa Hutang Normal</span><span id="pSisaNormal" class="text-slate-800">Rp 0</span></div>
-                <div class="flex justify-between text-xs font-bold text-emerald-600"><span>Potongan Ibra' (Diskon)</span><span id="pDiskon">- Rp 0</span></div>
+            <div class="space-y-3 bg-slate-50 p-5 rounded-2xl border mb-6 text-sm font-bold">
+                <div class="flex justify-between text-slate-500"><span>Sisa Hutang</span><span id="pSisaNormal">Rp 0</span></div>
+                <div class="flex justify-between text-emerald-600"><span>Diskon Ibra' (10%)</span><span id="pDiskon">- Rp 0</span></div>
                 <div class="pt-3 border-t border-slate-200 flex justify-between items-center">
-                    <span class="text-xs font-black text-slate-900">Total Pelunasan</span>
+                    <span class="text-slate-900">Total Bayar</span>
                     <span id="pTotalAkhir" class="text-lg font-black text-amber-600">Rp 0</span>
                 </div>
             </div>
 
             <div class="flex flex-col gap-2">
-                <button id="btnKirimPelunasan" class="w-full bg-slate-900 text-white font-black py-4 rounded-xl active:scale-95 transition-all flex items-center justify-center gap-2">
-                    <i data-lucide="send" class="w-4 h-4 text-amber-400"></i> Kirim Penawaran WA
-                </button>
-                <button onclick="closePelunasan()" class="w-full py-3 text-slate-400 text-xs font-bold">Batal</button>
+                <button id="btnKirimPelunasan" class="w-full bg-slate-900 text-white font-black py-4 rounded-xl active:scale-95 transition-all flex items-center justify-center gap-2"><i data-lucide="send" class="w-4 h-4 text-amber-400"></i> Kirim ke WhatsApp</button>
+                <button onclick="closePelunasan()" class="w-full py-3 text-slate-400 text-xs font-bold uppercase">Batal</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL WA REMINDER -->
+    <!-- Modal WA Reminder -->
     <div id="waModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0 px-2 sm:px-0">
         <div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-5 pb-8 shadow-2xl transform translate-y-full transition-transform">
             <div class="flex justify-between items-center mb-4 pb-2 border-b">
@@ -119,7 +119,7 @@
         lucide.createIcons();
         const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num);
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
-        let currentTab = 'antrean', currentActiveData = null, allTagihanData = [], targetWaLink = "";
+        let currentTab = 'antrean', allTagihanData = [], currentActiveData = null;
 
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
@@ -132,8 +132,10 @@
         }
 
         const formatNomorWA = (wa) => {
-            let n = wa.toString().replace(/[^0-9]/g, '');
-            return n.startsWith('0') ? '62' + n.substring(1) : (n.startsWith('8') ? '62' + n : n);
+            let n = (wa || "").toString().replace(/[^0-9]/g, '');
+            if (n.startsWith('0')) return '62' + n.substring(1);
+            if (n.startsWith('8')) return '62' + n;
+            return n;
         };
 
         function refreshData() { currentTab === 'antrean' ? fetchAntrean() : fetchTagihan(); }
@@ -142,23 +144,36 @@
             currentTab = tab;
             document.getElementById('tab-antrean').className = tab === 'antrean' ? 'flex-1 py-2 rounded-lg text-[11px] tab-active' : 'flex-1 py-2 rounded-lg text-[11px] tab-inactive';
             document.getElementById('tab-tagihan').className = tab === 'tagihan' ? 'flex-1 py-2 rounded-lg text-[11px] tab-active' : 'flex-1 py-2 rounded-lg text-[11px] tab-inactive';
-            if (tab === 'antrean') { document.getElementById('viewAntrean').classList.remove('hidden'); document.getElementById('viewTagihan').classList.add('hidden'); fetchAntrean(); } 
-            else { document.getElementById('viewTagihan').classList.remove('hidden'); document.getElementById('viewAntrean').classList.add('hidden'); fetchTagihan(); }
+            if (tab === 'antrean') { 
+                document.getElementById('viewAntrean').classList.remove('hidden'); 
+                document.getElementById('viewTagihan').classList.add('hidden'); 
+                fetchAntrean(); 
+            } else { 
+                document.getElementById('viewTagihan').classList.remove('hidden'); 
+                document.getElementById('viewAntrean').classList.add('hidden'); 
+                fetchTagihan(); 
+            }
         }
 
         async function fetchAntrean() {
             const container = document.getElementById('pendingList');
-            container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-2"></div></div>`;
+            container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-2"></div><p class="text-[10px] font-bold text-slate-400">Loading Antrean...</p></div>`;
             try {
-                const res = await fetch(CONFIG.API_URL + "?action=getPending&nocache=" + Date.now());
+                const res = await fetch(`${CONFIG.API_URL}?action=getPending&nocache=${Date.now()}`);
                 const result = await res.json();
                 const data = result.data || [];
-                container.innerHTML = data.length === 0 ? `<div class="text-center py-10 bg-white rounded-2xl border border-dashed text-slate-400 font-bold text-xs">Antrean kosong.</div>` : '';
+                container.innerHTML = data.length === 0 ? `<div class="text-center py-10 bg-white rounded-2xl border border-dashed text-slate-400 font-bold text-xs uppercase">Antrean Kosong</div>` : '';
                 
                 data.forEach((p) => {
                     let hClean = parseRupiah(p.harga) - parseRupiah(p.dp);
-                    let mMatch = (p.jaminan || "").match(/(\d+)%/);
-                    let marginVal = mMatch ? parseInt(mMatch[1]) : (p.jaminan.toLowerCase().includes("tanpa") ? 25 : 15);
+                    
+                    // --- LOGIKA MARGIN SINKRON ---
+                    let marginVal = parseInt(p.margin); 
+                    if (!marginVal || isNaN(marginVal)) {
+                        let j = (p.jaminan || "").toLowerCase();
+                        marginVal = j.includes("tanpa") ? 25 : 15;
+                    }
+
                     let rekTotal = hClean + (hClean * (marginVal / 100)); 
                     let rekBulan = Math.round(rekTotal / (parseInt(p.tenor) || 5));
                     let dataJson = encodeURIComponent(JSON.stringify({ ...p, rekTotal, rekBulan, marginAktif: marginVal }));
@@ -166,62 +181,69 @@
                     container.innerHTML += `
                         <div class="bg-white p-4 rounded-2xl border shadow-sm mb-3">
                             <div class="flex justify-between items-start mb-3">
-                                <div><h3 class="font-black text-slate-900 text-sm">${p.nama}</h3><p class="text-[10px] font-bold text-slate-500">${p.barang}</p></div>
-                                <div class="text-right"><span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">${p.tenor} BLN</span></div>
+                                <div>
+                                    <h3 class="font-black text-slate-900 text-sm leading-tight">${p.nama || "No Name"}</h3>
+                                    <p class="text-[10px] font-bold text-slate-500 mt-0.5">${p.barang || "-"}</p>
+                                    <span class="text-[8px] font-black px-1.5 py-0.5 rounded mt-2 inline-block bg-amber-100 text-amber-700 border border-amber-200">MARGIN: ${marginVal}%</span>
+                                </div>
+                                <div class="text-right"><span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">${p.tenor || 0} BLN</span></div>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
-                                <button class="py-2.5 bg-red-50 text-red-600 rounded-xl text-[10px] font-black opacity-50">TOLAK</button>
-                                <button onclick="bukaModalAcc('${dataJson}')" class="py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-[10px] font-black">HITUNG ACC</button>
+                                <button onclick="tolakPengajuan('${p.idKontrak}', '${p.nama}', '${p.wa}', '${p.barang}')" class="py-2.5 bg-red-50 text-red-600 rounded-xl text-[10px] font-black active:scale-95 transition-all">TOLAK</button>
+                                <button onclick="bukaModalAcc('${dataJson}')" class="py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-[10px] font-black active:scale-95 transition-all">HITUNG ACC</button>
                             </div>
                         </div>`;
                 });
                 lucide.createIcons();
-            } catch(e) { container.innerHTML = `<p class="text-center py-10 font-bold text-red-500">API Error.</p>`; }
+            } catch(e) { container.innerHTML = `<div class="text-center py-10 text-red-500 font-black text-xs">Gagal memuat API Pengajuan.</div>`; }
         }
 
         async function fetchTagihan() {
             const container = document.getElementById('customerList');
-            container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto"></div></div>`;
+            container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-2"></div><p class="text-[10px] font-bold text-slate-400 uppercase">Syncing Tagihan...</p></div>`;
             try {
-                const res = await fetch(CONFIG.API_URL + "?action=getAll&nocache=" + Date.now());
+                const res = await fetch(`${CONFIG.API_URL}?action=getAll&nocache=${Date.now()}`);
                 const result = await res.json();
-                allTagihanData = (result.data || []).filter(c => (c.hutang - c.terbayar) > 0);
+                allTagihanData = (result.data || []).filter(c => (parseRupiah(c.hutang) - parseRupiah(c.terbayar)) > 0);
                 renderTagihan(allTagihanData);
-            } catch(e) { container.innerHTML = `<p class="text-center py-10 text-xs">Gagal memuat data.</p>`; }
+            } catch(e) { container.innerHTML = `<div class="text-center py-10 text-red-500 font-black text-xs uppercase">Gagal memuat API Pelanggan.</div>`; }
         }
 
         function renderTagihan(data) {
             const container = document.getElementById('customerList'); container.innerHTML = '';
+            if(data.length === 0) container.innerHTML = `<div class="text-center py-10 bg-white rounded-2xl border border-dashed text-slate-400 font-bold text-xs uppercase">Tidak Ada Tagihan Aktif</div>`;
             data.forEach(p => {
                 let dataJson = encodeURIComponent(JSON.stringify(p));
                 container.innerHTML += `
                     <div class="bg-white p-4 rounded-2xl border shadow-sm flex flex-col gap-3">
                         <div class="flex justify-between items-start">
-                            <div><h3 class="font-black text-xs text-slate-800 uppercase">${p.nama}</h3><p class="text-[9px] font-bold text-slate-400 mt-1">ID: ${p.idKontrak} • Bulan Ke-${p.cicilanKe}</p></div>
+                            <div><h3 class="font-black text-xs text-slate-800 uppercase leading-none">${p.nama || "Guest"}</h3><p class="text-[9px] font-bold text-slate-400 mt-2">ID: ${p.idKontrak || "-"} • Ke-${p.cicilanKe || 1}</p></div>
                             <div class="text-right"><p class="font-black text-slate-900 text-xs">Rp ${formatRupiah(p.cicilanPerBulan)}</p></div>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
-                            <button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${p.cicilanPerBulan}')" class="py-2.5 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-black flex items-center justify-center gap-1"><i data-lucide="message-circle" class="w-3 h-3"></i> PENGINGAT</button>
-                            <button onclick="bukaModalPelunasan('${dataJson}')" class="py-2.5 bg-slate-900 text-amber-400 rounded-xl text-[10px] font-black flex items-center justify-center gap-1"><i data-lucide="zap" class="w-3 h-3"></i> PELUNASAN</button>
+                            <button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${p.cicilanPerBulan}')" class="py-2.5 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-black flex items-center justify-center gap-1"><i data-lucide="bell" class="w-3 h-3"></i> PENGINGAT</button>
+                            <button onclick="bukaModalPelunasan('${dataJson}')" class="py-2.5 bg-slate-900 text-amber-400 rounded-xl text-[10px] font-black flex items-center justify-center gap-1 active:scale-95 transition-all"><i data-lucide="zap" class="w-3 h-3"></i> PELUNASAN</button>
                         </div>
                     </div>`;
             });
             lucide.createIcons();
         }
 
-        // LOGIKA PELUNASAN (FITUR BARU)
+        function filterTagihan() {
+            const k = (document.getElementById('searchInput').value || "").toLowerCase();
+            renderTagihan(allTagihanData.filter(p => (p.nama || "").toLowerCase().includes(k)));
+        }
+
+        // --- MODAL PELUNASAN (MUROQOSHOH) ---
         window.bukaModalPelunasan = function(encoded) {
             const data = JSON.parse(decodeURIComponent(encoded)); currentActiveData = data;
-            const sisaHutang = data.hutang - data.terbayar;
-            
-            // Logika Muqassah: Diskon 50% dari sisa margin (margin diasumsikan rata-rata 20% dari hutang)
-            // Estimasi sisa margin = (sisaHutang / sisaBulan) * sisaBulan * (0.2)
-            const estimasiSisaMargin = sisaHutang * 0.1; // Contoh: Kita kasih diskon 10% dari sisa total hutang
-            const totalPelunasan = sisaHutang - estimasiSisaMargin;
+            const sisaHutang = parseRupiah(data.hutang) - parseRupiah(data.terbayar);
+            const diskon = Math.round(sisaHutang * 0.1); // Diskon 10%
+            const total = sisaHutang - diskon;
 
             document.getElementById('pSisaNormal').innerText = `Rp ${formatRupiah(sisaHutang)}`;
-            document.getElementById('pDiskon').innerText = `- Rp ${formatRupiah(estimasiSisaMargin)}`;
-            document.getElementById('pTotalAkhir').innerText = `Rp ${formatRupiah(totalPelunasan)}`;
+            document.getElementById('pDiskon').innerText = `- Rp ${formatRupiah(diskon)}`;
+            document.getElementById('pTotalAkhir').innerText = `Rp ${formatRupiah(total)}`;
 
             document.getElementById('pelunasanModal').classList.replace('hidden', 'flex');
             setTimeout(() => { 
@@ -230,7 +252,7 @@
             }, 10);
 
             document.getElementById('btnKirimPelunasan').onclick = () => {
-                const pesan = `Assalamu'alaikum Kak *${data.nama}* 🙏\n\nSebagai apresiasi atas itikad baik Kakak, Zenith Cell memberikan program *Muqassah (Diskon Pelunasan)* khusus untuk ID: ${data.idKontrak}.\n\nJika dilunasi hari ini, Kakak mendapatkan potongan sebesar *Rp ${formatRupiah(estimasiSisaMargin)}*.\n\nTotal Pelunasan: *Rp ${formatRupiah(totalPelunasan)}*\n\nOpsi ini bersifat sukarela dan ditujukan untuk memudahkan Kakak. Terima kasih! ✨`;
+                const pesan = `Halo Kak *${data.nama}* 🙏\n\nZenith Cell memberikan program *Muroqoshoh (Diskon Pelunasan)* khusus untukmu.\n\nSisa Hutang: Rp ${formatRupiah(sisaHutang)}\nPotongan Ibra: *Rp ${formatRupiah(diskon)}*\nTotal Pelunasan: *Rp ${formatRupiah(total)}*\n\nTerima kasih! ✨`;
                 window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(data.wa)}&text=${encodeURIComponent(pesan)}`, '_blank');
                 closePelunasan();
             };
@@ -242,13 +264,14 @@
             setTimeout(() => document.getElementById('pelunasanModal').classList.replace('flex', 'hidden'), 300); 
         };
 
+        // --- MODAL ACC ---
         window.bukaModalAcc = function(encoded) {
             const data = JSON.parse(decodeURIComponent(encoded)); currentActiveData = data;
             document.getElementById('accIdKontrak').innerText = data.idKontrak; 
             document.getElementById('accNama').innerText = data.nama; 
             document.getElementById('accBarang').innerText = data.barang;
             document.getElementById('badgeMarginFinal').innerText = `MARGIN: ${data.marginAktif}%`;
-            document.getElementById('accJatuhTempo').value = data.jatuhTempo; 
+            document.getElementById('accJatuhTempo').value = data.jatuhTempo || 25; 
             document.getElementById('accTenor').value = data.tenor;
             document.getElementById('accTotalHutang').value = formatRupiah(data.rekTotal); 
             document.getElementById('accCicilan').value = formatRupiah(data.rekBulan);
@@ -261,23 +284,24 @@
         document.getElementById('btnKonfirmasiAcc').addEventListener('click', () => {
             const payload = { tipe: "ACC_PENGAJUAN", idKontrak: currentActiveData.idKontrak, wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: document.getElementById('accJatuhTempo').value, totalHutang: parseRupiah(document.getElementById('accTotalHutang').value), cicilanBulan: parseRupiah(document.getElementById('accCicilan').value) };
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            const pesan = `Alhamdulillah Kak *${payload.nama}*, pengajuan *${payload.barang}* di *Zenith Cell* telah di-ACC!✨`;
-            window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent(pesan)}`, '_blank');
+            window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent("Alhamdulillah pengajuan di-ACC! ✨")}`, '_blank');
             closeModalAcc(); showToast("Berhasil di-ACC!");
             setTimeout(fetchAntrean, 1500);
         });
 
+        window.tolakPengajuan = function(id, nama, wa, barang) {
+            if(!confirm(`Tolak pengajuan ${nama}?`)) return;
+            fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", idKontrak: id }) });
+            window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}&text=${encodeURIComponent("Maaf pengajuan " + barang + " kamu ditolak. ✨")}`, '_blank');
+            setTimeout(fetchAntrean, 1500);
+        }
+
         window.bukaPesanWA = function(nama, wa, ke, nominal) {
-            document.getElementById('pesanWA').value = `Assalamu'alaikum Kak ${nama} 🙏\nMengingatkan dari *Zenith Cell*, cicilan gadget (Bulan Ke-${ke}) senilai *Rp ${formatRupiah(nominal)}* hampir jatuh tempo.\n\nTerima kasih! ✨`;
-            targetWaLink = `https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}`;
-            document.getElementById('waModal').classList.replace('hidden', 'flex');
-            setTimeout(() => { document.getElementById('waModal').classList.remove('opacity-0'); document.querySelector('#waModal > div').classList.remove('translate-y-full'); }, 10);
-        };
+            const m = `Halo Kak ${nama} 🙏 Mengingatkan cicilan gadget ke-${ke} senilai *Rp ${formatRupiah(nominal)}* hampir jatuh tempo. Terima kasih! ✨`;
+            window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}&text=${encodeURIComponent(m)}`, '_blank');
+        }
 
-        window.closeWaModal = function() { document.getElementById('waModal').classList.add('opacity-0'); document.querySelector('#waModal > div').classList.add('translate-y-full'); setTimeout(() => document.getElementById('waModal').classList.replace('flex', 'hidden'), 300); };
-        document.getElementById('btnKirimWA').addEventListener('click', () => { window.open(`${targetWaLink}&text=${encodeURIComponent(document.getElementById('pesanWA').value)}`, '_blank'); closeWaModal(); });
-
-        fetchAntrean();
+        refreshData();
     </script>
 </body>
 </html>
