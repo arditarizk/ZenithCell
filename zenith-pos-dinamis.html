@@ -17,29 +17,15 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* DESAIN STRUK MODERN ADAPTIF */
-        .receipt-paper {
-            background: #ffffff;
-            color: #000000;
-            font-family: 'Courier New', Courier, monospace;
-            width: 100%;
-            max-width: 340px; 
-            margin: 0 auto;
-            padding: 30px 20px;
-            position: relative;
-        }
-
-        /* Mode Digital (WhatsApp) - Modern Berwarna */
+        .receipt-paper { background: #ffffff; color: #000000; font-family: 'Courier New', Courier, monospace; width: 100%; max-width: 340px; margin: 0 auto; padding: 30px 20px; position: relative; }
         .is-whatsapp .brand-color { color: #10b981 !important; }
         .is-whatsapp .brand-bg { background-color: #f0fdf4 !important; border: 1px solid #dcfce7 !important; border-radius: 8px; }
         .is-whatsapp .receipt-paper { border-radius: 2rem; border: 1px solid #f1f5f9; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.1); }
-
-        /* Mode Cetak (Printer) - Monokrom High Contrast */
         .is-printer .brand-color { color: #000000 !important; font-weight: 900 !important; }
         .is-printer .brand-bg { background: transparent !important; border: 2px solid #000000 !important; border-radius: 4px; }
         .is-printer .receipt-paper { border: none !important; box-shadow: none !important; padding: 15px 5px; }
-        .is-printer .dashed-line { border-top: 2px dashed #000000 !important; }
-
         .dashed-line { border-top: 2px dashed #e2e8f0; margin: 15px 0; }
+        .is-printer .dashed-line { border-top: 2px dashed #000000 !important; }
         .solid-line { border-top: 3px solid #000000; margin: 15px 0; }
         .flex-between { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
     </style>
@@ -53,7 +39,7 @@
             <a href="index.html" class="p-2 bg-slate-50 rounded-full text-slate-500 mr-2"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
             <div class="flex items-center gap-3 flex-grow">
                 <div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shrink-0"><i data-lucide="smartphone-charging" class="w-6 h-6 text-emerald-400"></i></div>
-                <div><h1 class="font-black text-xl leading-none">Kasir POS</h1><p class="text-[10px] font-bold text-emerald-600 uppercase">Modern Billing</p></div>
+                <div><h1 class="font-black text-xl leading-none">Kasir POS</h1><p class="text-[10px] font-bold text-emerald-600 uppercase">Input & Pelunasan</p></div>
             </div>
             <button onclick="fetchCustomersFromCloud()" id="btnRefresh" class="p-2.5 bg-emerald-50 rounded-xl text-emerald-600"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
         </header>
@@ -78,7 +64,7 @@
             </form>
         </section>
 
-        <section class="mb-4 opacity-0 translate-y-2 transition-all duration-500" id="previewContainer">
+        <section class="mb-4 opacity-0 translate-y-2 transition-all duration-500 hidden" id="previewContainer">
             <div id="strukWrapper" class="is-whatsapp"> 
                 <div id="strukCard" class="receipt-paper">
                     <div class="text-center">
@@ -121,7 +107,7 @@
 
         <div class="w-full h-32 shrink-0"></div>
 
-        <div id="btnProsesContainer" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-40">
+        <div id="btnProsesContainer" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-40 hidden">
             <button id="btnProses" class="w-full bg-slate-900 text-white font-extrabold py-4 rounded-[1.5rem] active:scale-95 flex justify-center items-center gap-2 shadow-2xl border-t border-slate-700 transition-all">
                 <i data-lucide="save" class="w-5 h-5 text-emerald-400"></i><span id="txtBtnProses">Simpan & Buat Struk</span>
             </button>
@@ -131,6 +117,8 @@
     <script>
         lucide.createIcons();
         let dbCustomers = [], isSaved = false, currentSavedData = null;
+        window.currentDiskon = 0;
+        
         const formatRp = (n) => new Intl.NumberFormat('id-ID').format(n);
         const parseRp = (s) => parseInt(s.toString().replace(/[^0-9]/g, '')) || 0;
 
@@ -148,23 +136,39 @@
             } catch(e) { grid.innerHTML = `<div class="col-span-3 text-center text-red-500 text-xs">Gagal API.</div>`; }
         }
 
-        function selectCustomer(id) {
+        window.selectCustomer = function(id) {
             const c = dbCustomers.find(i => i.idKontrak === id);
+            const sisaHutang = c.hutang - c.terbayar;
+            const diskon = Math.round(sisaHutang * 0.1); // Diskon Muroqoshoh 10%
+            const totalLunas = sisaHutang - diskon;
+            window.currentDiskon = diskon;
+
             document.getElementById('cicilanArea').classList.remove('hidden');
             document.getElementById('nominalArea').classList.remove('hidden');
             document.getElementById('nominal').value = formatRp(c.cicilanPerBulan);
+            document.getElementById('btnProsesContainer').classList.remove('hidden');
+            
             document.getElementById('cicilanGrid').innerHTML = `
-                <label><input type="radio" name="cicilan" value="${c.cicilanKe}" class="peer sr-only" checked onchange="document.getElementById('nominal').value='${formatRp(c.cicilanPerBulan)}'; renderPreview()"><div class="px-5 py-3 rounded-xl bg-white border-2 peer-checked:bg-slate-900 peer-checked:text-white text-slate-600 font-black text-xs">Bulan Ke-${c.cicilanKe}</div></label>
-                <label><input type="radio" name="cicilan" value="Pelunasan" class="peer sr-only" onchange="document.getElementById('nominal').value='${formatRp(c.hutang - c.terbayar)}'; renderPreview()"><div class="px-5 py-3 rounded-xl bg-white border-2 peer-checked:bg-slate-900 peer-checked:text-white text-slate-600 font-black text-xs">Lunas Full</div></label>`;
+                <label><input type="radio" name="cicilan" value="${c.cicilanKe}" class="peer sr-only" checked onchange="document.getElementById('nominal').value='${formatRp(c.cicilanPerBulan)}'; renderPreview()"><div class="px-5 py-3 rounded-xl bg-white border-2 peer-checked:bg-slate-900 peer-checked:text-white text-slate-600 font-black text-xs flex flex-col items-center"><span>Bulan Ke-${c.cicilanKe}</span><span class="text-[8px] font-bold opacity-70 mt-0.5">Bulanan</span></div></label>
+                <label><input type="radio" name="cicilan" value="Pelunasan" class="peer sr-only" onchange="document.getElementById('nominal').value='${formatRp(totalLunas)}'; renderPreview()"><div class="px-5 py-3 rounded-xl bg-white border-2 peer-checked:bg-slate-900 peer-checked:text-white text-slate-600 font-black text-xs flex flex-col items-center"><span>Lunas Full</span><span class="text-[8px] font-bold text-amber-400 mt-0.5 uppercase tracking-widest">Diskon 10%</span></div></label>`;
             renderPreview();
         }
 
         const renderPreview = () => {
             const custRadio = document.querySelector('input[name="pelanggan"]:checked'), cicilanEl = document.querySelector('input[name="cicilan"]:checked'), nominalVal = parseRp(document.getElementById('nominal').value);
             if (!custRadio || !cicilanEl || nominalVal === 0) return null;
+            
+            document.getElementById('previewContainer').classList.remove('hidden');
             document.getElementById('previewContainer').classList.remove('opacity-0');
+            
             const data = dbCustomers.find(c => c.idKontrak === custRadio.value);
-            let sisaBaru = data.hutang - (data.terbayar + nominalVal); if(sisaBaru < 0) sisaBaru = 0;
+            let isLunas = cicilanEl.value === 'Pelunasan';
+            
+            let sisaHutangAsli = data.hutang - data.terbayar;
+            let sisaBaru = isLunas ? 0 : sisaHutangAsli - nominalVal; 
+            if(sisaBaru < 0) sisaBaru = 0;
+
+            let strukDiskonHtml = isLunas ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-emerald-600">Diskon Ibra':</span><span class="text-[10px] font-black text-right uppercase text-emerald-600">- Rp ${formatRp(window.currentDiskon)}</span></div>` : '';
             
             document.getElementById('isiStruk').innerHTML = `
                 <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold">Tgl/Waktu:</span><span class="text-[10px] font-bold text-right">${new Date().toLocaleString('id-ID')}</span></div>
@@ -173,15 +177,15 @@
                 <div class="flex-between mb-1"><span class="text-xs font-black uppercase">Pelanggan:</span><span class="text-xs font-black text-right uppercase brand-color">${data.nama}</span></div>
                 <div class="flex-between mb-4"><span class="text-xs font-black uppercase">Unit/Barang:</span><span class="text-xs font-black text-right uppercase">${data.barang || '-'}</span></div>
                 
-                <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold">Keterangan:</span><span class="text-[10px] font-black text-right uppercase">${cicilanEl.value === 'Pelunasan' ? 'Pelunasan Full' : 'Angsuran Ke-' + cicilanEl.value}</span></div>
+                <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold">Keterangan:</span><span class="text-[10px] font-black text-right uppercase">${isLunas ? 'Pelunasan Muroqoshoh' : 'Angsuran Ke-' + cicilanEl.value}</span></div>
                 <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold">Metode:</span><span class="text-[10px] font-black text-right uppercase">Transfer/Cash</span></div>
-
+                ${strukDiskonHtml}
                 <div class="solid-line"></div>
                 <div class="flex-between my-2 items-center"><span class="text-base font-black brand-color uppercase">Bayar:</span><span class="text-[26px] font-black brand-color tracking-tighter">Rp ${formatRp(nominalVal)}</span></div>
                 <div class="solid-line"></div>
                 
                 <div class="flex-between mt-3"><span class="text-[10px] uppercase font-bold">Sisa Hutang:</span><span class="text-sm font-black text-right uppercase">Rp ${formatRp(sisaBaru)}</span></div>`;
-            return { data, cicilan: cicilanEl.value, nominalVal, sisaBaru };
+            return { data, cicilan: cicilanEl.value, nominalVal, sisaBaru, isLunas };
         };
 
         document.getElementById('nominal').addEventListener('input', (e) => { if(isSaved) return; e.target.value = formatRp(parseRp(e.target.value)); renderPreview(); });
@@ -193,22 +197,32 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-        // SAVE LOGIC
         document.getElementById('btnProses').addEventListener('click', async () => {
             const p = renderPreview(); if (!p) return showToast("Lengkapi data!", "error");
             const btn = document.getElementById('btnProses'); btn.disabled = true; btn.innerHTML = "Menyimpan...";
             try {
-                await fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "KAS_MASUK_CICILAN", idKontrak: p.data.idKontrak, waktu: new Date().toLocaleString('id-ID'), bulanIni: new Date().getMonth() + 1, nama: p.data.nama, whatsapp: p.data.wa, cicilanKe: p.cicilan, nominalMasuk: p.nominalVal, catatan: "Sisa: Rp " + formatRp(p.sisaBaru) }) });
+                // Tipe disesuaikan: LUNAS FULL atau CICILAN BIASA
+                let payload = { 
+                    tipe: p.isLunas ? "PELUNASAN_AWAL" : "KAS_MASUK_CICILAN", 
+                    idKontrak: p.data.idKontrak, 
+                    waktu: new Date().toLocaleString('id-ID'), 
+                    bulanIni: new Date().getMonth() + 1, 
+                    nama: p.data.nama, 
+                    whatsapp: p.data.wa, 
+                    cicilanKe: p.cicilan, 
+                    nominalMasuk: p.nominalVal, 
+                    catatan: p.isLunas ? "Pelunasan Muroqoshoh Selesai" : "Sisa: Rp " + formatRp(p.sisaBaru) 
+                };
+                await fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                 isSaved = true; currentSavedData = p;
                 document.getElementById('nominal').disabled = true;
                 document.getElementById('formSection').style.opacity = '0.3';
                 document.getElementById('btnProsesContainer').classList.add('hidden');
                 document.getElementById('actionButtons').classList.replace('hidden', 'flex');
-                showToast("Berhasil Disimpan!");
+                showToast(p.isLunas ? "LUNAS! Data dipindah ke Riwayat." : "Berhasil Disimpan!");
             } catch(e) { btn.disabled = false; btn.innerHTML = "Gagal. Coba lagi."; }
         });
 
-        // REUSABLE SHARE LOGIC (ANTIGAGAL)
         async function captureAndShare(mode) {
             if(!currentSavedData) return;
             const wrapper = document.getElementById('strukWrapper');
@@ -217,44 +231,28 @@
             
             setTimeout(async () => {
                 try {
-                    const canvas = await html2canvas(document.getElementById('strukCard'), { 
-                        scale: 2.5, 
-                        backgroundColor: "#ffffff", 
-                        useCORS: true 
-                    });
-                    
+                    const canvas = await html2canvas(document.getElementById('strukCard'), { scale: 2.5, backgroundColor: "#ffffff", useCORS: true });
                     canvas.toBlob(async (blob) => {
                         const fileName = `Zenith_${currentSavedData.data.nama.replace(/\s/g,'')}_${Date.now()}.png`;
                         const file = new File([blob], fileName, { type: "image/png" });
 
                         if (navigator.share && navigator.canShare({ files: [file] })) {
-                            await navigator.share({
-                                files: [file],
-                                title: 'Kuitansi Zenith Cell',
-                                text: 'Tanda Terima Pembayaran Sah Zenith Cell.'
-                            });
+                            await navigator.share({ files: [file], title: 'Kuitansi Zenith Cell', text: 'Tanda Terima Pembayaran Sah Zenith Cell.' });
                         } else {
-                            // Fallback jika browser sangat jadul
-                            const a = document.createElement('a'); 
-                            a.download = fileName; 
-                            a.href = URL.createObjectURL(blob); 
-                            a.click();
+                            const a = document.createElement('a'); a.download = fileName; a.href = URL.createObjectURL(blob); a.click();
                         }
                     }, "image/png");
                 } catch(e) { showToast("Gagal memproses struk.", "error"); }
             }, 200);
         }
 
-                // FUNGSI KHUSUS PRINT RAWBT (TEKS MURNI BIAR TAJAM)
         function cetakStrukTajam() {
             if (!currentSavedData) return showToast("Data transaksi belum ada!", "error");
-
             const p = currentSavedData;
             const tgl = new Date().toLocaleString('id-ID');
-            const ketCicilan = p.cicilan === 'Pelunasan' ? 'Pelunasan Full' : 'Angsuran Ke-' + p.cicilan;
+            const ketCicilan = p.isLunas ? 'Pelunasan Full' : 'Angsuran Ke-' + p.cicilan;
             const barang = p.data.barang ? p.data.barang : '-';
 
-            // Menyusun struk bentuk teks (Lebar thermal 58mm biasanya muat 32 karakter)
             let struk = "        ZENITH CELL         \n";
             struk += " Gadget Syariah Kota Malang \n";
             struk += "--------------------------------\n";
@@ -265,26 +263,21 @@
             struk += "Pelanggan: " + p.data.nama.toUpperCase() + "\n";
             struk += "Unit     : " + barang.toUpperCase() + "\n";
             struk += "Ket      : " + ketCicilan + "\n";
+            if(p.isLunas) struk += "Diskon   : Rp " + formatRp(window.currentDiskon) + "\n";
             struk += "--------------------------------\n";
             struk += "BAYAR    : Rp " + formatRp(p.nominalVal) + "\n";
             struk += "Sisa     : Rp " + formatRp(p.sisaBaru) + "\n";
             struk += "--------------------------------\n";
             struk += "     Alhamdulillah Sah!     \n";
             struk += " Terima kasih, moga berkah! \n";
-            struk += "\n\n\n"; // Enter 3x biar gampang disobek
+            struk += "\n\n\n"; 
 
-            // Encode ke URL dan panggil RawBT Intent
             let teksEncoded = encodeURIComponent(struk);
-            let rawbtIntent = "intent:" + teksEncoded + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
-            
-            // Eksekusi buka RawBT
-            window.location.href = rawbtIntent;
+            window.location.href = "intent:" + teksEncoded + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
         }
 
-        // SETTING TOMBOL
-        document.getElementById('btnShareWA').onclick = () => captureAndShare('wa'); // WA tetap pakai gambar (Canvas)
-        document.getElementById('btnPrint').onclick = () => cetakStrukTajam(); // Print pakai Teks RawBT
-
+        document.getElementById('btnShareWA').onclick = () => captureAndShare('wa');
+        document.getElementById('btnPrint').onclick = () => cetakStrukTajam();
         fetchCustomersFromCloud();
     </script>
 
