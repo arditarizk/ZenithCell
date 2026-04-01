@@ -25,18 +25,21 @@
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
 
-        /* ANIMASI PENGUMUMAN BERJALAN */
+                /* ANIMASI PENGUMUMAN BERJALAN */
         @keyframes scrollText { 
-            0% { transform: translateX(100%); } 
+            /* Mulai tepat dari ujung kanan layar (viewport) */
+            0% { transform: translateX(100vw); } 
+            /* Berakhir setelah seluruh panjang teks melewati layar */
             100% { transform: translateX(-100%); } 
         }
         .scrolling-text { 
             display: inline-block; 
             white-space: nowrap; 
-            padding-left: 100%;
-            animation: scrollText 20s linear infinite; 
+            /* Padding dihapus biar gak nunggu lama */
+            animation: scrollText 33s linear infinite; 
             will-change: transform;
         }
+
     </style>
 </head>
 <body class="text-slate-800 flex justify-center selection:bg-emerald-200">
@@ -64,14 +67,15 @@
             </a>
         </header>
 
-        <div id="pengumumanContainer" class="hidden relative overflow-hidden bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-[1rem] shadow-md shadow-emerald-500/20 mb-5 flex items-center px-3 py-2.5">
-            <div class="bg-white/20 p-1.5 rounded-lg shrink-0 relative z-10 mr-2 backdrop-blur-sm">
-                <i data-lucide="megaphone" class="w-4 h-4 text-white"></i>
+                <div id="pengumumanContainer" class="hidden relative overflow-hidden bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-[1rem] shadow-md shadow-emerald-500/20 mb-5 flex items-center px-4 py-4 min-h-[64px]">
+            <div class="bg-white/20 p-2.5 rounded-xl shrink-0 relative z-10 mr-3 backdrop-blur-sm">
+                <i data-lucide="megaphone" class="w-5 h-5 text-white"></i>
             </div>
             <div class="overflow-hidden w-full relative mask-image-fade">
-                <p id="teksPengumuman" class="scrolling-text text-[11px] font-bold tracking-wide uppercase"></p>
+                <p id="teksPengumuman" class="scrolling-text text-xs font-bold tracking-wide uppercase leading-relaxed"></p>
             </div>
         </div>
+
 
         <div class="space-y-3 mb-3">
             <section class="clean-card p-4 rounded-2xl flex items-center gap-3">

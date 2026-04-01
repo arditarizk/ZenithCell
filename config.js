@@ -21,5 +21,7 @@ const CONFIG = {
     PENGUMUMAN_AKTIF: true, // Ubah ke false jika ingin menyembunyikan pengumuman
     
     // TEKS PROMO SYAWAL & PASKAH
-    TEKS_PENGUMUMAN: "✨ Selamat Idul Fitri 1447 H & Selamat Paskah bagi yang merayakan! Spesial bulan penuh berkah ini, nikmati Promo JALUR VIP Margin cuma 15%. Yuk ajukan gadget impianmu untuk silaturahmi sekarang juga! 📱"
+        // TEKS PROMO & PENGUMUMAN (Gen-Z Syariah Edition)
+    TEKS_PENGUMUMAN: " Selamat Idul Fitri 1447 H! Promo VIP Margin 15% buat silaturahmi makin HD!   HP baru Alhamdulillah, cicilan aman Astaghfirullah... tenang, di sini murni syariah tanpa denda!   Skip riba, go syariah! Biar rezeki lancar dan FYP jalur langit.   Niatnya nabung buat nikah, malah checkout iPhone boba. Gak apa-apa, yang penting akadnya halal!   Minimal HP spek dewa, ibadah juga harus luar biasa. Yuk ajukan sekarang!"
+
 };
