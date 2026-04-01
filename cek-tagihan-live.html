@@ -22,7 +22,7 @@
 
     <main class="w-full max-w-md relative z-10 flex flex-col min-h-[90vh]">
         <header class="mb-6 flex flex-col items-center text-center mt-4 relative">
-            <a href="index.html" class="absolute top-0 left-0 p-2 bg-white rounded-full text-slate-500 hover:bg-slate-100 shadow-sm border border-slate-100 z-20"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
+            <a href="index.html" class="absolute top-0 left-0 p-2 bg-white rounded-full text-slate-500 hover:bg-slate-100 shadow-sm border border-slate-100 z-20 transition-all active:scale-95"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
             <div class="w-16 h-16 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-2xl shadow-lg flex items-center justify-center mb-4"><i data-lucide="search" class="w-8 h-8 text-white"></i></div>
             <h1 class="font-extrabold text-slate-900 text-2xl tracking-tight leading-none">Cek Tagihan</h1>
             <p class="text-xs font-semibold text-emerald-600 mt-1 uppercase tracking-widest">Sistem Transparan</p>
@@ -31,19 +31,27 @@
         <section class="glass-panel p-5 sm:p-6 rounded-[2rem] mb-6 relative z-20">
             <form id="searchForm" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide text-center">Masukkan Nomor WhatsApp Anda</label>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide text-center">Masukkan Nomor WhatsApp</label>
                     <div class="relative flex items-center">
-                        <input type="tel" id="waInput" placeholder="Contoh: 081234567890" required class="w-full text-center pl-12 pr-12 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-slate-900 font-bold text-lg outline-none focus:border-emerald-500 transition-all">
-                        <button type="button" onclick="pasteDariClipboard()" class="absolute right-2 p-2.5 bg-slate-200/70 text-slate-600 rounded-xl hover:bg-emerald-100 hover:text-emerald-700 transition-colors active:scale-95 flex items-center justify-center" title="Paste Nomor">
-                            <i data-lucide="clipboard-paste" class="w-5 h-5"></i>
-                        </button>
+                        <input type="tel" id="waInput" placeholder="Contoh: 081234567890" required class="w-full text-center pl-4 pr-[90px] py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-slate-900 font-bold text-lg outline-none focus:border-emerald-500 transition-all">
+                        
+                        <div class="absolute right-2 flex items-center gap-1">
+                            <!-- Tombol Clear: Redup/Biasa aja, muncul hanya saat ada isian -->
+                            <button type="button" id="btnClear" onclick="hapusInput()" class="p-2.5 text-slate-400 rounded-xl hover:bg-slate-200 hover:text-slate-600 transition-all duration-200 flex items-center justify-center opacity-0 pointer-events-none scale-90" title="Hapus Nomor">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
+                            <button type="button" onclick="pasteDariClipboard()" class="p-2.5 bg-slate-200/70 text-slate-600 rounded-xl hover:bg-emerald-100 hover:text-emerald-700 transition-colors active:scale-95 flex items-center justify-center" title="Tempel Nomor">
+                                <i data-lucide="clipboard-paste" class="w-5 h-5"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <button type="submit" id="btnSearch" class="w-full bg-slate-900 text-white font-extrabold py-4 rounded-2xl active:scale-95 transition-all flex justify-center gap-2"><i data-lucide="search" id="searchIcon" class="w-5 h-5"></i> <span id="searchText">Cari Data Saya</span></button>
             </form>
         </section>
 
-        <section id="resultContainer" class="hidden flex-col gap-5 opacity-0 translate-y-4 transition-all duration-500">
+        <!-- Padding bawah untuk kebebasan navigasi HP -->
+        <section id="resultContainer" class="hidden flex-col gap-5 opacity-0 translate-y-4 transition-all duration-500 pb-16 mb-10">
             <div class="glass-panel p-6 rounded-[2rem] relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl"></div>
                 <div class="flex items-center gap-3 mb-5 border-b pb-4">
@@ -59,8 +67,6 @@
                         <span class="text-[10px] font-bold text-slate-400 uppercase">Tagihan Berikutnya:</span>
                         <p class="text-sm font-black text-amber-600 bg-amber-50 inline-block px-4 py-1.5 rounded-full border border-amber-200 mt-1 shadow-sm" id="resNextDue">...</p>
                     </div>
-
-                    <div id="statusLunas" class="hidden mt-2 gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full uppercase tracking-wider"><i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Lunas</div>
                 </div>
 
                 <div>
@@ -72,50 +78,29 @@
             <div id="boxRekening" class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center mt-1 mb-1">
                 <p class="text-[10px] font-bold text-slate-400 uppercase mb-3">Transfer Pembayaran Ke:</p>
                 <div class="space-y-2">
-     <div class="space-y-2">
-    <div onclick="salinRekening('8161292087', 'BCA')" class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-100 shadow-sm cursor-pointer active:bg-slate-50 transition-colors">
-        <div class="text-left">
-            <p class="text-[11px] font-black text-blue-700">BCA</p>
-            <p class="text-[9px] font-bold text-slate-500">Ardita Rizki Fauzi</p>
-        </div>
-        <div class="flex items-center gap-2">
-            <p class="text-xs font-black text-slate-800 tracking-wide">8161292087</p>
-            <i data-lucide="copy" class="w-3 h-3 text-slate-300"></i>
-        </div>
-    </div>
-
-    <div onclick="salinRekening('638501004971500', 'BRI')" class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-100 shadow-sm cursor-pointer active:bg-slate-50 transition-colors">
-        <div class="text-left">
-            <p class="text-[11px] font-black text-orange-600">BRI</p>
-            <p class="text-[9px] font-bold text-slate-500">Vivi Nur Damayanti</p>
-        </div>
-        <div class="flex items-center gap-2">
-            <p class="text-xs font-black text-slate-800 tracking-wide">638501004971500</p>
-            <i data-lucide="copy" class="w-3 h-3 text-slate-300"></i>
-        </div>
-    </div>
-
-    <div onclick="salinRekening('901556541299', 'SeaBank')" class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-100 shadow-sm cursor-pointer active:bg-slate-50 transition-colors">
-        <div class="text-left">
-            <p class="text-[11px] font-black text-orange-500">SeaBank</p>
-            <p class="text-[9px] font-bold text-slate-500">Ardita Rizki Fauzi</p>
-        </div>
-        <div class="flex items-center gap-2">
-            <p class="text-xs font-black text-slate-800 tracking-wide">901556541299</p>
-            <i data-lucide="copy" class="w-3 h-3 text-slate-300"></i>
-        </div>
-    </div>
-</div>
-
-
-            <a id="btnWA" href="#" target="_blank" class="w-full bg-[#25D366] text-white font-extrabold py-4 rounded-2xl active:scale-95 flex justify-center gap-2"><i data-lucide="message-circle" class="w-5 h-5"></i> Konfirmasi Via WA</a>
+                    <div onclick="salinRekening('8161292087', 'BCA')" class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-100 shadow-sm cursor-pointer active:bg-slate-50 transition-colors">
+                        <div class="text-left"><p class="text-[11px] font-black text-blue-700">BCA</p><p class="text-[9px] font-bold text-slate-500">Ardita Rizki Fauzi</p></div>
+                        <div class="flex items-center gap-2"><p class="text-xs font-black text-slate-800 tracking-wide">8161292087</p><i data-lucide="copy" class="w-3 h-3 text-slate-300"></i></div>
+                    </div>
+                    <div onclick="salinRekening('638501004971500', 'BRI')" class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-100 shadow-sm cursor-pointer active:bg-slate-50 transition-colors">
+                        <div class="text-left"><p class="text-[11px] font-black text-orange-600">BRI</p><p class="text-[9px] font-bold text-slate-500">Vivi Nur Damayanti</p></div>
+                        <div class="flex items-center gap-2"><p class="text-xs font-black text-slate-800 tracking-wide">638501004971500</p><i data-lucide="copy" class="w-3 h-3 text-slate-300"></i></div>
+                    </div>
+                    <div onclick="salinRekening('901556541299', 'SeaBank')" class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-100 shadow-sm cursor-pointer active:bg-slate-50 transition-colors">
+                        <div class="text-left"><p class="text-[11px] font-black text-orange-500">SeaBank</p><p class="text-[9px] font-bold text-slate-500">Ardita Rizki Fauzi</p></div>
+                        <div class="flex items-center gap-2"><p class="text-xs font-black text-slate-800 tracking-wide">901556541299</p><i data-lucide="copy" class="w-3 h-3 text-slate-300"></i></div>
+                    </div>
+                </div>
+            </div>
+            
+            <a id="btnWA" href="#" target="_blank" class="w-full bg-[#25D366] text-white font-extrabold py-4 rounded-2xl active:scale-95 flex justify-center gap-2 shadow-lg shadow-green-500/20 mb-12"><i data-lucide="message-circle" class="w-5 h-5"></i> Konfirmasi Via WA</a>
         </section>
 
         <section id="pendingContainer" class="hidden flex-col gap-5 opacity-0 translate-y-4 transition-all duration-500">
             <div class="glass-panel p-6 rounded-[2rem] bg-amber-50 border border-amber-200 text-center">
                 <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="clock-4" class="w-8 h-8 text-amber-500"></i></div>
                 <h3 class="font-black text-amber-900 text-lg mb-2">Pengajuan Sedang Diproses</h3>
-                <p class="text-xs font-medium text-amber-800 leading-relaxed mb-4">Halo <b id="pendNama" class="text-amber-900">...</b>, pengajuan kredit <b class="text-amber-900"><span id="pendBarang"></span></b> milik Anda masih dalam antrean verifikasi Admin. Mohon tunggu informasinya.</p>
+                <p class="text-xs font-medium text-amber-800 leading-relaxed mb-4">Halo Bapak/Ibu <b id="pendNama" class="text-amber-900">...</b>, pengajuan pembiayaan <b class="text-amber-900"><span id="pendBarang"></span></b> Anda masih dalam antrean verifikasi. Mohon kesediaannya untuk menunggu.</p>
             </div>
         </section>
     </main>
@@ -130,8 +115,8 @@
             const toast = document.createElement('div');
             const bgColor = type === 'success' ? 'bg-emerald-500' : (type === 'info' ? 'bg-blue-500' : 'bg-red-500');
             const icon = type === 'success' ? 'check-circle' : (type === 'info' ? 'info' : 'alert-circle');
-            toast.className = `${bgColor} text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 transform -translate-y-10 opacity-0 transition-all duration-300 w-full`;
-            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 shrink-0"></i><span class="text-sm font-bold">${message}</span>`;
+            toast.className = `${bgColor} text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 fixed top-5 left-1/2 -translate-x-1/2 z-[1000] min-w-[250px] font-bold text-sm text-left pointer-events-auto`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 shrink-0"></i><span>${message}</span>`;
             document.getElementById('toastContainer').appendChild(toast);
             lucide.createIcons();
             setTimeout(() => { toast.classList.remove('-translate-y-10', 'opacity-0'); }, 10);
@@ -139,12 +124,28 @@
         }
 
         const waInput = document.getElementById('waInput');
+        const btnClear = document.getElementById('btnClear');
 
         waInput.addEventListener('input', function() {
             let val = this.value.replace(/[^0-9]/g, '');
             if (val.startsWith('62')) val = '0' + val.substring(2);
             this.value = val;
+            
+            // Tampilkan tombol silang hanya setelah mengetik
+            if(this.value.length > 0) {
+                btnClear.classList.remove('opacity-0', 'pointer-events-none', 'scale-90');
+                btnClear.classList.add('opacity-100', 'scale-100');
+            } else {
+                btnClear.classList.add('opacity-0', 'pointer-events-none', 'scale-90');
+                btnClear.classList.remove('opacity-100', 'scale-100');
+            }
         });
+
+        function hapusInput() {
+            waInput.value = '';
+            waInput.focus();
+            waInput.dispatchEvent(new Event('input')); 
+        }
 
         async function pasteDariClipboard() {
             try {
@@ -154,7 +155,7 @@
                     waInput.dispatchEvent(new Event('input'));
                 }
             } catch (err) {
-                showToast("Gagal mengambil teks. Pastikan browser diizinkan membaca clipboard.");
+                showToast("Gagal menempelkan teks. Pastikan izin clipboard aktif.");
             }
         }
 
@@ -189,70 +190,74 @@
                     c.classList.remove('hidden'); void c.offsetWidth;
                     c.classList.remove('opacity-0', 'translate-y-4');
                 } else {
-                    showToast(result.message || "Nomor Anda tidak terdaftar di sistem kami.");
+                    showToast(result.message || "Nomor Anda belum terdaftar di sistem kami.");
                 }
             } catch (error) {
                 btn.disabled = false; 
                 document.getElementById('searchText').innerText = "Cari Data Saya"; 
                 document.getElementById('searchIcon').outerHTML = `<i data-lucide="search" id="searchIcon" class="w-5 h-5"></i>`; 
                 lucide.createIcons();
-                showToast("Gagal terhubung. Pastikan internet Anda lancar.");
+                showToast("Koneksi gagal. Silakan periksa jaringan internet Anda.");
             }
         });
 
-        // Ganti fungsi tampilkanHasil di cek-tagihan-live.html dengan ini:
-function tampilkanHasil(data) {
-    let hutangVal = parseInt(data.totalHutang) || 0; 
-    let bayarVal = parseInt(data.terbayar) || 0;
-    let sisa = hutangVal - bayarVal; if (sisa < 0) sisa = 0;
-    let persenLunas = hutangVal > 0 ? Math.round((bayarVal / hutangVal) * 100) : 0; 
+        function tampilkanHasil(data) {
+            let hutangVal = parseInt(data.totalHutang) || 0; 
+            let bayarVal = parseInt(data.terbayar) || 0;
+            let sisa = hutangVal - bayarVal; if (sisa < 0) sisa = 0;
+            let persenLunas = hutangVal > 0 ? Math.round((bayarVal / hutangVal) * 100) : 0; 
 
-    let angkaTgl = data.jatuhTempo ? (parseInt(data.jatuhTempo.toString().split('-')[0]) || 1) : 1;
-    let bulanTerakhir = parseInt(data.bulanTerakhirBayar) || 0;
-    
-    // LOGIKA ANTI-MEPET (Minimal 20 hari untuk tagihan pertama)
-    let targetBulan = bulanTerakhir === 0 ? bulanSekarang : bulanTerakhir + 1;
-    if (bulanTerakhir === 0) {
-        let selisihHari = angkaTgl - tglSekarang;
-        // Jika akad tgl 1 dan tempo tgl 2 (selisih 1 hari), maka masuk bulan depan (Mei)
-        if (selisihHari < 20) { targetBulan = bulanSekarang + 1; }
-    }
-    
-    let targetTahun = new Date().getFullYear();
-    if (targetBulan > 12) { targetBulan -= 12; targetTahun++; }
-    
-    const namaBulan = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-    let teksTanggalLengkap = `${angkaTgl} ${namaBulan[targetBulan]} ${targetTahun}`;
+            let angkaTgl = data.jatuhTempo ? (parseInt(data.jatuhTempo.toString().split('-')[0]) || 1) : 1;
+            let bulanTerakhir = parseInt(data.bulanTerakhirBayar) || 0;
+            
+            let targetBulan = bulanTerakhir === 0 ? bulanSekarang : bulanTerakhir + 1;
+            if (bulanTerakhir === 0) {
+                let selisihHari = angkaTgl - tglSekarang;
+                if (selisihHari < 20) { targetBulan = bulanSekarang + 1; }
+            }
+            
+            let targetTahun = new Date().getFullYear();
+            if (targetBulan > 12) { targetBulan -= 12; targetTahun++; }
+            
+            const namaBulan = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            let teksTanggalLengkap = `${angkaTgl} ${namaBulan[targetBulan]} ${targetTahun}`;
 
-    document.getElementById('resNama').innerText = data.nama; 
-    document.getElementById('resSisa').innerText = formatRupiah(sisa); 
-    document.getElementById('resPersen').innerText = `${persenLunas}%`;
-    document.getElementById('resNextDue').innerText = `${teksTanggalLengkap} (Bulan Ke-${data.cicilanKe})`;
-    
-    // Update link WA konfirmasi
-    let pesanWaLengkap = `Halo Admin Zenith Cell, saya ${data.nama} mau konfirmasi pembayaran cicilan.\n\n` +
-                         `Tagihan Untuk: *Bulan ${namaBulan[targetBulan]}*\n` +
-                         `Nominal: Rp ${formatRupiah(data.cicilanPerBulan)}\n` +
-                         `Sisa Total Hutang: Rp ${formatRupiah(sisa)}\n\nBerikut bukti transfer saya:`;
-    document.getElementById('btnWA').href = `https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(pesanWaLengkap)}`;
+            document.getElementById('resNama').innerText = data.nama; 
+            document.getElementById('resSisa').innerText = formatRupiah(sisa); 
+            document.getElementById('resPersen').innerText = `${persenLunas}%`;
+            document.getElementById('resNextDue').innerText = `${teksTanggalLengkap} (Bulan Ke-${data.cicilanKe})`;
+            
+            // WA FORMAT FORMAL (MAHASISWA KE DOSEN)
+            let pesanWaLengkap = `Assalamu'alaikum Admin Zenith Cell.\n\n` +
+                                 `Permisi, saya ${data.nama} bermaksud mengonfirmasi pembayaran angsuran dengan rincian berikut:\n\n` +
+                                 `Tagihan Bulan: ${namaBulan[targetBulan]} (Ke-${data.cicilanKe})\n` +
+                                 `Nominal Bayar: Rp ${formatRupiah(data.cicilanPerBulan)}\n` +
+                                 `Sisa Tagihan: Rp ${formatRupiah(sisa)}\n\n` +
+                                 `Berikut saya lampirkan bukti transfer pembayarannya. Terima kasih.`;
+            document.getElementById('btnWA').href = `https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(pesanWaLengkap)}`;
 
-    // Animasi Progress Bar & Tampilan
-    const container = document.getElementById('resultContainer');
-    container.classList.remove('hidden');
-    void container.offsetWidth;
-    container.classList.remove('opacity-0', 'translate-y-4');
-    document.getElementById('resBar').style.width = `${persenLunas}%`;
-}
+            const container = document.getElementById('resultContainer');
+            container.classList.remove('hidden');
+            void container.offsetWidth;
+            container.classList.remove('opacity-0', 'translate-y-4');
+            document.getElementById('resBar').style.width = `${persenLunas}%`;
+        }
 
-// FUNGSI SALIN REKENING (Tambahkan ini di script)
-async function salinRekening(nomor, bank) {
-    try {
-        await navigator.clipboard.writeText(nomor);
-        showToast(`No. Rekening ${bank} berhasil disalin!`, 'success');
-    } catch (err) {
-        showToast("Gagal menyalin nomor.");
-    }
-}
+        async function salinRekening(nomor, bank) {
+            try {
+                const tempInput = document.createElement('input');
+                tempInput.value = nomor;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                showToast(`Nomor Rekening ${bank} berhasil disalin.`, 'success');
+            } catch (err) {
+                showToast("Gagal menyalin nomor rekening.");
+            }
+        }
     </script>
 </body>
 </html>
+
+
