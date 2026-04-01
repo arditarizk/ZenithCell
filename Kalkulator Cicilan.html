@@ -206,7 +206,7 @@
         
         calculate(); // Run on init
 
-        function lanjutKeForm() {
+                function lanjutKeForm() {
             const harga = parseRupiah(priceInput.value);
             if(harga === 0) return alert("Silakan isi Harga Gadget terlebih dahulu!");
             
@@ -214,8 +214,16 @@
             const tenor = document.querySelector('input[name="tenor"]:checked').value;
             const jaminan = document.getElementById('jenisJalur').value === "15" ? "Jaminan" : "Tanpa";
             
-            // Lempar data otomatis ke form pengajuan via URL Parameter
-            window.location.href = `form-pengajuan.html?harga=${harga}&dp=${dp}&tenor=${tenor}&jalur=${jaminan}`;
+            // Susun URL dasar
+            let urlKeForm = `form-pengajuan.html?harga=${harga}&dp=${dp}&tenor=${tenor}&jalur=${jaminan}`;
+            
+            // CEK VOUCHER: Jika ada voucher aktif, tambahkan data margin ke URL
+            if (isVoucherClaimed && voucherMarginFixed !== null) {
+                urlKeForm += `&margin=${voucherMarginFixed}`;
+            }
+            
+            // Pindah ke halaman form dengan data lengkap
+            window.location.href = urlKeForm;
         }
     </script>
 </body>

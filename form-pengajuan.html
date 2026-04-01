@@ -223,6 +223,9 @@
         formInputs.forEach(input => input.addEventListener('input', saveDraft));
 
         // Tangkap Data dari URL Kalkulator
+                let promoMarginAktif = null; // Variabel penyimpan data voucher
+
+        // Tangkap Data dari URL Kalkulator
         window.addEventListener('DOMContentLoaded', () => {
             loadDraft();
             const urlParams = new URLSearchParams(window.location.search);
@@ -238,7 +241,23 @@
                 else if(j === "Jaminan") { document.getElementById('pilihJalur').value = "VIP"; }
                 toggleJalur();
             }
+            
+            // TANGKAP VOUCHER DAN TAMPILKAN BANNER
+            if(urlParams.has('margin')) {
+                promoMarginAktif = urlParams.get('margin');
+                
+                // Buat banner hijau penanda voucher aktif
+                const formHeader = document.querySelector('header');
+                const promoBadge = document.createElement('div');
+                promoBadge.className = "mb-6 bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-4 rounded-2xl shadow-md flex items-center gap-3";
+                promoBadge.innerHTML = `<div class="bg-white/20 p-2 rounded-lg shrink-0"><i data-lucide="ticket-percent" class="w-6 h-6 text-white"></i></div><div><h3 class="text-xs font-black uppercase tracking-widest">Promo Aktif!</h3><p class="text-[11px] font-medium opacity-90 mt-0.5">Voucher Margin VVIP (${promoMarginAktif}%) berhasil diterapkan.</p></div>`;
+                
+                // Sisipkan di bawah header
+                formHeader.insertAdjacentElement('afterend', promoBadge);
+                lucide.createIcons();
+            }
         });
+
 
         async function pickContact() {
             if (!('contacts' in navigator && 'ContactsManager' in window)) return showToast("HP Anda tidak mendukung pilih kontak otomatis.");
@@ -258,7 +277,7 @@
 
         const modal = document.getElementById('instruksiModal');
 
-        document.getElementById('pengajuanForm').addEventListener('submit', async (e) => {
+                document.getElementById('pengajuanForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const nama = document.getElementById('nama').value;
@@ -271,6 +290,11 @@
                 let jenis = document.getElementById('jenisJaminan').value;
                 if (jenis === 'Lainnya') jenis = document.getElementById('jaminanLainnya').value;
                 jaminanFinal = `VIP - ${jenis}`; 
+            }
+
+            // GABUNGKAN INFO VOUCHER KE KOLOM JAMINAN AGAR DIBACA OLEH ADMIN
+            if (typeof promoMarginAktif !== 'undefined' && promoMarginAktif !== null) {
+                jaminanFinal += ` (Promo Voucher ${promoMarginAktif}%)`;
             }
 
             const btnSubmit = document.getElementById('btnSubmitForm'), txtBtn = document.getElementById('txtBtnSubmit');
@@ -310,5 +334,6 @@
 
         function tutupModal() { modal.classList.add('opacity-0'); setTimeout(() => modal.classList.replace('flex','hidden'), 300); document.getElementById('pengajuanForm').reset(); toggleJalur(); }
     </script>
+
 </body>
 </html>
