@@ -19,7 +19,6 @@
 </head>
 <body class="text-slate-800 pb-24 pt-4 px-4 flex justify-center selection:bg-amber-200">
 
-    <!-- TOAST CONTAINER (Pengganti Alert) -->
     <div id="toastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 w-full max-w-sm px-4 pointer-events-none"></div>
 
     <main class="w-full max-w-md relative z-10 flex flex-col min-h-[90vh]">
@@ -109,7 +108,6 @@
         
         let currentTab = 'antrean', allTagihanData = [], currentActiveData = null, dataTolakSementara = null, targetWaLink = "";
 
-        // --- FUNGSI TOAST NOTIFICATION (Bebas Alert) ---
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
@@ -187,7 +185,6 @@
                                 <div class="text-right"><span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">${p.tenor || 0} BLN</span></div>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
-                                <!-- SUDAH DIPERBAIKI: Menggunakan bukaModalTolak -->
                                 <button onclick="bukaModalTolak('${p.idKontrak}', '${p.nama}', '${p.wa}', '${p.barang}')" class="py-2.5 bg-red-50 text-red-600 rounded-xl text-[10px] font-black active:scale-95 transition-all">TOLAK</button>
                                 <button onclick="bukaModalAcc('${dataJson}')" class="py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-[10px] font-black active:scale-95 transition-all">HITUNG ACC</button>
                             </div>
@@ -288,7 +285,6 @@
             lucide.createIcons();
         }
 
-        // --- FUNGSI MODAL ACC & WHATSAPP ---
         window.bukaModalAcc = function(encoded) {
             const data = JSON.parse(decodeURIComponent(encoded)); currentActiveData = data;
             document.getElementById('accIdKontrak').innerText = data.idKontrak; 
@@ -310,14 +306,13 @@
             
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
             
-            const msg = `Assalamu'alaikum Kak *${payload.nama}* 🙏\n\nAlhamdulillah, pengajuan gadget *${payload.barang}* kamu di *Zenith Cell* telah di-ACC!\n\nUntuk memantau sisa tagihan dan jadwal pembayaran, silakan cek secara berkala di link berikut:\nhttps://zenith-cell.netlify.app/cek-tagihan-live\n\nTerima kasih atas kepercayaannya! ✨`;
+            const msg = `Assalamu'alaikum Kak ${payload.nama}.\n\nAlhamdulillah, pengajuan pembiayaan ${payload.barang} Kakak di Zenith Cell telah disetujui (ACC).\n\nUntuk memantau sisa tagihan dan jadwal pembayaran bulanan, silakan cek secara berkala melalui tautan berikut:\nhttps://zenith-cell.netlify.app/cek-tagihan-live\n\nTerima kasih atas kepercayaannya.`;
             window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent(msg)}`, '_blank');
             
-            closeModalAcc(); showToast("Berhasil di-ACC!", "success");
+            closeModalAcc(); showToast("Berhasil di-ACC!");
             setTimeout(fetchAntrean, 1500);
         });
 
-        // --- FUNGSI MODAL TOLAK (100% BEBAS ALERT) ---
         window.bukaModalTolak = function(id, nama, wa, barang) {
             dataTolakSementara = { id, nama, wa, barang };
             document.getElementById('tolakNamaUser').innerText = nama;
@@ -341,11 +336,11 @@
 
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", idKontrak: id }) });
             
-            const msg = `Assalamu'alaikum Kak *${nama}* 🙏\n\nTerima kasih telah mempercayakan pengajuan *${barang}* di *Zenith Cell*.\n\nMohon maaf, setelah melalui proses verifikasi, saat ini pengajuan kamu *belum dapat kami proses*.\n\nJangan berkecil hati, kamu bisa mencoba mengajukan kembali di lain waktu. Terima kasih atas pengertiannya! ✨`;
+            const msg = `Assalamu'alaikum Kak ${nama}.\n\nTerima kasih telah mempercayakan pengajuan ${barang} di Zenith Cell.\n\nMohon maaf, setelah melalui proses verifikasi, untuk saat ini pengajuan Kakak belum dapat kami proses lebih lanjut.\n\nTerima kasih atas pengertiannya, semoga sehat selalu.`;
             window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}&text=${encodeURIComponent(msg)}`, '_blank');
             
             closeTolakModal();
-            showToast("Pengajuan berhasil ditolak", "error"); // Toast Merah
+            showToast("Pengajuan berhasil ditolak", "error");
             
             setTimeout(() => { 
                 btn.disabled = false; btn.innerText = "Ya, Tolak"; 
@@ -353,11 +348,10 @@
             }, 1000);
         });
 
-        // --- FUNGSI PESAN WA PENGINGAT ---
         window.bukaPesanWA = function(nama, wa, ke, nominal, tglLengkap, bulanTagihan) {
-            const rek = `💳 *BCA* - 8161292087\n👤 Ardita Rizki Fauzi\n\n💳 *BRI* - 638501004971500\n👤 Vivi Nur Damayanti\n\n💳 *SeaBank* - 901556541299\n👤 Ardita Rizki Fauzi`;
+            const rek = `BCA - 8161292087 (a.n. Ardita Rizki Fauzi)\nBRI - 638501004971500 (a.n. Vivi Nur Damayanti)\nSeaBank - 901556541299 (a.n. Ardita Rizki Fauzi)`;
             
-            const m = `Assalamu'alaikum Kak *${nama}* 🙏\n\nSekadar mengingatkan dari *Zenith Cell*, untuk cicilan gadget (Bulan Ke-${ke}) senilai *Rp ${formatRupiah(nominal)}* untuk tagihan bulan *${bulanTagihan}* jatuh tempo pada tanggal *${tglLengkap}*.\n\nSilakan transfer ke rekening resmi kami:\n\n${rek}\n\nTerima kasih banyak! ✨`;
+            const m = `Assalamu'alaikum Kak ${nama}.\n\nPermisi Kak, dari Zenith Cell izin menginformasikan bahwa tagihan angsuran (Bulan Ke-${ke}) senilai Rp ${formatRupiah(nominal)} untuk bulan ${bulanTagihan} akan jatuh tempo pada tanggal ${tglLengkap}.\n\nPembayaran dapat dilakukan melalui salah satu rekening berikut:\n\n${rek}\n\nTerima kasih atas kerja samanya.`;
             
             document.getElementById('pesanWA').value = m;
             targetWaLink = `https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}`;

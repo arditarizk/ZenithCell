@@ -21,7 +21,6 @@
 </head>
 <body class="text-slate-800 px-4 pt-6 flex justify-center selection:bg-emerald-200">
 
-    <!-- TOAST CONTAINER -->
     <div id="toastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 pointer-events-none w-full max-w-sm px-4"></div>
 
     <main class="w-full max-w-md relative z-10 flex flex-col">
@@ -33,31 +32,7 @@
             </div>
         </header>
 
-        <!-- SEKSI EDUKASI (POJOK LITERASI) -->
-        <section class="mb-6 overflow-hidden">
-            <div class="flex items-center gap-2 mb-3">
-                <div class="p-1.5 bg-indigo-100 rounded-lg text-indigo-600"><i data-lucide="graduation-cap" class="w-4 h-4"></i></div>
-                <h2 class="text-xs font-black uppercase tracking-widest text-slate-500">Pojok Literasi Syariah</h2>
-            </div>
-            
-            <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
-                <div class="min-w-[200px] bg-indigo-600 p-4 rounded-3xl text-white shadow-lg shadow-indigo-200">
-                    <p class="text-[10px] font-black uppercase opacity-70 mb-1">Apa itu Akad?</p>
-                    <p class="text-xs font-bold leading-relaxed">Janji suci atau kesepakatan antara Anda & Zenith Cell yang berlandaskan kejujuran.</p>
-                </div>
-                <div class="min-w-[200px] bg-emerald-600 p-4 rounded-3xl text-white shadow-lg shadow-emerald-200">
-                    <p class="text-[10px] font-black uppercase opacity-70 mb-1">Murabahah</p>
-                    <p class="text-xs font-bold leading-relaxed">Kami beli barangnya, lalu kami jual ke Anda dengan margin keuntungan yang disepakati.</p>
-                </div>
-                <div class="min-w-[200px] bg-amber-500 p-4 rounded-3xl text-white shadow-lg shadow-amber-200">
-                    <p class="text-[10px] font-black uppercase opacity-70 mb-1">Margin vs Bunga</p>
-                    <p class="text-xs font-bold leading-relaxed">Di sini tidak ada bunga. Yang ada adalah keuntungan jual-beli yang nilainya tetap sejak awal.</p>
-                </div>
-            </div>
-        </section>
-
         <form id="pengajuanForm" class="space-y-5">
-            <!-- IDENTITAS -->
             <section class="glass-panel p-5 rounded-3xl">
                 <h2 class="text-sm font-extrabold mb-4 flex items-center gap-2 text-slate-800"><i data-lucide="user" class="w-4 h-4 text-emerald-500"></i> Identitas Diri</h2>
                 <div class="space-y-3">
@@ -68,7 +43,6 @@
                 </div>
             </section>
 
-            <!-- PEKERJAAN & KONTAK -->
             <section class="glass-panel p-5 rounded-3xl">
                 <h2 class="text-sm font-extrabold mb-4 flex items-center gap-2 text-slate-800"><i data-lucide="briefcase" class="w-4 h-4 text-emerald-500"></i> Pekerjaan & Kontak</h2>
                 <div class="space-y-3">
@@ -91,7 +65,6 @@
                 </div>
             </section>
 
-            <!-- BARANG & AKAD -->
             <section class="glass-panel p-5 rounded-3xl">
                 <h2 class="text-sm font-extrabold mb-4 flex items-center gap-2 text-slate-800"><i data-lucide="shopping-bag" class="w-4 h-4 text-emerald-500"></i> Detail Akad Barang</h2>
                 <div class="space-y-4">
@@ -159,13 +132,12 @@
         </form>
     </main>
 
-    <!-- MODAL SUKSES (Mengarahkan ke WA) -->
     <div id="instruksiModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity">
         <div class="bg-white rounded-[2rem] p-6 max-w-[320px] w-full text-center shadow-2xl transform scale-95 transition-transform">
-            <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="heart" class="w-8 h-8 text-emerald-500"></i></div>
-            <h3 class="text-lg font-extrabold text-slate-900 mb-1">Alhamdulillah!</h3>
-            <p class="text-slate-500 text-xs mb-6 leading-relaxed">Pengajuan Anda telah direkam oleh sistem. Silakan lanjutkan ke WhatsApp Admin untuk proses verifikasi.</p>
-            <button onclick="location.reload()" class="w-full bg-slate-100 font-bold py-3 rounded-xl text-sm active:scale-95 transition-all hover:bg-slate-200">Selesai</button>
+            <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="check-circle" class="w-8 h-8 text-emerald-500"></i></div>
+            <h3 class="text-lg font-extrabold text-slate-900 mb-1">Berhasil Disimpan</h3>
+            <p class="text-slate-500 text-xs mb-6 leading-relaxed">Pengajuan Anda telah direkam oleh sistem. Silakan lanjutkan ke WhatsApp Admin untuk validasi.</p>
+            <button onclick="location.reload()" class="w-full bg-slate-100 font-bold py-3 rounded-xl text-sm active:scale-95 transition-all">Selesai</button>
         </div>
     </div>
 
@@ -173,7 +145,6 @@
         lucide.createIcons();
         let promoMarginAktif = null;
 
-        // FUNGSI TOAST NOTIFICATION MODERN (Anti Alert)
         function showToast(message, type = 'error') {
             const toast = document.createElement('div');
             const bgColor = type === 'success' ? 'bg-emerald-500' : (type === 'info' ? 'bg-blue-500' : 'bg-red-500');
@@ -186,69 +157,42 @@
             setTimeout(() => { toast.classList.add('-translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3500);
         }
 
-        // LOGIKA BARU: VALIDASI VOUCHER VS JALUR VIP
         function verifikasiVoucher() {
-            const input = document.getElementById('inputVoucher');
-            const msg = document.getElementById('msgVoucher');
-            const btn = document.getElementById('btnCekVoucher');
+            const input = document.getElementById('inputVoucher'), msg = document.getElementById('msgVoucher'), btn = document.getElementById('btnCekVoucher');
             const kode = input.value.trim().toLowerCase();
-            
-            const jalurDipilih = document.getElementById('pilihJalur').value; // "REGULER" atau "VIP"
+            const jalurDipilih = document.getElementById('pilihJalur').value;
             const marginJalur = jalurDipilih === "VIP" ? 15 : 25;
 
-            if(!kode) {
-                showToast("Silakan masukkan kode voucher terlebih dahulu.");
-                return;
-            }
-
+            if(!kode) { showToast("Silakan masukkan kode voucher terlebih dahulu."); return; }
             if(CONFIG.VOUCHERS && CONFIG.VOUCHERS[kode]) {
                 let marginVoucher = CONFIG.VOUCHERS[kode].margin;
-
-                // PROTEKSI: Cek apakah margin jalur saat ini sudah lebih murah dari voucher
                 if (marginVoucher >= marginJalur) {
-                    showToast(`Maaf, Jalur ${jalurDipilih} (${marginJalur}%) sudah lebih murah atau sama dengan voucher ini (${marginVoucher}%). Voucher tidak dapat digabung.`, "info");
-                    input.value = ""; // Reset input
-                    return;
+                    showToast(`Maaf, Jalur ${jalurDipilih} (${marginJalur}%) sudah lebih murah dari voucher ini (${marginVoucher}%).`, "info");
+                    input.value = ""; return;
                 }
-
                 promoMarginAktif = marginVoucher;
-                msg.innerText = "🎉 " + CONFIG.VOUCHERS[kode].pesan + ` (Margin Promo: ${marginVoucher}%)`;
+                msg.innerText = "Kode Promo Aktif (Margin: " + marginVoucher + "%)";
                 msg.className = "text-[9px] mt-1.5 font-bold text-emerald-600 block animate-pulse-soft";
-                
                 input.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
-                input.disabled = true; 
-                btn.classList.add('hidden');
-                
-                showToast(`Alhamdulillah, Voucher Aktif! Margin Anda turun menjadi ${marginVoucher}%`, "success");
+                input.disabled = true; btn.classList.add('hidden');
+                showToast(`Voucher Aktif. Margin menjadi ${marginVoucher}%`, "success");
             } else {
                 promoMarginAktif = null;
-                msg.innerText = "❌ Kode voucher tidak ditemukan/tidak valid.";
+                msg.innerText = "Kode voucher tidak valid.";
                 msg.className = "text-[9px] mt-1.5 font-bold text-red-500 block";
-                showToast("Kode voucher tidak valid.");
             }
         }
 
-        // FUNGSI GANTI JALUR DENGAN AUTO-RESET VOUCHER
         function toggleJalur() {
             const jalur = document.getElementById('pilihJalur').value;
             document.getElementById('boxJaminan').classList.toggle('hidden', jalur === 'REGULER');
-
-            // Jika pelanggan ubah jalur saat voucher sudah aktif, RESET VOUCHER-nya.
+            
             if (promoMarginAktif !== null) {
-                promoMarginAktif = null; // Batalkan voucher
-                
-                const input = document.getElementById('inputVoucher');
-                const btn = document.getElementById('btnCekVoucher');
-                const msg = document.getElementById('msgVoucher');
-                
-                input.value = "";
-                input.disabled = false;
-                input.classList.remove('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
-                
-                btn.classList.remove('hidden');
-                msg.classList.add('hidden');
-                
-                showToast("Voucher dibatalkan otomatis karena perubahan Jalur Transaksi.", "info");
+                promoMarginAktif = null; 
+                const input = document.getElementById('inputVoucher'), btn = document.getElementById('btnCekVoucher'), msg = document.getElementById('msgVoucher');
+                input.value = ""; input.disabled = false; input.classList.remove('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
+                btn.classList.remove('hidden'); msg.classList.add('hidden');
+                showToast("Voucher dibatalkan otomatis karena perubahan jalur transaksi.", "info");
             }
         }
 
@@ -270,7 +214,7 @@
         });
 
         async function pickContact() {
-            if (!('contacts' in navigator && 'ContactsManager' in window)) return showToast("Mohon maaf, fitur pilih kontak tidak didukung di peramban ini.", "info");
+            if (!('contacts' in navigator && 'ContactsManager' in window)) return showToast("Fitur pilih kontak tidak didukung pada peramban ini.", "info");
             try {
                 const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
                 if (contacts.length > 0) {
@@ -279,65 +223,49 @@
                     if (phone.startsWith('62')) phone = '0' + phone.substring(2);
                     document.getElementById('daruratWa').value = phone;
                 }
-            } catch (ex) { console.log(ex); showToast("Gagal mengambil kontak."); }
+            } catch (ex) { console.log(ex); }
         }
 
-        // FORCE SUBMIT LOGIC (NO-CORS) - PASTI MASUK DATABASE
+        // FORCE SUBMIT LOGIC
         document.getElementById('pengajuanForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSubmitForm');
             const nikClean = document.getElementById('nik').value;
-            
-            if (nikClean.length !== 16) {
-                showToast("Mohon maaf, NIK KTP wajib berjumlah 16 digit angka.");
-                return; 
-            }
+            if (nikClean.length !== 16) return showToast("NIK KTP harus berjumlah tepat 16 digit.");
 
-            // Logika Penentuan Margin Akhir (Voucher didahulukan, jika kosong pakai Jalur)
             const marginFix = promoMarginAktif ? promoMarginAktif : (document.getElementById('pilihJalur').value === "VIP" ? 15 : 25);
-            
             const data = {
-                nama: document.getElementById('nama').value, 
-                nik: nikClean, 
-                wa: document.getElementById('wa').value,
-                alamat: document.getElementById('alamat').value, 
-                pekerjaan: document.getElementById('pekerjaan').value,
-                gaji: document.getElementById('gaji').value, 
-                daruratNama: document.getElementById('daruratNama').value,
-                daruratWa: document.getElementById('daruratWa').value, 
-                barang: document.getElementById('barang').value,
-                harga: document.getElementById('hargaBarang').value, 
-                dp: document.getElementById('dpBarang').value || "0",
+                nama: document.getElementById('nama').value, nik: nikClean, wa: document.getElementById('wa').value,
+                alamat: document.getElementById('alamat').value, pekerjaan: document.getElementById('pekerjaan').value,
+                gaji: document.getElementById('gaji').value, daruratNama: document.getElementById('daruratNama').value,
+                daruratWa: document.getElementById('daruratWa').value, barang: document.getElementById('barang').value,
+                harga: document.getElementById('hargaBarang').value, dp: document.getElementById('dpBarang').value || "0",
                 tenor: document.getElementById('tenorSelect').value, 
                 jaminan: document.getElementById('pilihJalur').value === "VIP" ? document.getElementById('jenisJaminan').value : "Tanpa Jaminan",
-                jatuhTempo: document.getElementById('jatuhTempo').value, 
-                margin: marginFix
+                jatuhTempo: document.getElementById('jatuhTempo').value, margin: marginFix
             };
 
             btn.disabled = true; btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Menyimpan...`;
             lucide.createIcons();
-            
             const id = "ZN-" + Math.floor(100000 + Math.random() * 900000);
 
             try {
-                // Tembak Data ke Google Sheets (Pasti Tembus)
                 fetch(CONFIG.API_URL, { 
                     method: 'POST', 
                     mode: 'no-cors', 
                     body: JSON.stringify({ tipe: "PENGAJUAN_BARU", idKontrak: id, timestamp: new Date().toLocaleString('id-ID'), ...data }) 
                 });
                 
-                // --- PESAN WHATSAPP YANG LEBIH ISLAMI (SYARIAH) ---
-                const waMsg = `Assalamu'alaikum Warahmatullahi Wabarakatuh 🙏\n\nBismillah, Admin Zenith Cell. Saya bermaksud mengajukan pembiayaan syariah (Akad Murabahah) dengan rincian sebagai berikut:\n\n🆔 *ID Pengajuan:* ${id}\n👤 *Nama:* ${data.nama}\n📱 *Barang:* ${data.barang}\n💰 *Harga Pokok:* Rp ${data.harga}\n💵 *Uang Muka (DP):* Rp ${data.dp}\n🗓 *Tenor:* ${data.tenor} Bulan\n📅 *Jatuh Tempo:* Setiap Tgl ${data.jatuhTempo}\n⚖️ *Margin Transaksi:* ${data.margin}% (${data.jaminan})\n\nSemoga pengajuan ini membawa keberkahan untuk kita semua. Mohon arahannya untuk proses verifikasi selanjutnya. Jazakumullah khairan! ✨`;
+                // --- PESAN WA: MAHASISWA KE DOSEN (Formal & Sopan) ---
+                const waMsg = `Assalamu'alaikum Admin Zenith Cell.\n\nPermisi, saya bermaksud mengajukan pembiayaan dengan rincian sebagai berikut:\n\nID Pengajuan: ${id}\nNama: ${data.nama}\nBarang: ${data.barang}\nHarga Pokok: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor} Bulan\nJatuh Tempo: Tgl ${data.jatuhTempo}\nSkema: ${data.margin}% (${data.jaminan})\n\nBerikut saya lampirkan foto KTP dan jaminan fisik (jika ada).\nMohon arahannya untuk proses verifikasi lebih lanjut. Terima kasih.`;
                 
                 window.open(`https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(waMsg)}`, '_blank');
                 
                 document.getElementById('instruksiModal').classList.replace('hidden', 'flex');
                 setTimeout(() => document.getElementById('instruksiModal').classList.remove('opacity-0'), 10);
             } catch(error) {
-                showToast("Terjadi kendala jaringan saat mengirim data.");
-                btn.disabled = false; btn.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i> Ajukan Pembiayaan`;
-                lucide.createIcons();
+                showToast("Terjadi kendala jaringan.");
+                btn.disabled = false; btn.innerText = "Ajukan Pembiayaan";
             }
         });
     </script>
