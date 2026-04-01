@@ -10,9 +10,10 @@
     <script src="config.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .spinner { border: 3px solid rgba(245, 158, 11, 0.3); border-top: 3px solid #f59e0b; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        .spinner { border: 3px solid rgba(245, 158, 11, 0.3); border-top: 3px solid #f59e0b; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .tab-active { background-color: #0f172a; color: white; font-weight: 800; }
         .tab-inactive { background-color: transparent; color: #64748b; font-weight: 600; }
@@ -23,107 +24,111 @@
     <div id="toastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 pointer-events-none w-full max-w-sm px-4"></div>
 
     <main class="w-full max-w-md relative z-10 flex flex-col min-h-[90vh]">
-        <header class="mb-5 flex items-center justify-between bg-white p-4 rounded-[2rem] shadow-sm border relative">
-            <a href="index.html" class="p-2 bg-slate-50 rounded-full text-slate-500 mr-2"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
+        <header class="mb-5 flex items-center justify-between bg-white p-3.5 rounded-2xl shadow-sm border relative">
+            <a href="index.html" class="p-2 bg-slate-50 rounded-xl text-slate-500 mr-2"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
             <div class="flex items-center gap-3 flex-grow">
-                <div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center"><i data-lucide="layout-dashboard" class="w-6 h-6 text-amber-400"></i></div>
-                <div><h1 class="font-black text-xl leading-none">Server Admin</h1><p class="text-[10px] font-bold text-amber-600 uppercase">Live Sync</p></div>
+                <div class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center"><i data-lucide="layout-dashboard" class="w-5 h-5 text-amber-400"></i></div>
+                <div><h1 class="font-black text-base leading-none">Server Admin</h1><p class="text-[9px] font-bold text-amber-600 uppercase mt-0.5">Live Sync</p></div>
             </div>
-            <button onclick="refreshData()" id="btnRefresh" class="p-2.5 bg-amber-50 rounded-xl text-amber-600"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
+            <button onclick="refreshData()" id="btnRefresh" class="p-2 bg-amber-50 rounded-xl text-amber-600"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
         </header>
 
-        <div class="flex gap-2 mb-4 bg-white p-1.5 rounded-2xl shadow-sm border border-slate-100">
-            <button onclick="switchTab('antrean')" id="tab-antrean" class="flex-1 py-2.5 rounded-xl text-xs tab-active transition-all">Antrean ACC</button>
-            <button onclick="switchTab('tagihan')" id="tab-tagihan" class="flex-1 py-2.5 rounded-xl text-xs tab-inactive transition-all">Tagihan Aktif</button>
+        <div class="flex gap-2 mb-4 bg-white p-1 rounded-xl shadow-sm border border-slate-100">
+            <button onclick="switchTab('antrean')" id="tab-antrean" class="flex-1 py-2 rounded-lg text-[11px] tab-active transition-all">Antrean ACC</button>
+            <button onclick="switchTab('tagihan')" id="tab-tagihan" class="flex-1 py-2 rounded-lg text-[11px] tab-inactive transition-all">Tagihan Aktif</button>
         </div>
 
         <div id="viewAntrean" class="flex-col flex-grow flex">
-            <div class="flex justify-between items-end mb-2 px-2">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Pengajuan Baru</span>
-                <span class="text-[10px] font-bold bg-white px-2 py-1 rounded-md text-slate-400 shadow-sm" id="countPending">0 Menunggu</span>
+            <div class="flex justify-between items-end mb-2 px-1">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pengajuan Baru</span>
+                <span class="text-[9px] font-bold bg-white px-2 py-1 rounded-md text-slate-400 border shadow-sm" id="countPending">0 Menunggu</span>
             </div>
             <div id="pendingList" class="space-y-3 flex-grow overflow-y-auto no-scrollbar pb-10"></div>
         </div>
 
         <div id="viewTagihan" class="flex-col flex-grow hidden">
-            <div class="mb-4 relative">
+            <div class="mb-3 relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i></div>
-                <input type="text" id="searchAdmin" placeholder="Cari nama pelanggan..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold shadow-sm outline-none focus:border-amber-400 transition-colors">
+                <input type="text" id="searchAdmin" placeholder="Cari nama pelanggan..." class="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold shadow-sm outline-none focus:border-amber-400 transition-colors">
             </div>
 
-            <div class="flex justify-between items-end mb-2 px-2">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Tagihan Berjalan</span>
-                <span class="text-[10px] font-bold bg-white px-2 py-1 rounded-md text-slate-400 shadow-sm" id="bulanIni">Bulan Ini</span>
+            <div class="flex justify-between items-end mb-2 px-1">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tagihan Berjalan</span>
+                <span class="text-[9px] font-bold bg-white px-2 py-1 rounded-md text-slate-400 border shadow-sm" id="bulanIni">Bulan Ini</span>
             </div>
-            
-            <button onclick="bukaModalMigrasi()" class="w-full mb-4 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-3.5 rounded-2xl flex justify-center items-center gap-2 shadow-sm"><i data-lucide="database" class="w-4 h-4"></i> Migrasi Data Manual</button>
-            
+            <button onclick="bukaModalMigrasi()" class="w-full mb-3 bg-slate-800 text-white text-[11px] font-bold py-3 rounded-xl flex justify-center items-center gap-2 active:scale-95"><i data-lucide="database" class="w-3.5 h-3.5"></i> Migrasi Data Manual</button>
             <div id="customerList" class="space-y-3 flex-grow overflow-y-auto no-scrollbar pb-10"></div>
         </div>
     </main>
 
-    <div id="accModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0">
-        <div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-6 pb-8 shadow-2xl transform translate-y-full transition-transform max-h-[90vh] overflow-y-auto no-scrollbar" id="accModalContent">
-            <div class="flex justify-between items-center mb-5 border-b pb-3">
-                <h2 class="font-black text-lg text-slate-900"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 inline"></i> Finalisasi Akad</h2>
-                <button onclick="closeModalAcc()" class="p-2 bg-slate-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
+    <div id="accModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0 px-2 sm:px-0">
+        <div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-5 pb-8 shadow-2xl transform translate-y-full transition-transform max-h-[90vh] overflow-y-auto no-scrollbar" id="accModalContent">
+            
+            <div class="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
+                <h2 class="font-black text-base text-slate-900 flex items-center gap-2"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500"></i> Finalisasi Akad</h2>
+                <button onclick="closeModalAcc()" class="p-2 bg-slate-50 rounded-full hover:bg-slate-100"><i data-lucide="x" class="w-4 h-4 text-slate-400"></i></button>
             </div>
+            
             <div class="space-y-4">
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-1 rounded-bl-lg" id="accIdKontrak">ZNTH-000</div>
-                    <p class="text-[10px] text-slate-500 font-bold uppercase">Pelanggan</p>
-                    <p class="font-black text-slate-800 text-sm mt-1" id="accNama">...</p>
-                    <p class="text-xs text-slate-600 mt-1" id="accBarang">...</p>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest">Pelanggan</p>
+                        <div class="bg-emerald-100 text-emerald-700 text-[9px] font-black px-2 py-0.5 rounded max-w-[120px] truncate" id="accIdKontrak">ZN-000</div>
+                    </div>
+                    <p class="font-black text-slate-800 text-base leading-tight mt-1" id="accNama">...</p>
+                    <p class="text-[11px] font-semibold text-slate-500 mt-0.5" id="accBarang">...</p>
                 </div>
                 
                 <div>
-                    <label class="block text-[11px] font-extrabold text-emerald-600 mb-1.5 uppercase">Tgl Jatuh Tempo <span class="text-slate-400 font-medium normal-case">(Bisa Diedit)</span></label>
-                    <div class="relative flex items-center"><span class="absolute left-4 text-slate-400 font-bold">Tgl</span><input type="number" id="accJatuhTempo" min="1" max="31" class="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-emerald-100 rounded-xl font-bold text-lg outline-none focus:border-emerald-500 transition-colors"></div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 mb-1.5 uppercase">Tgl Jatuh Tempo <span class="text-emerald-600 font-medium normal-case">(Bisa Diedit)</span></label>
+                    <div class="relative flex items-center"><span class="absolute left-3 text-slate-400 font-bold text-xs">Tgl</span><input type="number" id="accJatuhTempo" min="1" max="31" class="w-full pl-10 pr-3 py-3 bg-white border border-slate-200 rounded-xl font-bold text-sm outline-none focus:border-emerald-500 transition-colors shadow-sm"></div>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-extrabold text-emerald-600 mb-1.5 uppercase">Total Harga Jual <span class="text-slate-400 font-medium normal-case">(Bisa Diedit)</span></label>
-                    <div class="relative flex items-center"><span class="absolute left-4 text-slate-400 font-bold">Rp</span><input type="text" id="accTotalHutang" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-emerald-100 rounded-xl font-bold text-lg outline-none focus:border-emerald-500 transition-colors"></div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 mb-1.5 uppercase">Total Harga Jual <span class="text-emerald-600 font-medium normal-case">(Bisa Diedit)</span></label>
+                    <div class="relative flex items-center"><span class="absolute left-3 text-slate-400 font-bold text-xs">Rp</span><input type="text" id="accTotalHutang" inputmode="numeric" class="w-full pl-10 pr-3 py-3 bg-white border border-slate-200 rounded-xl font-bold text-sm outline-none focus:border-emerald-500 transition-colors shadow-sm"></div>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-extrabold text-emerald-600 mb-1.5 uppercase">Cicilan Per Bulan <span class="text-slate-400 font-medium normal-case">(Bisa Diedit)</span></label>
-                    <div class="relative flex items-center"><span class="absolute left-4 text-slate-400 font-bold">Rp</span><input type="text" id="accCicilan" inputmode="numeric" class="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-emerald-100 rounded-xl font-bold text-lg outline-none focus:border-emerald-500 transition-colors"></div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 mb-1.5 uppercase">Cicilan Per Bulan <span class="text-emerald-600 font-medium normal-case">(Bisa Diedit)</span></label>
+                    <div class="relative flex items-center"><span class="absolute left-3 text-slate-400 font-bold text-xs">Rp</span><input type="text" id="accCicilan" inputmode="numeric" class="w-full pl-10 pr-3 py-3 bg-white border border-slate-200 rounded-xl font-bold text-sm outline-none focus:border-emerald-500 transition-colors shadow-sm"></div>
                 </div>
             </div>
-            <button id="btnKonfirmasiAcc" class="w-full mt-6 bg-emerald-500 text-white font-extrabold py-4 px-6 rounded-xl active:scale-95 transition-all flex justify-center gap-2"><i data-lucide="user-check" class="w-5 h-5"></i> ACC & Pindah ke Kasir</button>
+            
+            <button id="btnKonfirmasiAcc" class="w-full mt-6 bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold py-3.5 px-6 rounded-xl active:scale-95 transition-all flex justify-center items-center gap-2 shadow-md shadow-emerald-500/20">
+                <i data-lucide="user-check" class="w-4 h-4"></i> ACC & Pindah ke Kasir
+            </button>
         </div>
     </div>
 
-    <div id="waModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0">
-        <div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-6 pb-8 shadow-2xl transform translate-y-full transition-transform" id="waModalContent">
-            <div class="flex justify-between items-center mb-5 border-b pb-3">
-                <h2 class="font-black text-lg text-slate-900"><i data-lucide="send" class="w-5 h-5 text-emerald-500 inline"></i> Pesan WA</h2>
-                <button onclick="closeWaModal()" class="p-2 bg-slate-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
+    <div id="waModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0 px-2 sm:px-0">
+        <div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-5 pb-8 shadow-2xl transform translate-y-full transition-transform">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                <h2 class="font-black text-base text-slate-900 flex items-center gap-2"><i data-lucide="send" class="w-4 h-4 text-emerald-500"></i> Pesan WA</h2>
+                <button onclick="closeWaModal()" class="p-2 bg-slate-50 rounded-full hover:bg-slate-100"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            <textarea id="pesanWA" rows="8" class="w-full p-4 bg-emerald-50/50 rounded-2xl text-[13px] font-medium outline-none resize-none"></textarea>
-            <button id="btnKirimWA" class="w-full mt-5 bg-[#25D366] text-white font-extrabold py-4 rounded-xl active:scale-95 flex justify-center gap-2"><i data-lucide="message-circle" class="w-5 h-5"></i> Buka & Kirim WA</button>
+            <textarea id="pesanWA" rows="7" class="w-full p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl text-xs font-medium outline-none resize-none"></textarea>
+            <button id="btnKirimWA" class="w-full mt-4 bg-[#25D366] text-white font-bold py-3 rounded-xl active:scale-95 flex justify-center gap-2"><i data-lucide="message-circle" class="w-4 h-4"></i> Kirim Pengingat</button>
         </div>
     </div>
 
-    <div id="migrasiModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0">
-        <div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-6 pb-8 shadow-2xl transform translate-y-full transition-transform max-h-[85vh] overflow-y-auto no-scrollbar" id="migrasiModalContent">
-            <div class="flex justify-between items-center mb-5 border-b pb-3">
-                <h2 class="font-black text-lg text-slate-900"><i data-lucide="database" class="w-5 h-5 text-emerald-500 inline"></i> Migrasi Data Manual</h2>
-                <button onclick="closeModalMigrasi()" class="p-2 bg-slate-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
+    <div id="migrasiModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0 px-2 sm:px-0">
+        <div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-5 pb-8 shadow-2xl transform translate-y-full transition-transform max-h-[85vh] overflow-y-auto no-scrollbar" id="migrasiModalContent">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                <h2 class="font-black text-base text-slate-900 flex items-center gap-2"><i data-lucide="database" class="w-4 h-4 text-emerald-500"></i> Migrasi Manual</h2>
+                <button onclick="closeModalMigrasi()" class="p-2 bg-slate-50 rounded-full hover:bg-slate-100"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            <form id="formMigrasi" class="space-y-4" onsubmit="event.preventDefault(); prosesMigrasi();">
-                <input type="text" id="migNama" placeholder="Nama Pelanggan" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
-                <input type="tel" id="migWa" placeholder="No WhatsApp" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
-                <input type="text" id="migBarang" placeholder="Nama Barang" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
-                
-                <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Total Hutang</label><input type="text" id="migHutang" required class="w-full px-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm"></div>
-                    <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Sudah Terbayar</label><input type="text" id="migTerbayar" required class="w-full px-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm"></div>
-                    <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Cicilan / Bulan</label><input type="text" id="migCicilan" required class="w-full px-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm"></div>
-                    <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Lanjut Ke-</label><input type="number" id="migKe" min="1" placeholder="Mulai Ke-" required class="w-full px-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm"></div>
+            <form id="formMigrasi" class="space-y-3" onsubmit="event.preventDefault(); prosesMigrasi();">
+                <input type="text" id="migNama" placeholder="Nama Pelanggan" required class="w-full px-3 py-2.5 bg-slate-50 border rounded-xl font-bold outline-none text-[11px]">
+                <input type="tel" id="migWa" placeholder="No WhatsApp" required class="w-full px-3 py-2.5 bg-slate-50 border rounded-xl font-bold outline-none text-[11px]">
+                <input type="text" id="migBarang" placeholder="Nama Barang" required class="w-full px-3 py-2.5 bg-slate-50 border rounded-xl font-bold outline-none text-[11px]">
+                <div class="grid grid-cols-2 gap-2">
+                    <div><label class="block text-[9px] font-bold text-slate-400 mb-1">Total Hutang</label><input type="text" id="migHutang" required class="w-full px-3 py-2 bg-slate-50 border rounded-lg font-bold outline-none text-[11px]"></div>
+                    <div><label class="block text-[9px] font-bold text-slate-400 mb-1">Sudah Terbayar</label><input type="text" id="migTerbayar" required class="w-full px-3 py-2 bg-slate-50 border rounded-lg font-bold outline-none text-[11px]"></div>
+                    <div><label class="block text-[9px] font-bold text-slate-400 mb-1">Cicilan / Bulan</label><input type="text" id="migCicilan" required class="w-full px-3 py-2 bg-slate-50 border rounded-lg font-bold outline-none text-[11px]"></div>
+                    <div><label class="block text-[9px] font-bold text-slate-400 mb-1">Lanjut Ke-</label><input type="number" id="migKe" min="1" placeholder="Bulan" required class="w-full px-3 py-2 bg-slate-50 border rounded-lg font-bold outline-none text-[11px]"></div>
                 </div>
-                <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Tanggal Jatuh Tempo</label><input type="number" id="migTempo" min="1" max="31" placeholder="Misal: 25" required class="w-full px-4 py-3.5 bg-slate-50 border rounded-xl font-bold outline-none text-sm"></div>
+                <div><label class="block text-[9px] font-bold text-slate-400 mb-1">Tanggal Jatuh Tempo</label><input type="number" id="migTempo" min="1" max="31" placeholder="Tgl (Misal: 25)" required class="w-full px-3 py-2.5 bg-slate-50 border rounded-xl font-bold outline-none text-[11px]"></div>
                 
-                <button type="submit" id="btnSubmitMigrasi" class="w-full mt-6 bg-slate-900 text-white font-extrabold py-4 px-6 rounded-xl active:scale-95 transition-all flex justify-center gap-2"><i data-lucide="save" class="w-5 h-5"></i> Simpan Data Langsung</button>
+                <button type="submit" id="btnSubmitMigrasi" class="w-full mt-4 bg-slate-900 text-white font-bold py-3.5 rounded-xl active:scale-95 flex justify-center gap-2"><i data-lucide="save" class="w-4 h-4"></i> Simpan Data</button>
             </form>
         </div>
     </div>
@@ -133,10 +138,10 @@
         
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
-            const bgColor = type === 'success' ? 'bg-emerald-500' : (type === 'info' ? 'bg-blue-500' : 'bg-red-500');
-            const icon = type === 'success' ? 'check-circle' : (type === 'info' ? 'info' : 'alert-circle');
+            const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
+            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
             toast.className = `${bgColor} text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 transform -translate-y-10 opacity-0 transition-all duration-300 w-full`;
-            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 shrink-0"></i><span class="text-sm font-bold">${message}</span>`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 shrink-0"></i><span class="text-xs font-bold">${message}</span>`;
             document.getElementById('toastContainer').appendChild(toast);
             lucide.createIcons();
             setTimeout(() => { toast.classList.remove('-translate-y-10', 'opacity-0'); }, 10);
@@ -144,7 +149,7 @@
         }
 
         function toggleLoading(isLoading) {
-            const icon = document.querySelector('#btnRefresh svg') || document.querySelector('#btnRefresh i');
+            const icon = document.querySelector('#btnRefresh i') || document.querySelector('#btnRefresh svg');
             if (icon) { if (isLoading) icon.classList.add('animate-spin'); else icon.classList.remove('animate-spin'); }
         }
 
@@ -152,12 +157,10 @@
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
         const tglSekarang = new Date().getDate();
         const bulanSekarang = new Date().getMonth() + 1; 
-        document.getElementById('bulanIni').innerText = `Tgl Hari Ini: ${tglSekarang}`;
+        document.getElementById('bulanIni').innerText = `Tgl: ${tglSekarang}`;
 
         let currentTab = 'antrean'; let targetWaLink = ""; let currentActiveData = null;
-        let marginStandar = CONFIG.MARGIN_DEFAULT || 25; 
 
-        // FITUR LIVE SEARCH
         document.getElementById('searchAdmin').addEventListener('input', function(e) {
             const keyword = e.target.value.toLowerCase();
             const cards = document.querySelectorAll('.customer-card');
@@ -170,8 +173,8 @@
 
         function switchTab(tab) {
             currentTab = tab;
-            document.getElementById('tab-antrean').className = tab === 'antrean' ? 'flex-1 py-2.5 rounded-xl text-xs tab-active' : 'flex-1 py-2.5 rounded-xl text-xs tab-inactive';
-            document.getElementById('tab-tagihan').className = tab === 'tagihan' ? 'flex-1 py-2.5 rounded-xl text-xs tab-active' : 'flex-1 py-2.5 rounded-xl text-xs tab-inactive';
+            document.getElementById('tab-antrean').className = tab === 'antrean' ? 'flex-1 py-2 rounded-lg text-[11px] tab-active' : 'flex-1 py-2 rounded-lg text-[11px] tab-inactive';
+            document.getElementById('tab-tagihan').className = tab === 'tagihan' ? 'flex-1 py-2 rounded-lg text-[11px] tab-active' : 'flex-1 py-2 rounded-lg text-[11px] tab-inactive';
             if (tab === 'antrean') { document.getElementById('viewAntrean').classList.replace('hidden', 'flex'); document.getElementById('viewTagihan').classList.replace('flex', 'hidden'); fetchAntrean(); } 
             else { document.getElementById('viewTagihan').classList.replace('hidden', 'flex'); document.getElementById('viewAntrean').classList.replace('flex', 'hidden'); fetchTagihan(); }
         }
@@ -180,7 +183,7 @@
 
         async function fetchAntrean() {
             const container = document.getElementById('pendingList'); toggleLoading(true);
-            container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-xs font-bold text-slate-500">Menarik data...</p></div>`;
+            container.innerHTML = `<div class="text-center py-6"><div class="spinner mx-auto mb-2"></div><p class="text-[10px] font-bold text-slate-400">Menarik data...</p></div>`;
 
             try {
                 const res = await fetch(CONFIG.API_URL + "?action=getPending&nocache=" + Date.now());
@@ -190,31 +193,39 @@
                 document.getElementById('countPending').innerText = `${data.length} Menunggu`;
                 container.innerHTML = '';
                 
-                if(data.length === 0) { container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-slate-400">Belum ada pengajuan masuk.</p></div>`; }
+                if(data.length === 0) { container.innerHTML = `<div class="text-center py-6 bg-white rounded-2xl border border-dashed"><p class="text-[10px] font-bold text-slate-400">Belum ada pengajuan.</p></div>`; }
                 else {
                     data.forEach((p) => {
                         let hargaBersih = parseRupiah(p.harga.toString()) - parseRupiah(p.dp.toString());
-                        let rekTotal = hargaBersih + (hargaBersih * (marginStandar / 100)); 
+                        
+                        // LOGIKA MARGIN KEMBALI KE 15% & 25%
+                        let marginAktif = (p.jaminan && p.jaminan.includes("Tanpa Jaminan")) ? 25 : 15; 
+                        
+                        let rekTotal = hargaBersih + (hargaBersih * (marginAktif / 100)); 
                         let tenorAngka = parseInt(p.tenor) || 6;
                         let rekBulan = Math.round(rekTotal / tenorAngka);
                         
                         let dataJson = encodeURIComponent(JSON.stringify({ idKontrak: p.idKontrak, nama: p.nama, wa: p.wa, barang: p.barang, jatuhTempo: p.jatuhTempo, rekTotal: rekTotal, rekBulan: rekBulan }));
 
                         container.innerHTML += `
-                            <div id="card-${p.idKontrak}" class="bg-white p-4 rounded-3xl shadow-sm border flex flex-col gap-3 relative transition-all duration-300">
+                            <div id="card-${p.idKontrak}" class="bg-white p-3.5 rounded-2xl shadow-sm border flex flex-col gap-2 relative">
                                 <div class="flex justify-between items-start">
-                                    <div><h3 class="font-extrabold text-slate-800 text-sm">${p.nama}</h3><p class="text-[10px] font-bold text-slate-500 mt-0.5">${p.barang}</p></div>
-                                    <div class="text-right"><p class="text-[10px] font-bold text-slate-400">Tenor</p><p class="font-black text-slate-900">${p.tenor}</p></div>
+                                    <div>
+                                        <h3 class="font-extrabold text-slate-800 text-xs">${p.nama}</h3>
+                                        <p class="text-[9px] font-bold text-slate-500 mt-0.5">${p.barang}</p>
+                                        <span class="text-[8px] font-black px-1.5 py-0.5 rounded mt-1 inline-block ${marginAktif === 15 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}">${marginAktif === 15 ? '🌟 VIP (Jaminan 15%)' : 'Reguler (Tanpa Jaminan 25%)'}</span>
+                                    </div>
+                                    <div class="text-right"><p class="text-[9px] font-bold text-slate-400">Tenor</p><p class="font-black text-slate-900 text-[11px]">${p.tenor}</p></div>
                                 </div>
                                 <div class="grid grid-cols-2 gap-2 mt-1">
-                                    <button onclick="tolakPengajuan('${p.idKontrak}')" class="py-2.5 bg-red-50 text-red-600 rounded-xl text-[11px] font-bold flex justify-center items-center">Tolak</button>
-                                    <button onclick="bukaModalAcc('${dataJson}')" class="py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-[11px] font-bold flex justify-center items-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> ACC Kredit</button>
+                                    <button onclick="tolakPengajuan('${p.idKontrak}')" class="py-2 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold">Tolak</button>
+                                    <button onclick="bukaModalAcc('${dataJson}')" class="py-2 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-lg text-[10px] font-bold flex justify-center items-center gap-1"><i data-lucide="check" class="w-3 h-3"></i> Hitung ACC</button>
                                 </div>
                             </div>`;
                     });
                 }
                 lucide.createIcons();
-            } catch(e) { container.innerHTML = `<p class="text-center text-red-500 text-xs mt-10">Gagal internet/Koneksi API.</p>`; }
+            } catch(e) { container.innerHTML = `<p class="text-center text-red-500 text-[10px] mt-6">Gagal koneksi API.</p>`; }
             toggleLoading(false);
         }
 
@@ -223,7 +234,6 @@
             const data = JSON.parse(decodeURIComponent(encodedData)); currentActiveData = data;
             document.getElementById('accIdKontrak').innerText = data.idKontrak; 
             document.getElementById('accNama').innerText = data.nama; document.getElementById('accBarang').innerText = data.barang;
-            
             document.getElementById('accJatuhTempo').value = data.jatuhTempo; 
             document.getElementById('accTotalHutang').value = formatRupiah(data.rekTotal); 
             document.getElementById('accCicilan').value = formatRupiah(data.rekBulan);
@@ -240,7 +250,7 @@
             const finalTotal = parseRupiah(document.getElementById('accTotalHutang').value);
             const finalCicilan = parseRupiah(document.getElementById('accCicilan').value);
             
-            if(finalTotal === 0 || finalCicilan === 0 || finalTempo === "") return showToast("Data tidak boleh kosong!", "error");
+            if(finalTotal === 0 || finalCicilan === 0 || finalTempo === "") return showToast("Nominal tidak boleh kosong!", "error");
             
             const payload = { tipe: "ACC_PENGAJUAN", idKontrak: currentActiveData.idKontrak, wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: finalTempo, totalHutang: finalTotal, cicilanBulan: finalCicilan };
             btn.disabled = true; btn.innerHTML = "Memproses...";
@@ -249,13 +259,13 @@
                 if (card) card.style.display = 'none';
                 fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                 closeModalAcc(); 
-                setTimeout(() => { fetchAntrean(); showToast("Sukses di-ACC dan masuk ke Kasir!", "success"); }, 2000); 
+                setTimeout(() => { fetchAntrean(); showToast("Sukses di-ACC!", "success"); }, 2000); 
             } catch(e) { showToast("Gagal koneksi.", "error"); }
-            btn.disabled = false; btn.innerHTML = `<i data-lucide="user-check" class="w-5 h-5"></i> ACC & Pindah ke Kasir`;
+            btn.disabled = false; btn.innerHTML = `<i data-lucide="user-check" class="w-4 h-4"></i> ACC & Pindah ke Kasir`;
         });
 
         window.tolakPengajuan = function(idKontrak) {
-            if(confirm("Yakin ingin menghapus permanen pengajuan ini?")) {
+            if(confirm("Yakin ingin menolak permanen pengajuan ini?")) {
                 const card = document.getElementById(`card-${idKontrak}`);
                 if (card) card.style.display = 'none';
                 fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", idKontrak: idKontrak }) });
@@ -265,14 +275,14 @@
 
         async function fetchTagihan() {
             const container = document.getElementById('customerList'); toggleLoading(true);
-            container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-3"></div><p class="text-xs font-bold text-slate-500">Membaca Tagihan...</p></div>`;
+            container.innerHTML = `<div class="text-center py-6"><div class="spinner mx-auto mb-2"></div><p class="text-[10px] font-bold text-slate-400">Membaca Tagihan...</p></div>`;
 
             try {
                 const res = await fetch(CONFIG.API_URL + "?action=getAll&nocache=" + Date.now());
                 const result = await res.json();
                 
                 if (result.status === "error") {
-                    container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-amber-500">${result.message}</p></div>`;
+                    container.innerHTML = `<div class="text-center py-6 bg-white rounded-2xl border border-dashed"><p class="text-[10px] font-bold text-amber-500">${result.message}</p></div>`;
                     toggleLoading(false); return;
                 }
 
@@ -280,7 +290,7 @@
                 container.innerHTML = '';
                 
                 if(aktifCustomers.length === 0) { 
-                    container.innerHTML = `<div class="text-center py-10 bg-white rounded-3xl border border-dashed"><p class="text-sm font-bold text-emerald-500">Semua pelanggan Lunas!</p></div>`; 
+                    container.innerHTML = `<div class="text-center py-6 bg-white rounded-2xl border border-dashed"><p class="text-[10px] font-bold text-emerald-500">Semua Lunas!</p></div>`; 
                 } else {
                     aktifCustomers.forEach(p => {
                         let sisaBulanIni = p.cicilanPerBulan > 0 ? p.cicilanPerBulan : Math.round(p.hutang / 6); 
@@ -298,58 +308,51 @@
                         const isSudahBayarBulanIni = p.bulanTerakhirBayar === bulanSekarang;
                         const isTelat = !isSudahBayarBulanIni && (tglSekarang >= angkaTanggal && bulanSekarang >= targetBulan);
                         
-                        let badgeColor = isSudahBayarBulanIni ? "bg-emerald-100 text-emerald-700 border border-emerald-200" : (isTelat ? "bg-red-100 text-red-600 border border-red-200" : "bg-slate-100 text-slate-600");
-                        let badgeText = isSudahBayarBulanIni ? "✔ LUNAS BULAN INI" : `Tempo: ${tglLengkap}`;
+                        let badgeColor = isSudahBayarBulanIni ? "bg-emerald-100 text-emerald-700" : (isTelat ? "bg-red-100 text-red-600" : "bg-slate-100 text-slate-600");
+                        let badgeText = isSudahBayarBulanIni ? "LUNAS" : `Tempo: ${tglLengkap}`;
 
                         let tombolAksi = isSudahBayarBulanIni 
-                            ? `<button disabled class="py-2.5 bg-slate-50 text-slate-400 rounded-xl text-[11px] font-bold w-full"><i data-lucide="check-circle-2" class="w-3.5 h-3.5 inline"></i> Aman Terkendali</button>`
-                            : `<button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${tglLengkap}', '${namaBulan[targetBulan]}')" class="py-2.5 bg-amber-50 text-amber-700 rounded-xl text-[11px] font-bold w-full flex justify-center items-center gap-1.5 border border-amber-100"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i> ${isTelat ? 'Tegur Keterlambatan (WA)' : 'Kirim WA Pengingat'}</button>`;
+                            ? `<button disabled class="py-2 bg-slate-50 text-slate-400 rounded-lg text-[10px] font-bold w-full"><i data-lucide="check" class="w-3 h-3 inline"></i> Aman</button>`
+                            : `<button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${tglLengkap}', '${namaBulan[targetBulan]}')" class="py-2 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg text-[10px] font-bold w-full flex justify-center items-center gap-1.5"><i data-lucide="message-circle" class="w-3 h-3"></i> ${isTelat ? 'Tegur (WA)' : 'Pengingat'}</button>`;
 
-                        // Class customer-card ditambahkan untuk fitur Live Search
                         container.innerHTML += `
-                            <div data-nama="${p.nama}" class="customer-card bg-white p-4 rounded-3xl shadow-sm border flex flex-col gap-3 relative hover:border-amber-200 transition-colors">
+                            <div data-nama="${p.nama}" class="customer-card bg-white p-3.5 rounded-2xl shadow-sm border flex flex-col gap-2 relative hover:border-amber-200 transition-colors">
                                 <div class="flex justify-between items-start">
-                                    <div><h3 class="font-extrabold text-slate-800 text-sm">${p.nama}</h3><div class="flex items-center gap-2 mt-1"><span class="text-[10px] font-bold text-slate-500">Bulan Ke-${p.cicilanKe}</span><span class="text-[9px] font-bold ${badgeColor} px-1.5 py-0.5 rounded uppercase">${badgeText}</span></div></div>
-                                    <div class="text-right"><p class="text-[10px] font-bold text-slate-400">Tagihan Bulanan</p><p class="font-black text-slate-900">Rp ${formatRupiah(sisaBulanIni)}</p></div>
+                                    <div><h3 class="font-extrabold text-slate-800 text-xs">${p.nama}</h3><div class="flex items-center gap-1 mt-0.5"><span class="text-[9px] font-bold text-slate-500">Bulan Ke-${p.cicilanKe}</span><span class="text-[8px] font-bold ${badgeColor} px-1.5 py-0.5 rounded uppercase">${badgeText}</span></div></div>
+                                    <div class="text-right"><p class="text-[9px] font-bold text-slate-400">Tagihan</p><p class="font-black text-slate-900 text-[11px]">Rp ${formatRupiah(sisaBulanIni)}</p></div>
                                 </div>
                                 <div class="mt-1">${tombolAksi}</div>
                             </div>`;
                     });
                 }
                 lucide.createIcons();
-            } catch(e) { container.innerHTML = `<p class="text-center text-red-500 text-xs mt-10">Gagal internet/Koneksi API.</p>`; }
+            } catch(e) { container.innerHTML = `<p class="text-center text-red-500 text-[10px] mt-6">Gagal koneksi API.</p>`; }
             toggleLoading(false);
         }
 
-        const modalWa = document.getElementById('waModal'), modalWaContent = document.getElementById('waModalContent');
+        const modalWa = document.getElementById('waModal');
         window.bukaPesanWA = function(nama, wa, cicilanKe, nominal, tglLengkap, namaBulanTarget) {
-            document.getElementById('pesanWA').value = `Assalamu'alaikum Kak ${nama} 🙏\n\nSekadar mengingatkan dari *Zenith Cell*, untuk cicilan gadget (Bulan Ke-${cicilanKe}) senilai *Rp ${formatRupiah(nominal)}* untuk tagihan bulan *${namaBulanTarget}* sudah memasuki jadwal pembayaran (${tglLengkap}).\n\nKarena kami menggunakan sistem syariah (Tanpa Denda), mohon kerja sama dan amanahnya. 😊\n\nJika sudah ditransfer, mohon fotokan buktinya ke chat ini ya Kak. Terima kasih banyak! ✨`;
+            const teksRekening = `💳 *BCA* - 8161292087\n👤 a/n Ardita Rizki Fauzi\n\n💳 *BRI* - 638501004971500\n👤 a/n Vivi Nur Damayanti\n\n💳 *SeaBank* - 901556541299\n👤 a/n Ardita Rizki Fauzi`;
+            document.getElementById('pesanWA').value = `Assalamu'alaikum Kak ${nama} 🙏\n\nSekadar mengingatkan dari *Zenith Cell*, untuk cicilan gadget (Bulan Ke-${cicilanKe}) senilai *Rp ${formatRupiah(nominal)}* untuk tagihan bulan *${namaBulanTarget}* sudah memasuki jadwal pembayaran (${tglLengkap}).\n\nSilakan transfer ke salah satu rekening resmi kami:\n\n${teksRekening}\n\nJika sudah ditransfer, mohon fotokan buktinya ke chat ini ya Kak. Terima kasih banyak! ✨`;
             targetWaLink = `https://api.whatsapp.com/send?phone=${wa}`;
-            modalWa.classList.replace('hidden', 'flex'); setTimeout(() => { modalWa.classList.remove('opacity-0'); modalWaContent.classList.remove('translate-y-full'); }, 10);
+            modalWa.classList.replace('hidden', 'flex'); setTimeout(() => { modalWa.classList.remove('opacity-0'); document.querySelector('#waModal > div').classList.remove('translate-y-full'); }, 10);
         };
-        window.closeWaModal = function() { modalWa.classList.add('opacity-0'); modalWaContent.classList.add('translate-y-full'); setTimeout(() => modalWa.classList.replace('flex', 'hidden'), 300); };
+        window.closeWaModal = function() { modalWa.classList.add('opacity-0'); document.querySelector('#waModal > div').classList.add('translate-y-full'); setTimeout(() => modalWa.classList.replace('flex', 'hidden'), 300); };
         document.getElementById('btnKirimWA').addEventListener('click', () => { window.open(`${targetWaLink}&text=${encodeURIComponent(document.getElementById('pesanWA').value)}`, '_blank'); closeWaModal(); });
 
         const modalMigrasi = document.getElementById('migrasiModal'), migrasiContent = document.getElementById('migrasiModalContent');
         window.bukaModalMigrasi = function() { modalMigrasi.classList.replace('hidden', 'flex'); setTimeout(() => { modalMigrasi.classList.remove('opacity-0'); migrasiContent.classList.remove('translate-y-full'); }, 10); };
         window.closeModalMigrasi = function() { modalMigrasi.classList.add('opacity-0'); migrasiContent.classList.add('translate-y-full'); setTimeout(() => modalMigrasi.classList.replace('flex', 'hidden'), 300); };
         
-        document.getElementById('migWa').addEventListener('input', function() {
-            let val = this.value.replace(/[^0-9]/g, ''); if (val.startsWith('62')) val = '0' + val.substring(2); this.value = val;
-        });
-
+        document.getElementById('migWa').addEventListener('input', function() { let val = this.value.replace(/[^0-9]/g, ''); if (val.startsWith('62')) val = '0' + val.substring(2); this.value = val; });
         ['migHutang', 'migTerbayar', 'migCicilan'].forEach(id => { document.getElementById(id).addEventListener('input', (e) => { e.target.value = formatRupiah(parseRupiah(e.target.value)); }); });
 
         window.prosesMigrasi = function() {
             const btn = document.getElementById('btnSubmitMigrasi');
-            const payload = {
-                tipe: "MIGRASI_PELANGGAN", nama: document.getElementById('migNama').value, wa: document.getElementById('migWa').value, barang: document.getElementById('migBarang').value,
-                totalHutang: parseRupiah(document.getElementById('migHutang').value), sudahTerbayar: parseRupiah(document.getElementById('migTerbayar').value),
-                cicilanBulan: parseRupiah(document.getElementById('migCicilan').value), jatuhTempo: document.getElementById('migTempo').value, cicilanKe: document.getElementById('migKe').value
-            };
-            btn.disabled = true; btn.innerHTML = "Menyimpan ke Server...";
+            const payload = { tipe: "MIGRASI_PELANGGAN", nama: document.getElementById('migNama').value, wa: document.getElementById('migWa').value, barang: document.getElementById('migBarang').value, totalHutang: parseRupiah(document.getElementById('migHutang').value), sudahTerbayar: parseRupiah(document.getElementById('migTerbayar').value), cicilanBulan: parseRupiah(document.getElementById('migCicilan').value), jatuhTempo: document.getElementById('migTempo').value, cicilanKe: document.getElementById('migKe').value };
+            btn.disabled = true; btn.innerHTML = "Menyimpan...";
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            setTimeout(() => { closeModalMigrasi(); document.getElementById('formMigrasi').reset(); fetchTagihan(); showToast("Data Migrasi Berhasil Ditambahkan!", "success"); btn.disabled = false; btn.innerHTML = `<i data-lucide="save" class="w-5 h-5"></i> Simpan Data Langsung`; }, 2000);
+            setTimeout(() => { closeModalMigrasi(); document.getElementById('formMigrasi').reset(); fetchTagihan(); showToast("Data Migrasi Ditambahkan!", "success"); btn.disabled = false; btn.innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> Simpan Data`; }, 2000);
         };
         fetchAntrean(); 
     </script>

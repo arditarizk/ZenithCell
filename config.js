@@ -12,8 +12,14 @@ const CONFIG = {
     MARGIN_DEFAULT: 25, 
     
     VOUCHERS: {
-        "dulurdewe22": { margin: 22, pesan: "Kode valid! Margin layanan turun jadi 22% " },
-        "nawakewed": { margin: 20, pesan: "Kode valid! Margin VVIP 20% " },
-        "birthday": { margin: 23, pesan: "Happy Birthday, Ardita! Margin super ringan 23% " }
-    }
+        "dulurdewe22": { margin: 22, pesan: "Kode valid! Margin layanan turun jadi 22% 🎉" },
+        "nawakewed": { margin: 20, pesan: "Kode valid! Margin VVIP 20% 🎉" },
+        "birthday": { margin: 23, pesan: "Happy Birthday, Ardita! Margin super ringan 23% 🎉" }
+    },
+
+    // PENGATURAN PENGUMUMAN BERJALAN (MARQUEE)
+    PENGUMUMAN_AKTIF: true, // Ubah ke false jika ingin menyembunyikan pengumuman
+    
+    // TEKS PROMO SYAWAL & PASKAH
+    TEKS_PENGUMUMAN: "✨ Selamat Idul Fitri 1447 H & Selamat Paskah bagi yang merayakan! Spesial bulan penuh berkah ini, nikmati Promo JALUR VIP Margin cuma 15%. Yuk ajukan gadget impianmu untuk silaturahmi sekarang juga! 📱"
 };

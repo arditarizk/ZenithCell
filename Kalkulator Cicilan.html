@@ -29,7 +29,7 @@
             <header class="mb-8">
                 <a href="index.html" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 mb-5 shadow-sm"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
                 <div class="flex items-center gap-2 mb-3">
-                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-100/80 text-emerald-700 text-xs font-bold uppercase"><i data-lucide="shield-check" class="w-4 h-4"></i> Standar OJK</div>
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-100/80 text-emerald-700 text-xs font-bold uppercase"><i data-lucide="shield-check" class="w-4 h-4"></i> Transparan & Syariah</div>
                 </div>
                 <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">Simulasi Cicilan <br/><span class="text-emerald-600">Zenith Cell.</span></h1>
             </header>
@@ -50,6 +50,15 @@
                             <input type="text" id="dp" inputmode="numeric" placeholder="0" class="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 rounded-2xl font-bold text-xl outline-none">
                         </div>
                     </div>
+                    
+                    <div class="group">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Pilih Jalur Promo & Jaminan</label>
+                        <select id="jenisJalur" onchange="calculate()" class="w-full px-4 py-4 bg-emerald-50 border-2 border-emerald-200 text-emerald-800 rounded-2xl font-bold outline-none text-sm appearance-none cursor-pointer">
+                            <option value="15">🌟 JALUR VIP (Margin 15%) - Syarat Titip Jaminan</option>
+                            <option value="25" selected>REGULER (Margin 25%) - Tanpa Jaminan</option>
+                        </select>
+                        <p class="text-[10px] text-slate-500 font-medium mt-2 leading-relaxed">Jalur VIP memerlukan titipan jaminan (BPKB/Ijazah) selama masa cicilan untuk diskon biaya layanan.</p>
+                    </div>
                 </div>
 
                 <div class="relative" id="voucherContainer">
@@ -58,25 +67,23 @@
                             <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center shrink-0 border border-amber-300" id="voucherIconBox"><i data-lucide="ticket-percent" class="w-6 h-6 text-amber-600" id="voucherIcon"></i></div>
                             <div class="flex-grow">
                                 <h3 class="text-sm font-black text-amber-900 mb-0.5" id="voucherTitle">Punya Kode Voucher?</h3>
-                                <p class="text-xs text-amber-700 font-medium" id="voucherDesc">Ketik kode promo atau kosongkan lalu klik <b class="text-amber-800">Cek Hoki</b>!</p>
+                                <p class="text-xs text-amber-700 font-medium" id="voucherDesc">Ketik kode promo untuk mendapatkan potongan ekstra!</p>
                             </div>
                         </div>
                         <div class="flex flex-col sm:flex-row gap-2 w-full">
-                            <input type="text" id="kodePromo" placeholder="Kode promo (Opsional)" class="w-full sm:w-1/2 px-4 py-3.5 bg-white border-2 border-amber-200 rounded-xl text-sm font-bold uppercase outline-none">
-                            <button id="btnVoucher" onclick="klaimVoucher()" class="w-full sm:w-1/2 shrink-0 bg-amber-500 text-white text-sm font-extrabold py-3.5 px-5 rounded-xl shadow-lg active:scale-95 flex justify-center items-center gap-2"><i data-lucide="party-popper" class="w-5 h-5"></i> <span id="btnText">Cek Hoki Saya</span></button>
+                            <input type="text" id="kodePromo" placeholder="Masukkan Kode Promo" class="w-full sm:w-1/2 px-4 py-3.5 bg-white border-2 border-amber-200 rounded-xl text-sm font-bold uppercase outline-none">
+                            <button id="btnVoucher" onclick="klaimVoucher()" class="w-full sm:w-1/2 shrink-0 bg-amber-500 hover:bg-amber-600 text-white text-sm font-extrabold py-3.5 px-5 rounded-xl shadow-lg active:scale-95 flex justify-center items-center gap-2 transition-all"><i data-lucide="badge-percent" class="w-5 h-5"></i> <span id="btnText">Terapkan Voucher</span></button>
                         </div>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-3">Pilih Durasi Cicilan (Tenor)</label>
-                    <div class="grid grid-cols-4 sm:grid-cols-6 gap-2 sm:gap-3">
-                        <script>
-                            for(let i=1; i<=12; i++) {
-                                let isChecked = i === 6 ? 'checked' : '';
-                                document.write(`<label class="cursor-pointer relative"><input type="radio" name="tenor" value="${i}" class="radio-input peer sr-only" ${isChecked} onchange="calculate()"><div class="radio-btn-label w-full py-3 rounded-xl bg-white border-2 flex flex-col items-center justify-center peer-checked:bg-slate-800 peer-checked:text-white shadow-sm group"><span class="text-lg sm:text-xl font-black leading-none">${i}</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>`);
-                            }
-                        </script>
+                    <label class="block text-sm font-bold text-slate-700 mb-3">Pilih Tenor (Maksimal 10 Bulan)</label>
+                    <div class="grid grid-cols-4 gap-2 sm:gap-3">
+                        <label class="cursor-pointer relative"><input type="radio" name="tenor" value="3" class="radio-input peer sr-only" onchange="calculate()"><div class="radio-btn-label w-full py-3 rounded-xl bg-white border-2 flex flex-col items-center justify-center peer-checked:bg-slate-800 peer-checked:text-white shadow-sm group"><span class="text-lg sm:text-xl font-black leading-none">3</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>
+                        <label class="cursor-pointer relative"><input type="radio" name="tenor" value="5" class="radio-input peer sr-only" checked onchange="calculate()"><div class="radio-btn-label w-full py-3 rounded-xl bg-white border-2 flex flex-col items-center justify-center peer-checked:bg-slate-800 peer-checked:text-white shadow-sm group"><span class="text-lg sm:text-xl font-black leading-none">5</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>
+                        <label class="cursor-pointer relative"><input type="radio" name="tenor" value="8" class="radio-input peer sr-only" onchange="calculate()"><div class="radio-btn-label w-full py-3 rounded-xl bg-white border-2 flex flex-col items-center justify-center peer-checked:bg-slate-800 peer-checked:text-white shadow-sm group"><span class="text-lg sm:text-xl font-black leading-none">8</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>
+                        <label class="cursor-pointer relative"><input type="radio" name="tenor" value="10" class="radio-input peer sr-only" onchange="calculate()"><div class="radio-btn-label w-full py-3 rounded-xl bg-white border-2 flex flex-col items-center justify-center peer-checked:bg-slate-800 peer-checked:text-white shadow-sm group"><span class="text-lg sm:text-xl font-black leading-none">10</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>
                     </div>
                 </div>
             </form>
@@ -92,7 +99,7 @@
                 <div class="glass-panel-dark rounded-[2rem] p-6 space-y-4 mb-6 mt-auto">
                     <div class="flex justify-between items-center sm:pl-4"><span class="text-slate-300 text-sm">Pokok Pembiayaan</span><span class="font-bold text-white" id="resPokok">Rp 0</span></div>
                     <div class="flex justify-between items-center sm:pl-4">
-                        <span class="text-slate-300 text-sm flex items-center gap-2">Biaya Layanan <span class="text-[9px] font-bold bg-blue-500/20 px-1.5 py-0.5 rounded text-blue-300 uppercase" id="resMarginText">Standar OJK</span></span>
+                        <span class="text-slate-300 text-sm flex items-center gap-2">Biaya Layanan <span class="text-[9px] font-bold bg-blue-500/20 px-1.5 py-0.5 rounded text-blue-300 uppercase" id="resMarginText">Standar (25%)</span></span>
                         <span class="font-bold text-white" id="resMargin">Rp 0</span>
                     </div>
                     <div class="pt-4 border-t border-white/10 flex justify-between items-center sm:pl-4"><span class="text-emerald-400 text-sm font-bold uppercase">Total Akad</span><span class="font-black text-xl text-white" id="resTotal">Rp 0</span></div>
@@ -108,50 +115,54 @@
         const priceInput = document.getElementById('price'), dpInput = document.getElementById('dp');
         const resPokok = document.getElementById('resPokok'), resMargin = document.getElementById('resMargin'), resTotal = document.getElementById('resTotal'), resCicilan = document.getElementById('resCicilan');
         
-        let currentMargin = CONFIG.MARGIN_DEFAULT || 25; 
         let isVoucherClaimed = false;
+        let voucherMarginFixed = null;
 
         function klaimVoucher() {
             if (isVoucherClaimed) return;
             const btn = document.getElementById('btnVoucher'), desc = document.getElementById('voucherDesc'), title = document.getElementById('voucherTitle'), inputKode = document.getElementById('kodePromo');
             const kodeVal = inputKode.value.trim().toLowerCase();
             
+            if (kodeVal === "") {
+                alert("Silakan ketik kode voucher terlebih dahulu!");
+                inputKode.focus();
+                return;
+            }
+
             btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Memproses...`; btn.classList.add('opacity-90', 'cursor-wait'); inputKode.disabled = true;
             
             setTimeout(() => {
-                let pesanBerhasil = ""; let isDiskon = true;
+                let pesanBerhasil = ""; 
+                let isDiskon = false;
 
-                if (CONFIG.VOUCHERS && CONFIG.VOUCHERS[kodeVal]) {
-                    currentMargin = CONFIG.VOUCHERS[kodeVal].margin;
+                if (typeof CONFIG !== 'undefined' && CONFIG.VOUCHERS && CONFIG.VOUCHERS[kodeVal]) {
+                    // Pakai Voucher Valid dari config.js
+                    voucherMarginFixed = CONFIG.VOUCHERS[kodeVal].margin;
                     pesanBerhasil = CONFIG.VOUCHERS[kodeVal].pesan;
-                } else if (kodeVal !== "") {
-                    currentMargin = CONFIG.MARGIN_DEFAULT;
-                    isDiskon = false;
-                    pesanBerhasil = `Kode tidak valid. Menggunakan margin standar <b class="text-blue-700 bg-blue-100 px-1 rounded">${currentMargin}%</b>.`;
+                    isDiskon = true;
                 } else {
-                    const gachaPool = [CONFIG.MARGIN_DEFAULT, CONFIG.MARGIN_DEFAULT, 24, 23, 22]; 
-                    currentMargin = gachaPool[Math.floor(Math.random() * gachaPool.length)];
-                    if (currentMargin === CONFIG.MARGIN_DEFAULT) { 
-                        isDiskon = false; pesanBerhasil = `Biaya normal OJK <b class="text-blue-700 bg-blue-100 px-1 rounded">${currentMargin}%</b>. Transaksi aman! 🛡️`; 
-                    } else { 
-                        pesanBerhasil = `Hoki! Hasil undian memotong margin layanan menjadi <b class="text-emerald-700 bg-emerald-100 px-1 rounded">${currentMargin}%</b> 🎉`; 
-                    }
+                    // Voucher Salah / Tidak Ada
+                    voucherMarginFixed = null;
+                    pesanBerhasil = `Maaf, kode voucher tidak ditemukan atau tidak valid.`;
+                    isDiskon = false;
                 }
-                
-                isVoucherClaimed = true; btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> Selesai`; btn.classList.remove('cursor-wait');
                 
                 if(isDiskon) {
-                    title.innerText = "Status: Potongan Aktif!";
+                    isVoucherClaimed = true; 
+                    btn.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i> Selesai`; btn.classList.remove('cursor-wait');
+                    title.innerText = "Status: Voucher Aktif!";
                     btn.classList.replace('bg-amber-500', 'bg-emerald-500'); document.getElementById('voucherBox').className = "bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 p-4 sm:p-5 rounded-2xl relative flex flex-col gap-4 animate-pop";
                     document.getElementById('voucherIcon').className = "w-6 h-6 text-emerald-600"; desc.className = "text-xs text-emerald-800 font-medium"; title.className = "text-sm font-black text-emerald-900 mb-0.5";
+                    inputKode.classList.add('opacity-60'); 
                 } else {
-                    title.innerText = "Status: Terverifikasi OJK";
-                    btn.classList.replace('bg-amber-500', 'bg-blue-500'); document.getElementById('voucherBox').className = "bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 p-4 sm:p-5 rounded-2xl relative flex flex-col gap-4 animate-pop";
-                    document.getElementById('voucherIcon').className = "w-6 h-6 text-blue-600"; desc.className = "text-xs text-blue-800 font-medium"; title.className = "text-sm font-black text-blue-900 mb-0.5";
+                    btn.innerHTML = `Coba Lagi`; btn.classList.remove('cursor-wait', 'opacity-90');
+                    desc.className = "text-xs text-red-600 font-bold";
+                    inputKode.disabled = false; // Bisa dicoba lagi
                 }
-                inputKode.classList.add('opacity-60'); desc.innerHTML = pesanBerhasil;
+                
+                desc.innerHTML = pesanBerhasil;
                 lucide.createIcons(); calculate(); 
-            }, 1200); 
+            }, 800); 
         }
 
         const formatRupiah = (num) => (num === 0 || isNaN(num)) ? "0" : new Intl.NumberFormat('id-ID').format(num);
@@ -163,31 +174,48 @@
             const price = parseRupiah(priceInput.value); const dp = parseRupiah(dpInput.value);
             const tenor = parseInt(document.querySelector('input[name="tenor"]:checked').value);
             
+            // Ambil Base Margin dari Pilihan VIP (15%) atau Reguler (25%)
+            const jalurBaseMargin = parseInt(document.getElementById('jenisJalur').value);
+            let finalMargin = jalurBaseMargin;
+
+            // Terapkan Potongan Voucher Jika Ada
+            if (isVoucherClaimed && voucherMarginFixed !== null) {
+                finalMargin = voucherMarginFixed;
+            }
+
             const marginBadge = document.getElementById('resMarginText');
-            if (currentMargin < CONFIG.MARGIN_DEFAULT) {
-                marginBadge.innerText = `Promo (${currentMargin}%)`;
+            if (isVoucherClaimed && voucherMarginFixed !== null) {
+                marginBadge.innerText = `Promo Voucher (${finalMargin}%)`;
                 marginBadge.className = "text-[9px] font-bold bg-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-400 uppercase";
             } else {
-                marginBadge.innerText = `Standar OJK (${currentMargin}%)`;
+                marginBadge.innerText = `Standar (${finalMargin}%)`;
                 marginBadge.className = "text-[9px] font-bold bg-blue-500/20 px-1.5 py-0.5 rounded text-blue-300 uppercase";
             }
 
             if (price === 0) { resPokok.innerText = "Rp 0"; resMargin.innerText = "Rp 0"; resTotal.innerText = "Rp 0"; resCicilan.innerText = "0"; return; }
 
             let pokok = price - dp; if (pokok < 0) pokok = 0; 
-            const nominalMargin = pokok * (currentMargin / 100);
+            const nominalMargin = pokok * (finalMargin / 100);
             const total = pokok + nominalMargin;
-            resPokok.innerText = `Rp ${formatRupiah(pokok)}`; resMargin.innerText = `Rp ${formatRupiah(nominalMargin)}`; resTotal.innerText = `Rp ${formatRupiah(total)}`;
+            
+            resPokok.innerText = `Rp ${formatRupiah(pokok)}`; 
+            resMargin.innerText = `Rp ${formatRupiah(nominalMargin)}`; 
+            resTotal.innerText = `Rp ${formatRupiah(total)}`;
             resCicilan.innerText = formatRupiah(Math.round(total / tenor));
         }
-        calculate();
+        
+        calculate(); // Run on init
 
         function lanjutKeForm() {
             const harga = parseRupiah(priceInput.value);
-            if(harga === 0) return alert("Isi Harga Gadget!");
+            if(harga === 0) return alert("Silakan isi Harga Gadget terlebih dahulu!");
+            
             const dp = parseRupiah(dpInput.value);
             const tenor = document.querySelector('input[name="tenor"]:checked').value;
-            window.location.href = `form-pengajuan.html?harga=${harga}&dp=${dp}&tenor=${tenor}`;
+            const jaminan = document.getElementById('jenisJalur').value === "15" ? "Jaminan" : "Tanpa";
+            
+            // Lempar data otomatis ke form pengajuan via URL Parameter
+            window.location.href = `form-pengajuan.html?harga=${harga}&dp=${dp}&tenor=${tenor}&jalur=${jaminan}`;
         }
     </script>
 </body>

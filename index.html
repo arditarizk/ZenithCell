@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Zenith Cell - Gadget Syariah Kota Malang</title>
     
-    <link rel="icon" type="image/png" href="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/5daa1530-3351-436c-abc0-38c81c73669f.png">
-    <link rel="apple-touch-icon" href="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/5daa1530-3351-436c-abc0-38c81c73669f.png">
+    <link rel="icon" type="image/png" href="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/71ece48f-b3db-4307-ba22-d7b06c544ca4.png">
+    <link rel="apple-touch-icon" href="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/71ece48f-b3db-4307-ba22-d7b06c544ca4.png">
     
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -24,6 +24,19 @@
         .faq-item.active i.chevron { transform: rotate(180deg); color: #10b981; }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        /* ANIMASI PENGUMUMAN BERJALAN */
+        @keyframes scrollText { 
+            0% { transform: translateX(100%); } 
+            100% { transform: translateX(-100%); } 
+        }
+        .scrolling-text { 
+            display: inline-block; 
+            white-space: nowrap; 
+            padding-left: 100%;
+            animation: scrollText 20s linear infinite; 
+            will-change: transform;
+        }
     </style>
 </head>
 <body class="text-slate-800 flex justify-center selection:bg-emerald-200">
@@ -32,7 +45,7 @@
         
         <header class="mb-6 text-center flex flex-col items-center relative">
             <button onclick="bukaSidebar()" class="absolute top-0 right-0 p-2.5 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-emerald-500 active:scale-95 transition-all">
-                <i data-lucide="settings" class="w-5 h-5"></i>
+                <i data-lucide="menu" class="w-5 h-5"></i>
             </button>
 
             <div class="w-24 h-24 bg-white p-1.5 rounded-[1.5rem] shadow-sm border border-slate-100 flex items-center justify-center mb-5 mt-2">
@@ -51,6 +64,15 @@
             </a>
         </header>
 
+        <div id="pengumumanContainer" class="hidden relative overflow-hidden bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-[1rem] shadow-md shadow-emerald-500/20 mb-5 flex items-center px-3 py-2.5">
+            <div class="bg-white/20 p-1.5 rounded-lg shrink-0 relative z-10 mr-2 backdrop-blur-sm">
+                <i data-lucide="megaphone" class="w-4 h-4 text-white"></i>
+            </div>
+            <div class="overflow-hidden w-full relative mask-image-fade">
+                <p id="teksPengumuman" class="scrolling-text text-[11px] font-bold tracking-wide uppercase"></p>
+            </div>
+        </div>
+
         <div class="space-y-3 mb-3">
             <section class="clean-card p-4 rounded-2xl flex items-center gap-3">
                 <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 shrink-0"><i data-lucide="file-text" class="w-6 h-6"></i></div>
@@ -58,7 +80,7 @@
                     <h3 class="font-bold text-xs text-slate-800">Perjanjian Akad (PDF)</h3>
                     <p class="text-[9px] text-slate-500 mt-0.5">Unduh form persyaratan kredit.</p>
                 </div>
-                <a href="https://drive.google.com/uc?export=download&id=1E2UrhhMmcF5Nf4F7uUJtdWuY4704ht9d" download class="bg-emerald-500 hover:bg-emerald-600 text-white p-3 rounded-xl transition-colors active:scale-95 shadow-sm"><i data-lucide="download" class="w-4 h-4"></i></a>
+                <a href="ZENITH CELL – MALANG-1.pdf" download class="bg-emerald-500 hover:bg-emerald-600 text-white p-3 rounded-xl transition-colors active:scale-95 shadow-sm"><i data-lucide="download" class="w-4 h-4"></i></a>
             </section>
 
             <a href="cek-tagihan-live.html" class="clean-card p-4 rounded-2xl flex items-center gap-3 hover:border-blue-200 active:scale-95 transition-all cursor-pointer group">
@@ -126,29 +148,74 @@
             </button>
             
             <a href="cek-tagihan-live.html" class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-slate-700 transition-colors"><i data-lucide="search" class="w-5 h-5"></i><span class="text-[8px] font-bold uppercase">Cek</span></a>
-            <a href="https://wa.me/62895410571547" target="_blank" class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-slate-700 transition-colors"><i data-lucide="headphones" class="w-5 h-5"></i><span class="text-[8px] font-bold uppercase">Bantuan</span></a>
+            <button onclick="bukaSidebar()" class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-slate-700 transition-colors"><i data-lucide="menu" class="w-5 h-5"></i><span class="text-[8px] font-bold uppercase">Menu</span></button>
         </div>
     </nav>
 
     <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[90] opacity-0 pointer-events-none transition-opacity duration-300" onclick="tutupSidebar()"></div>
-    <aside id="sidebarMenu" class="fixed top-0 right-0 h-full w-64 bg-slate-50 shadow-2xl z-[100] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-slate-200">
-        <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white">
-            <h3 class="font-black text-slate-800 flex items-center gap-2"><i data-lucide="settings-2" class="w-4 h-4 text-emerald-500"></i> Pengaturan</h3>
+    
+    <aside id="sidebarMenu" class="fixed top-0 right-0 h-full w-72 bg-slate-50 shadow-2xl z-[100] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-slate-200">
+        
+        <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white shrink-0">
+            <h3 class="font-black text-slate-800 flex items-center gap-2"><i data-lucide="compass" class="w-5 h-5 text-emerald-500"></i> Eksplorasi</h3>
             <button onclick="tutupSidebar()" class="p-1.5 bg-slate-50 rounded-full text-slate-400 hover:text-red-500 active:scale-95 transition-all"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
         
-        <div class="p-4 flex-grow space-y-2">
-            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-3 px-1 mt-2">Menu Otoritas</p>
-            <button onclick="tutupSidebar(); setTimeout(() => requestPin('reminder-tagihan-dinamis.html'), 300)" class="w-full flex items-center gap-3 p-3 bg-slate-900 text-white rounded-2xl active:scale-95 transition-transform shadow-md">
-                <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i></div>
-                <div class="text-left">
-                    <h4 class="font-bold text-xs">Server Admin</h4>
-                    <p class="text-[9px] text-slate-400">Panel Manajemen</p>
+        <div class="p-4 flex-grow space-y-4 overflow-y-auto no-scrollbar pb-10">
+            
+            <div>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Layanan Islami Harian</p>
+                <div class="space-y-2">
+                    <a href="https://jadwalsholat.nu.or.id/" target="_blank" class="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-emerald-200 rounded-2xl active:scale-95 transition-all shadow-sm group">
+                        <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-emerald-500 transition-colors"><i data-lucide="clock-4" class="w-5 h-5 text-emerald-600 group-hover:text-white"></i></div>
+                        <div class="text-left flex-grow">
+                            <h4 class="font-bold text-xs text-slate-800">Jadwal Sholat</h4>
+                            <p class="text-[9px] text-slate-500">Akurat se-Indonesia (NU)</p>
+                        </div>
+                        <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-300"></i>
+                    </a>
+                    <a href="https://quran.nu.or.id/" target="_blank" class="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-emerald-200 rounded-2xl active:scale-95 transition-all shadow-sm group">
+                        <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-emerald-500 transition-colors"><i data-lucide="book-open" class="w-5 h-5 text-emerald-600 group-hover:text-white"></i></div>
+                        <div class="text-left flex-grow">
+                            <h4 class="font-bold text-xs text-slate-800">Al-Qur'an Digital</h4>
+                            <p class="text-[9px] text-slate-500">Lengkap dengan Terjemahan</p>
+                        </div>
+                        <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-300"></i>
+                    </a>
+                    <a href="https://baznas.go.id/bayarzakat" target="_blank" class="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-emerald-200 rounded-2xl active:scale-95 transition-all shadow-sm group">
+                        <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-emerald-500 transition-colors"><i data-lucide="calculator" class="w-5 h-5 text-emerald-600 group-hover:text-white"></i></div>
+                        <div class="text-left flex-grow">
+                            <h4 class="font-bold text-xs text-slate-800">Kalkulator Zakat</h4>
+                            <p class="text-[9px] text-slate-500">Hitung & Salurkan (Baznas)</p>
+                        </div>
+                        <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-300"></i>
+                    </a>
                 </div>
-            </button>
+            </div>
+
+            <div class="pt-2 border-t border-slate-200">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1 mt-2">Menu Otoritas (Admin)</p>
+                <div class="space-y-2">
+                    <button onclick="tutupSidebar(); setTimeout(() => requestPin('zenith-pos-dinamis.html'), 300)" class="w-full flex items-center gap-3 p-3 bg-emerald-500 text-white rounded-2xl active:scale-95 transition-transform shadow-md">
+                        <div class="w-10 h-10 bg-emerald-600/50 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="smartphone-charging" class="w-5 h-5 text-white"></i></div>
+                        <div class="text-left">
+                            <h4 class="font-bold text-xs">Kasir POS</h4>
+                            <p class="text-[9px] text-emerald-100">Input Pembayaran</p>
+                        </div>
+                    </button>
+                    <button onclick="tutupSidebar(); setTimeout(() => requestPin('reminder-tagihan-dinamis.html'), 300)" class="w-full flex items-center gap-3 p-3 bg-slate-900 text-white rounded-2xl active:scale-95 transition-transform shadow-md">
+                        <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i></div>
+                        <div class="text-left">
+                            <h4 class="font-bold text-xs">Server Admin</h4>
+                            <p class="text-[9px] text-slate-400">Panel Manajemen</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
         </div>
         
-        <div class="p-5 border-t border-slate-200 text-center bg-white">
+        <div class="p-4 border-t border-slate-200 text-center bg-white shrink-0">
             <p class="text-[9px] font-bold text-slate-400">Zenith Cell Ecosystem v1.5</p>
         </div>
     </aside>
@@ -187,6 +254,12 @@
     <script>
         lucide.createIcons();
         if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg failed', err)); }
+
+        // SCRIPT PENGUMUMAN BERJALAN
+        if (typeof CONFIG !== 'undefined' && CONFIG.PENGUMUMAN_AKTIF && CONFIG.TEKS_PENGUMUMAN) {
+            document.getElementById('pengumumanContainer').classList.remove('hidden');
+            document.getElementById('teksPengumuman').innerText = CONFIG.TEKS_PENGUMUMAN;
+        }
 
         // FUNGSI SIDEBAR
         const sidebarMenu = document.getElementById('sidebarMenu'), sidebarOverlay = document.getElementById('sidebarOverlay');
