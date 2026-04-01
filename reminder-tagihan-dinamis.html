@@ -19,6 +19,7 @@
 </head>
 <body class="text-slate-800 pb-24 pt-4 px-4 flex justify-center selection:bg-amber-200">
 
+    <!-- TOAST CONTAINER (Pengganti Alert) -->
     <div id="toastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 w-full max-w-sm px-4 pointer-events-none"></div>
 
     <main class="w-full max-w-md relative z-10 flex flex-col min-h-[90vh]">
@@ -76,6 +77,19 @@
         </div>
     </div>
 
+    <!-- Modal Konfirmasi Tolak -->
+    <div id="tolakModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-[2rem] p-6 max-w-[320px] w-full text-center shadow-2xl transform scale-95 transition-transform" id="tolakCard">
+            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="alert-triangle" class="w-8 h-8 text-red-500"></i></div>
+            <h3 class="text-lg font-extrabold text-slate-900 mb-1">Tolak Pengajuan?</h3>
+            <p class="text-slate-500 text-xs mb-6 leading-relaxed">Pengajuan atas nama <strong id="tolakNamaUser" class="text-slate-700"></strong> akan ditolak dan disembunyikan dari antrean.</p>
+            <div class="flex gap-3">
+                <button onclick="closeTolakModal()" class="flex-1 bg-slate-100 font-bold py-3.5 rounded-xl text-slate-600 text-sm active:scale-95 transition-all">Batal</button>
+                <button id="btnConfirmTolak" class="flex-1 bg-red-500 text-white font-bold py-3.5 rounded-xl text-sm active:scale-95 transition-all">Ya, Tolak</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL WA REMINDER -->
     <div id="waModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0 px-2 sm:px-0">
         <div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-5 pb-8 shadow-2xl transform translate-y-full transition-transform">
@@ -92,8 +106,10 @@
         lucide.createIcons();
         const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num);
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
-        let currentTab = 'antrean', allTagihanData = [], currentActiveData = null;
+        
+        let currentTab = 'antrean', allTagihanData = [], currentActiveData = null, dataTolakSementara = null, targetWaLink = "";
 
+        // --- FUNGSI TOAST NOTIFICATION (Bebas Alert) ---
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
@@ -111,7 +127,20 @@
             return n;
         };
 
-        function refreshData() { currentTab === 'antrean' ? fetchAntrean() : fetchTagihan(); }
+        const getErrorTemplate = (title, message) => `
+            <div class="bg-red-50 border border-red-200 rounded-3xl p-6 text-center m-2 shadow-sm">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 text-red-500"><i data-lucide="alert-triangle" class="w-6 h-6"></i></div>
+                <h3 class="font-black text-sm text-red-900 mb-1">${title}</h3>
+                <p class="text-[10px] text-red-600 font-bold uppercase tracking-wide mb-3">${message}</p>
+                <div class="text-[9px] text-slate-500 bg-white p-3 rounded-xl text-left space-y-1">
+                    <p><b>Tips:</b> Pastikan URL Config sudah ter-Deploy ("Anyone").</p>
+                </div>
+            </div>`;
+
+        function refreshData() { 
+            if (typeof CONFIG === 'undefined' || !CONFIG.API_URL) return showToast("Error: API_URL tidak ditemukan!", "error");
+            currentTab === 'antrean' ? fetchAntrean() : fetchTagihan(); 
+        }
         
         function switchTab(tab) {
             currentTab = tab;
@@ -133,18 +162,16 @@
             container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-2"></div><p class="text-[10px] font-bold text-slate-400">Loading Antrean...</p></div>`;
             try {
                 const res = await fetch(`${CONFIG.API_URL}?action=getPending&nocache=${Date.now()}`);
+                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
                 const result = await res.json();
+                if (result.status === "error") throw new Error(result.msg);
+                
                 const data = result.data || [];
                 container.innerHTML = data.length === 0 ? `<div class="text-center py-10 bg-white rounded-2xl border border-dashed text-slate-400 font-bold text-xs uppercase">Antrean Kosong</div>` : '';
                 
                 data.forEach((p) => {
                     let hClean = parseRupiah(p.harga) - parseRupiah(p.dp);
-                    let marginVal = parseInt(p.margin); 
-                    if (!marginVal || isNaN(marginVal)) {
-                        let j = (p.jaminan || "").toLowerCase();
-                        marginVal = j.includes("tanpa") ? 25 : 15;
-                    }
-
+                    let marginVal = parseInt(p.margin) || 25; 
                     let rekTotal = hClean + (hClean * (marginVal / 100)); 
                     let rekBulan = Math.round(rekTotal / (parseInt(p.tenor) || 5));
                     let dataJson = encodeURIComponent(JSON.stringify({ ...p, rekTotal, rekBulan, marginAktif: marginVal }));
@@ -160,13 +187,17 @@
                                 <div class="text-right"><span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">${p.tenor || 0} BLN</span></div>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
-                                <button onclick="tolakPengajuan('${p.idKontrak}', '${p.nama}', '${p.wa}', '${p.barang}')" class="py-2.5 bg-red-50 text-red-600 rounded-xl text-[10px] font-black active:scale-95 transition-all">TOLAK</button>
+                                <!-- SUDAH DIPERBAIKI: Menggunakan bukaModalTolak -->
+                                <button onclick="bukaModalTolak('${p.idKontrak}', '${p.nama}', '${p.wa}', '${p.barang}')" class="py-2.5 bg-red-50 text-red-600 rounded-xl text-[10px] font-black active:scale-95 transition-all">TOLAK</button>
                                 <button onclick="bukaModalAcc('${dataJson}')" class="py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-[10px] font-black active:scale-95 transition-all">HITUNG ACC</button>
                             </div>
                         </div>`;
                 });
                 lucide.createIcons();
-            } catch(e) { container.innerHTML = `<div class="text-center py-10 text-red-500 font-black text-xs">Gagal memuat API Pengajuan.</div>`; }
+            } catch(e) { 
+                container.innerHTML = getErrorTemplate("Gagal Memuat Antrean", e.message);
+                lucide.createIcons();
+            }
         }
 
         async function fetchTagihan() {
@@ -174,34 +205,90 @@
             container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-2"></div><p class="text-[10px] font-bold text-slate-400 uppercase">Syncing Tagihan...</p></div>`;
             try {
                 const res = await fetch(`${CONFIG.API_URL}?action=getAll&nocache=${Date.now()}`);
+                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
                 const result = await res.json();
+                if (result.status === "error") throw new Error(result.msg);
+
                 allTagihanData = (result.data || []).filter(c => (parseRupiah(c.hutang) - parseRupiah(c.terbayar)) > 0);
-                renderTagihan(allTagihanData);
-            } catch(e) { container.innerHTML = `<div class="text-center py-10 text-red-500 font-black text-xs uppercase">Gagal memuat API Pelanggan.</div>`; }
+                
+                container.innerHTML = '';
+                if(allTagihanData.length === 0) {
+                    container.innerHTML = `<div class="text-center py-10 bg-white rounded-2xl border border-dashed text-slate-400 font-bold text-xs uppercase">Tidak Ada Tagihan Aktif</div>`;
+                    return;
+                }
+                
+                const tglSekarang = new Date().getDate();
+                const bulanSekarang = new Date().getMonth() + 1;
+                const namaBulan = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+                allTagihanData.forEach(p => {
+                    let sisaBulanIni = p.cicilanPerBulan > 0 ? p.cicilanPerBulan : Math.round(p.hutang / 6);
+                    let angkaTanggal = parseInt(p.jatuhTempo) || 1;
+                    let bulanTerakhir = parseInt(p.bulanTerakhirBayar) || 0;
+                    
+                    let targetBulan = bulanTerakhir === 0 ? bulanSekarang : bulanTerakhir + 1;
+                    if (p.cicilanKe == 1 && bulanTerakhir === 0 && (angkaTanggal - tglSekarang < 20)) { targetBulan = bulanSekarang + 1; }
+                    
+                    let targetTahun = new Date().getFullYear(); 
+                    if (targetBulan > 12) { targetBulan -= 12; targetTahun++; }
+                    
+                    let tglLengkap = `${angkaTanggal} ${namaBulan[targetBulan]} ${targetTahun}`;
+                    let namaBulanTagihan = namaBulan[targetBulan];
+
+                    container.innerHTML += `
+                        <div class="bg-white p-4 rounded-2xl border shadow-sm flex flex-col gap-3">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-black text-xs text-slate-800 uppercase leading-none">${p.nama || "Guest"}</h3>
+                                    <p class="text-[9px] font-bold text-slate-400 mt-2">ID: ${p.idKontrak || "-"} • Ke-${p.cicilanKe || 1}</p>
+                                </div>
+                                <div class="text-right"><p class="font-black text-slate-900 text-xs">Rp ${formatRupiah(sisaBulanIni)}</p></div>
+                            </div>
+                            <button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${tglLengkap}', '${namaBulanTagihan}')" class="w-full py-3 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 active:scale-95 transition-all"><i data-lucide="bell" class="w-3.5 h-3.5"></i> KIRIM PENGINGAT WA</button>
+                        </div>`;
+                });
+                lucide.createIcons();
+            } catch(e) { 
+                container.innerHTML = getErrorTemplate("Gagal Memuat Pelanggan", e.message);
+                lucide.createIcons();
+            }
         }
 
-        function renderTagihan(data) {
+        function filterTagihan() {
+            const k = (document.getElementById('searchInput').value || "").toLowerCase();
+            const filtered = allTagihanData.filter(p => (p.nama || "").toLowerCase().includes(k));
+            
             const container = document.getElementById('customerList'); container.innerHTML = '';
-            if(data.length === 0) container.innerHTML = `<div class="text-center py-10 bg-white rounded-2xl border border-dashed text-slate-400 font-bold text-xs uppercase">Tidak Ada Tagihan Aktif</div>`;
-            data.forEach(p => {
+            if(filtered.length === 0) { container.innerHTML = `<div class="text-center py-10 bg-white rounded-2xl border border-dashed text-slate-400 font-bold text-xs uppercase">Tidak Ada Data</div>`; return; }
+            
+            const tglSekarang = new Date().getDate();
+            const bulanSekarang = new Date().getMonth() + 1;
+            const namaBulan = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+            filtered.forEach(p => {
+                let sisaBulanIni = p.cicilanPerBulan > 0 ? p.cicilanPerBulan : Math.round(p.hutang / 6);
+                let angkaTanggal = parseInt(p.jatuhTempo) || 1;
+                let bulanTerakhir = parseInt(p.bulanTerakhirBayar) || 0;
+                
+                let targetBulan = bulanTerakhir === 0 ? bulanSekarang : bulanTerakhir + 1;
+                if (p.cicilanKe == 1 && bulanTerakhir === 0 && (angkaTanggal - tglSekarang < 20)) { targetBulan = bulanSekarang + 1; }
+                let targetTahun = new Date().getFullYear(); if (targetBulan > 12) { targetBulan -= 12; targetTahun++; }
+                
+                let tglLengkap = `${angkaTanggal} ${namaBulan[targetBulan]} ${targetTahun}`;
+                
                 container.innerHTML += `
                     <div class="bg-white p-4 rounded-2xl border shadow-sm flex flex-col gap-3">
                         <div class="flex justify-between items-start">
-                            <div><h3 class="font-black text-xs text-slate-800 uppercase leading-none">${p.nama || "Guest"}</h3><p class="text-[9px] font-bold text-slate-400 mt-2">ID: ${p.idKontrak || "-"} • Ke-${p.cicilanKe || 1}</p></div>
-                            <div class="text-right"><p class="font-black text-slate-900 text-xs">Rp ${formatRupiah(p.cicilanPerBulan)}</p></div>
+                            <div><h3 class="font-black text-xs text-slate-800 uppercase leading-none">${p.nama}</h3><p class="text-[9px] font-bold text-slate-400 mt-2">ID: ${p.idKontrak} • Ke-${p.cicilanKe}</p></div>
+                            <div class="text-right"><p class="font-black text-slate-900 text-xs">Rp ${formatRupiah(sisaBulanIni)}</p></div>
                         </div>
-                        <button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${p.cicilanPerBulan}')" class="w-full py-3 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 active:scale-95 transition-all"><i data-lucide="bell" class="w-3.5 h-3.5"></i> KIRIM PENGINGAT WA</button>
+                        <button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${tglLengkap}', '${namaBulan[targetBulan]}')" class="w-full py-3 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 active:scale-95 transition-all"><i data-lucide="bell" class="w-3.5 h-3.5"></i> KIRIM PENGINGAT WA</button>
                     </div>`;
             });
             lucide.createIcons();
         }
 
-        function filterTagihan() {
-            const k = (document.getElementById('searchInput').value || "").toLowerCase();
-            renderTagihan(allTagihanData.filter(p => (p.nama || "").toLowerCase().includes(k)));
-        }
-
-        // --- MODAL ACC ---
+        // --- FUNGSI MODAL ACC & WHATSAPP ---
         window.bukaModalAcc = function(encoded) {
             const data = JSON.parse(decodeURIComponent(encoded)); currentActiveData = data;
             document.getElementById('accIdKontrak').innerText = data.idKontrak; 
@@ -220,26 +307,65 @@
 
         document.getElementById('btnKonfirmasiAcc').addEventListener('click', () => {
             const payload = { tipe: "ACC_PENGAJUAN", idKontrak: currentActiveData.idKontrak, wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: document.getElementById('accJatuhTempo').value, totalHutang: parseRupiah(document.getElementById('accTotalHutang').value), cicilanBulan: parseRupiah(document.getElementById('accCicilan').value) };
+            
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent("Alhamdulillah pengajuan di-ACC! ✨")}`, '_blank');
-            closeModalAcc(); showToast("Berhasil di-ACC!");
+            
+            const msg = `Assalamu'alaikum Kak *${payload.nama}* 🙏\n\nAlhamdulillah, pengajuan gadget *${payload.barang}* kamu di *Zenith Cell* telah di-ACC!\n\nUntuk memantau sisa tagihan dan jadwal pembayaran, silakan cek secara berkala di link berikut:\nhttps://zenith-cell.netlify.app/cek-tagihan-live\n\nTerima kasih atas kepercayaannya! ✨`;
+            window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent(msg)}`, '_blank');
+            
+            closeModalAcc(); showToast("Berhasil di-ACC!", "success");
             setTimeout(fetchAntrean, 1500);
         });
 
-        window.tolakPengajuan = function(id, nama, wa, barang) {
-            if(!confirm(`Tolak pengajuan ${nama}?`)) return;
-            fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", idKontrak: id }) });
-            window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}&text=${encodeURIComponent("Maaf pengajuan " + barang + " kamu ditolak. ✨")}`, '_blank');
-            setTimeout(fetchAntrean, 1500);
+        // --- FUNGSI MODAL TOLAK (100% BEBAS ALERT) ---
+        window.bukaModalTolak = function(id, nama, wa, barang) {
+            dataTolakSementara = { id, nama, wa, barang };
+            document.getElementById('tolakNamaUser').innerText = nama;
+            const modal = document.getElementById('tolakModal');
+            modal.classList.replace('hidden', 'flex');
+            setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('tolakCard').classList.remove('scale-95'); }, 10);
         }
 
-        window.bukaPesanWA = function(nama, wa, ke, nominal) {
-            const m = `Halo Kak ${nama} 🙏 Mengingatkan cicilan ke-${ke} senilai *Rp ${formatRupiah(nominal)}* hampir jatuh tempo. Terima kasih! ✨`;
+        window.closeTolakModal = function() {
+            const modal = document.getElementById('tolakModal');
+            modal.classList.add('opacity-0');
+            document.getElementById('tolakCard').classList.add('scale-95');
+            setTimeout(() => modal.classList.replace('flex', 'hidden'), 300);
+        }
+
+        document.getElementById('btnConfirmTolak').addEventListener('click', () => {
+            if (!dataTolakSementara) return;
+            const { id, nama, wa, barang } = dataTolakSementara;
+            const btn = document.getElementById('btnConfirmTolak');
+            btn.disabled = true; btn.innerText = "Memproses...";
+
+            fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", idKontrak: id }) });
+            
+            const msg = `Assalamu'alaikum Kak *${nama}* 🙏\n\nTerima kasih telah mempercayakan pengajuan *${barang}* di *Zenith Cell*.\n\nMohon maaf, setelah melalui proses verifikasi, saat ini pengajuan kamu *belum dapat kami proses*.\n\nJangan berkecil hati, kamu bisa mencoba mengajukan kembali di lain waktu. Terima kasih atas pengertiannya! ✨`;
+            window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}&text=${encodeURIComponent(msg)}`, '_blank');
+            
+            closeTolakModal();
+            showToast("Pengajuan berhasil ditolak", "error"); // Toast Merah
+            
+            setTimeout(() => { 
+                btn.disabled = false; btn.innerText = "Ya, Tolak"; 
+                fetchAntrean(); 
+            }, 1000);
+        });
+
+        // --- FUNGSI PESAN WA PENGINGAT ---
+        window.bukaPesanWA = function(nama, wa, ke, nominal, tglLengkap, bulanTagihan) {
+            const rek = `💳 *BCA* - 8161292087\n👤 Ardita Rizki Fauzi\n\n💳 *BRI* - 638501004971500\n👤 Vivi Nur Damayanti\n\n💳 *SeaBank* - 901556541299\n👤 Ardita Rizki Fauzi`;
+            
+            const m = `Assalamu'alaikum Kak *${nama}* 🙏\n\nSekadar mengingatkan dari *Zenith Cell*, untuk cicilan gadget (Bulan Ke-${ke}) senilai *Rp ${formatRupiah(nominal)}* untuk tagihan bulan *${bulanTagihan}* jatuh tempo pada tanggal *${tglLengkap}*.\n\nSilakan transfer ke rekening resmi kami:\n\n${rek}\n\nTerima kasih banyak! ✨`;
+            
             document.getElementById('pesanWA').value = m;
             targetWaLink = `https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}`;
+            
             document.getElementById('waModal').classList.replace('hidden', 'flex');
             setTimeout(() => { document.getElementById('waModal').classList.remove('opacity-0'); document.querySelector('#waModal > div').classList.remove('translate-y-full'); }, 10);
         }
+        
         window.closeWaModal = function() { document.getElementById('waModal').classList.add('opacity-0'); document.querySelector('#waModal > div').classList.add('translate-y-full'); setTimeout(() => document.getElementById('waModal').classList.replace('flex', 'hidden'), 300); };
 
         document.getElementById('btnKirimWA').addEventListener('click', () => {
@@ -251,3 +377,5 @@
     </script>
 </body>
 </html>
+
+
