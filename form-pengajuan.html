@@ -15,6 +15,8 @@
         input:focus-within, select:focus-within, textarea:focus-within { outline: 2px solid #10b981; outline-offset: 2px; transition: all 0.2s ease; }
         .radio-peer-tenor:checked + div { transform: scale(0.95); background-color: #0f172a; color: white; border-color: #0f172a; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .animate-pulse-soft { animation: pulse-soft 2s infinite; }
     </style>
 </head>
 <body class="text-slate-800 px-4 pt-6 flex justify-center selection:bg-emerald-200">
@@ -31,6 +33,7 @@
         </header>
 
         <form id="pengajuanForm" class="space-y-5">
+            <!-- SEKSI 1: IDENTITAS -->
             <section class="glass-panel p-5 rounded-3xl">
                 <h2 class="text-sm font-extrabold mb-4 flex items-center gap-2 text-slate-800"><i data-lucide="user" class="w-4 h-4 text-emerald-500"></i> Identitas Diri</h2>
                 <div class="space-y-3">
@@ -41,6 +44,7 @@
                 </div>
             </section>
 
+            <!-- SEKSI 2: PEKERJAAN -->
             <section class="glass-panel p-5 rounded-3xl">
                 <h2 class="text-sm font-extrabold mb-4 flex items-center gap-2 text-slate-800"><i data-lucide="briefcase" class="w-4 h-4 text-emerald-500"></i> Pekerjaan & Kontak</h2>
                 <div class="space-y-3">
@@ -63,6 +67,7 @@
                 </div>
             </section>
 
+            <!-- SEKSI 3: BARANG & AKAD (Voucher dipindah ke sini) -->
             <section class="glass-panel p-5 rounded-3xl">
                 <h2 class="text-sm font-extrabold mb-4 flex items-center gap-2 text-slate-800"><i data-lucide="shopping-bag" class="w-4 h-4 text-emerald-500"></i> Barang & Akad</h2>
                 <div class="space-y-4">
@@ -73,32 +78,29 @@
                         <div class="relative flex items-center"><span class="absolute left-3 text-slate-400 font-bold text-xs">Rp</span><input type="text" id="dpBarang" name="dpBarang" inputmode="numeric" placeholder="DP Muka" class="w-full pl-9 pr-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm"></div>
                     </div>
 
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Tanggal Jatuh Tempo (Tiap Bulan)</label>
-                        <div class="relative flex items-center"><span class="absolute left-3 text-slate-400 font-bold text-xs">Tgl</span><input type="number" id="jatuhTempo" name="jatuhTempo" min="1" max="31" placeholder="Misal: 25" required class="w-full pl-10 pr-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm"></div>
-                    </div>
-
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Durasi Tenor</label>
-                        <div class="grid grid-cols-4 gap-2 sm:gap-3" id="tenorContainer">
-                            <label class="cursor-pointer relative shrink-0"><input type="radio" name="tenor" value="3" class="radio-peer-tenor sr-only"><div class="w-full py-3 rounded-xl bg-slate-50 border-2 text-slate-600 font-black text-lg flex flex-col items-center justify-center shadow-sm transition-colors"><span class="leading-none">3</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>
-                            <label class="cursor-pointer relative shrink-0"><input type="radio" name="tenor" value="5" class="radio-peer-tenor sr-only" checked><div class="w-full py-3 rounded-xl bg-slate-50 border-2 text-slate-600 font-black text-lg flex flex-col items-center justify-center shadow-sm transition-colors"><span class="leading-none">5</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>
-                            <label class="cursor-pointer relative shrink-0"><input type="radio" name="tenor" value="8" class="radio-peer-tenor sr-only"><div class="w-full py-3 rounded-xl bg-slate-50 border-2 text-slate-600 font-black text-lg flex flex-col items-center justify-center shadow-sm transition-colors"><span class="leading-none">8</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>
-                            <label class="cursor-pointer relative shrink-0"><input type="radio" name="tenor" value="10" class="radio-peer-tenor sr-only"><div class="w-full py-3 rounded-xl bg-slate-50 border-2 text-slate-600 font-black text-lg flex flex-col items-center justify-center shadow-sm transition-colors"><span class="leading-none">10</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Pilih Jalur Transaksi</label>
+                    <div class="pt-2 border-t border-slate-100">
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Jalur Transaksi</label>
                         <select id="pilihJalur" required onchange="toggleJalur()" class="w-full px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl font-bold outline-none text-sm">
-                            <option value="" disabled selected>-- Pilih Jalur --</option>
+                            <option value="REGULER" selected>REGULER (Margin 25%) - Tanpa Jaminan</option>
                             <option value="VIP">🌟 JALUR VIP (Margin 15%) - Titip Jaminan</option>
-                            <option value="REGULER">REGULER (Margin 25%) - Tanpa Jaminan</option>
                         </select>
                     </div>
 
-                    <div id="boxJaminan" class="hidden space-y-2 mt-2 p-4 bg-emerald-50/50 border border-emerald-100 rounded-xl">
-                        <label class="block text-[10px] font-bold text-emerald-700 mb-1">Jenis Jaminan Fisik (Wajib untuk VIP)</label>
+                    <!-- KOTAK VOUCHER INTEGRASI (PINDAHAN) -->
+                    <div class="p-3 bg-amber-50/50 border border-amber-100 rounded-2xl">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i data-lucide="ticket-percent" class="w-3 h-3 text-amber-500"></i>
+                            <span class="text-[9px] font-black text-amber-700 uppercase tracking-wider">Gunakan Kode Promo</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="inputVoucher" placeholder="Ketik kode..." class="flex-grow px-3 py-2 bg-white border border-amber-200 rounded-lg font-black uppercase outline-none text-xs">
+                            <button type="button" id="btnCekVoucher" onclick="verifikasiVoucher()" class="bg-amber-500 text-white px-3 rounded-lg font-bold text-[10px] active:scale-95 transition-all">Gunakan</button>
+                        </div>
+                        <p id="msgVoucher" class="text-[9px] mt-1.5 font-bold hidden"></p>
+                    </div>
+
+                    <div id="boxJaminan" class="hidden space-y-2 p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl">
+                        <label class="block text-[10px] font-bold text-emerald-700 mb-1">Jenis Jaminan Fisik</label>
                         <select id="jenisJaminan" onchange="toggleJaminanLainnya()" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl font-bold outline-none text-sm">
                             <option value="" disabled selected>-- Pilih Jaminan --</option>
                             <option value="BPKB Motor">BPKB Motor</option>
@@ -109,6 +111,21 @@
                         <input type="text" id="jaminanLainnya" placeholder="Ketik jaminan di sini..." class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl font-bold outline-none mt-2 text-sm hidden">
                     </div>
 
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Tgl Jatuh Tempo</label>
+                            <div class="relative flex items-center"><span class="absolute left-3 text-slate-400 font-bold text-xs">Tgl</span><input type="number" id="jatuhTempo" name="jatuhTempo" min="1" max="31" placeholder="Misal: 25" required class="w-full pl-10 pr-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm"></div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Durasi Tenor</label>
+                            <select name="tenor" id="tenorSelect" class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
+                                <option value="3">3 Bulan</option>
+                                <option value="5" selected>5 Bulan</option>
+                                <option value="8">8 Bulan</option>
+                                <option value="10">10 Bulan</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -133,6 +150,7 @@
 
     <script>
         lucide.createIcons();
+        let promoMarginAktif = null;
 
         function showToast(message, type = 'error') {
             const toast = document.createElement('div');
@@ -144,6 +162,32 @@
             lucide.createIcons();
             setTimeout(() => { toast.classList.remove('-translate-y-10', 'opacity-0'); }, 10);
             setTimeout(() => { toast.classList.add('-translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3500);
+        }
+
+        function verifikasiVoucher() {
+            const input = document.getElementById('inputVoucher');
+            const btn = document.getElementById('btnCekVoucher');
+            const msg = document.getElementById('msgVoucher');
+            const kode = input.value.trim().toLowerCase();
+
+            if(!kode) return;
+            btn.disabled = true; btn.innerText = "...";
+
+            setTimeout(() => {
+                if(CONFIG.VOUCHERS && CONFIG.VOUCHERS[kode]) {
+                    promoMarginAktif = CONFIG.VOUCHERS[kode].margin;
+                    msg.innerText = "🎉 " + CONFIG.VOUCHERS[kode].pesan;
+                    msg.className = "text-[9px] mt-1.5 font-bold text-emerald-600 block animate-pulse-soft";
+                    input.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
+                    input.disabled = true; btn.classList.add('hidden');
+                    showToast("Voucher Aktif!", "success");
+                } else {
+                    promoMarginAktif = null;
+                    msg.innerText = "❌ Kode tidak valid.";
+                    msg.className = "text-[9px] mt-1.5 font-bold text-red-500 block";
+                    btn.disabled = false; btn.innerText = "Gunakan";
+                }
+            }, 600);
         }
 
         const formatRupiah = (num) => (num === 0 || isNaN(num)) ? "" : new Intl.NumberFormat('id-ID').format(num);
@@ -163,8 +207,7 @@
             inputElement.addEventListener('input', function() {
                 let val = this.value.replace(/[^0-9]/g, ''); 
                 if (val.startsWith('62')) val = '0' + val.substring(2); 
-                if (val.length > 15) val = val.substring(0, 15);
-                this.value = val;
+                this.value = val.substring(0, 15);
             });
         }
         bersihkanNomorWA(document.getElementById('wa'));
@@ -174,93 +217,30 @@
             const jalur = document.getElementById('pilihJalur').value;
             const boxJaminan = document.getElementById('boxJaminan');
             const jenisJaminan = document.getElementById('jenisJaminan');
-            
-            if(jalur === 'VIP') {
-                boxJaminan.classList.remove('hidden');
-                jenisJaminan.required = true;
-            } else {
-                boxJaminan.classList.add('hidden');
-                jenisJaminan.required = false;
-                jenisJaminan.value = "";
-                document.getElementById('jaminanLainnya').classList.add('hidden');
-                document.getElementById('jaminanLainnya').value = "";
-            }
+            if(jalur === 'VIP') { boxJaminan.classList.remove('hidden'); jenisJaminan.required = true; } 
+            else { boxJaminan.classList.add('hidden'); jenisJaminan.required = false; }
         }
 
         function toggleJaminanLainnya() {
             const select = document.getElementById('jenisJaminan'); 
             const inputLain = document.getElementById('jaminanLainnya');
-            if (select.value === 'Lainnya') { 
-                inputLain.classList.remove('hidden'); inputLain.required = true; 
-            } else { 
-                inputLain.classList.add('hidden'); inputLain.required = false; inputLain.value = ''; 
-            }
+            if (select.value === 'Lainnya') { inputLain.classList.remove('hidden'); inputLain.required = true; } 
+            else { inputLain.classList.add('hidden'); inputLain.required = false; }
         }
 
-        const formInputs = document.querySelectorAll('#pengajuanForm input, #pengajuanForm select, #pengajuanForm textarea');
-        function saveDraft() {
-            let draft = {};
-            formInputs.forEach(input => {
-                if(input.type === 'radio' && !input.checked) return;
-                draft[input.name || input.id] = input.value;
-            });
-            localStorage.setItem('zenith_draft', JSON.stringify(draft));
-        }
-        
-        function loadDraft() {
-            const draft = JSON.parse(localStorage.getItem('zenith_draft'));
-            if(draft && Object.keys(draft).length > 2) {
-                formInputs.forEach(input => {
-                    const savedVal = draft[input.name || input.id];
-                    if(savedVal !== undefined) {
-                        if(input.type === 'radio') { if(input.value === savedVal) input.checked = true; } 
-                        else { input.value = savedVal; }
-                    }
-                });
-                toggleJalur();
-            }
-        }
-        formInputs.forEach(input => input.addEventListener('input', saveDraft));
-
-        // Tangkap Data dari URL Kalkulator
-                let promoMarginAktif = null; // Variabel penyimpan data voucher
-
-        // Tangkap Data dari URL Kalkulator
         window.addEventListener('DOMContentLoaded', () => {
-            loadDraft();
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.has('harga')) document.getElementById('hargaBarang').value = formatRupiah(parseInt(urlParams.get('harga')));
-            if(urlParams.has('dp')) { let dpVal = parseInt(urlParams.get('dp')); if(dpVal > 0) document.getElementById('dpBarang').value = formatRupiah(dpVal); }
-            if(urlParams.has('tenor')) {
-                let t = urlParams.get('tenor'); let radio = document.querySelector(`input[name="tenor"][value="${t}"]`);
-                if(radio) { radio.checked = true; }
-            }
+            if(urlParams.has('dp')) document.getElementById('dpBarang').value = formatRupiah(parseInt(urlParams.get('dp')));
+            if(urlParams.has('tenor')) document.getElementById('tenorSelect').value = urlParams.get('tenor');
             if(urlParams.has('jalur')) {
-                const j = urlParams.get('jalur');
-                if(j === "Tanpa") { document.getElementById('pilihJalur').value = "REGULER"; } 
-                else if(j === "Jaminan") { document.getElementById('pilihJalur').value = "VIP"; }
+                document.getElementById('pilihJalur').value = urlParams.get('jalur') === "Jaminan" ? "VIP" : "REGULER";
                 toggleJalur();
-            }
-            
-            // TANGKAP VOUCHER DAN TAMPILKAN BANNER
-            if(urlParams.has('margin')) {
-                promoMarginAktif = urlParams.get('margin');
-                
-                // Buat banner hijau penanda voucher aktif
-                const formHeader = document.querySelector('header');
-                const promoBadge = document.createElement('div');
-                promoBadge.className = "mb-6 bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-4 rounded-2xl shadow-md flex items-center gap-3";
-                promoBadge.innerHTML = `<div class="bg-white/20 p-2 rounded-lg shrink-0"><i data-lucide="ticket-percent" class="w-6 h-6 text-white"></i></div><div><h3 class="text-xs font-black uppercase tracking-widest">Promo Aktif!</h3><p class="text-[11px] font-medium opacity-90 mt-0.5">Voucher Margin VVIP (${promoMarginAktif}%) berhasil diterapkan.</p></div>`;
-                
-                // Sisipkan di bawah header
-                formHeader.insertAdjacentElement('afterend', promoBadge);
-                lucide.createIcons();
             }
         });
 
-
         async function pickContact() {
-            if (!('contacts' in navigator && 'ContactsManager' in window)) return showToast("HP Anda tidak mendukung pilih kontak otomatis.");
+            if (!('contacts' in navigator && 'ContactsManager' in window)) return showToast("Pilih kontak tidak didukung.");
             try {
                 const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
                 if (contacts.length > 0) {
@@ -268,85 +248,67 @@
                     let phone = contacts[0].tel[0].replace(/[^0-9]/g, '');
                     if (phone.startsWith('62')) phone = '0' + phone.substring(2);
                     document.getElementById('daruratWa').value = phone;
-                    saveDraft();
                 }
             } catch (ex) { console.log(ex); }
         }
 
-        ['hargaBarang', 'dpBarang'].forEach(id => { document.getElementById(id).addEventListener('input', (e) => { e.target.value = formatRupiah(parseRupiah(e.target.value)); }); });
+        ['hargaBarang', 'dpBarang'].forEach(id => { 
+            document.getElementById(id).addEventListener('input', (e) => { e.target.value = formatRupiah(parseRupiah(e.target.value)); }); 
+        });
 
-        const modal = document.getElementById('instruksiModal');
-
-                document.getElementById('pengajuanForm').addEventListener('submit', async (e) => {
+        document.getElementById('pengajuanForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const nama = document.getElementById('nama').value;
+            const btnSubmit = document.getElementById('btnSubmitForm'), txtBtn = document.getElementById('txtBtnSubmit');
             const nikClean = document.getElementById('nik').value.replace(/[^0-9]/g, '');
             if (nikClean.length !== 16) { showToast("NIK harus 16 digit!"); return; }
 
             const jalur = document.getElementById('pilihJalur').value;
-            let jaminanFinal = "Tanpa Jaminan"; 
-            if (jalur === "VIP") {
-                let jenis = document.getElementById('jenisJaminan').value;
-                if (jenis === 'Lainnya') jenis = document.getElementById('jaminanLainnya').value;
-                jaminanFinal = `VIP - ${jenis}`; 
-            }
+            let jaminanFinal = (jalur === "VIP") ? `VIP - ${document.getElementById('jenisJaminan').value === 'Lainnya' ? document.getElementById('jaminanLainnya').value : document.getElementById('jenisJaminan').value}` : "Tanpa Jaminan";
 
-            // GABUNGKAN INFO VOUCHER KE KOLOM JAMINAN AGAR DIBACA OLEH ADMIN
-            if (typeof promoMarginAktif !== 'undefined' && promoMarginAktif !== null) {
-                jaminanFinal += ` (Promo Voucher ${promoMarginAktif}%)`;
-            }
+            if (promoMarginAktif) { jaminanFinal += ` (Voucher ${promoMarginAktif}%)`; }
 
-            const btnSubmit = document.getElementById('btnSubmitForm'), txtBtn = document.getElementById('txtBtnSubmit');
             const data = {
-    nama: nama,
-    nik: nikClean,
-    wa: document.getElementById('wa').value,
-    alamat: document.getElementById('alamat').value, 
-    pekerjaan: document.getElementById('pekerjaan').value,
-    gaji: document.getElementById('gaji').value,
-    daruratNama: document.getElementById('daruratNama').value,
-    daruratWa: document.getElementById('daruratWa').value,
-    barang: document.getElementById('barang').value,
-    harga: document.getElementById('hargaBarang').value,
-    dp: document.getElementById('dpBarang').value || "0",
-    tenor: document.querySelector('input[name="tenor"]:checked').value,
-    jaminan: jaminanFinal,
-    jatuhTempo: document.getElementById('jatuhTempo').value,
+                nama: document.getElementById('nama').value, nik: nikClean, wa: document.getElementById('wa').value,
+                alamat: document.getElementById('alamat').value, pekerjaan: document.getElementById('pekerjaan').value,
+                gaji: document.getElementById('gaji').value, daruratNama: document.getElementById('daruratNama').value,
+                daruratWa: document.getElementById('daruratWa').value, barang: document.getElementById('barang').value,
+                harga: document.getElementById('hargaBarang').value, dp: document.getElementById('dpBarang').value || "0",
+                tenor: document.getElementById('tenorSelect').value, jaminan: jaminanFinal,
+                jatuhTempo: document.getElementById('jatuhTempo').value,
+                margin: promoMarginAktif ? promoMarginAktif : (jalur === "VIP" ? 15 : 25)
+            };
 
-    // ✅ TAMBAHAN INI (WAJIB)
-    margin: (promoMarginAktif !== null)
-        ? parseInt(promoMarginAktif)
-        : (jalur === "VIP" ? 15 : 25)
-};
-            btnSubmit.disabled = true; txtBtn.innerText = "Memverifikasi...";
+            btnSubmit.disabled = true; txtBtn.innerText = "Memproses...";
 
             try {
-                const checkRes = await fetch(`${CONFIG.API_URL}?action=checkDuplicate&wa=${data.wa}&nik=${data.nik}&nocache=${Date.now()}`);
-                const checkResult = await checkRes.json();
+                const res = await fetch(`${CONFIG.API_URL}?action=checkDuplicate&wa=${data.wa}&nik=${data.nik}&nocache=${Date.now()}`);
+                const check = await res.json();
+                if (check.isDuplicate) { showToast(check.message); btnSubmit.disabled = false; txtBtn.innerText = "Kirim Pengajuan"; return; }
 
-                if (checkResult.isDuplicate) { showToast(checkResult.message); btnSubmit.disabled = false; txtBtn.innerText = "Kirim Pengajuan"; return; }
-
-                txtBtn.innerText = "Mengirim...";
-                const idKontrakBaru = "ZN-" + Math.floor(100000 + Math.random() * 900000);
+                const id = "ZN-" + Math.floor(100000 + Math.random() * 900000);
+                fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "PENGAJUAN_BARU", idKontrak: id, timestamp: new Date().toLocaleString('id-ID'), ...data }) });
                 
-                const payloadSheet = { tipe: "PENGAJUAN_BARU", idKontrak: idKontrakBaru, timestamp: new Date().toLocaleString('id-ID'), ...data };
-                fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payloadSheet) });
-                
-                localStorage.removeItem('zenith_draft');
-
-                const teksPesan = `*PENGAJUAN KREDIT BARU* 📝\nID: ${idKontrakBaru}\nNama: ${data.nama}\nBarang: *${data.barang}*\nHarga: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor} Bulan\nJaminan: *${data.jaminan}*\nJatuh Tempo: Tgl ${data.jatuhTempo}\n\n_Mohon dilanjut Min. Berikut saya lampirkan KTP & Jaminan:_`;
-                window.open(`https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(teksPesan)}`, '_blank');
+                const teks = `*PENGAJUAN KREDIT BARU* 📝\nID: ${id}\nNama: ${data.nama}\nBarang: *${data.barang}*\nHarga: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor} Bulan\nJaminan: *${data.jaminan}*\nJatuh Tempo: Tgl ${data.jatuhTempo}\n\n_Mohon dilanjut Min._`;
+                window.open(`https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(teks)}`, '_blank');
 
                 btnSubmit.disabled = false; txtBtn.innerText = "Kirim Pengajuan";
-                modal.classList.remove('hidden'); modal.classList.add('flex');
-                setTimeout(() => { modal.classList.remove('opacity-0'); }, 10);
-
+                document.getElementById('instruksiModal').classList.replace('hidden', 'flex');
+                setTimeout(() => { document.getElementById('instruksiModal').classList.remove('opacity-0'); }, 10);
             } catch(e) { showToast("Gagal terhubung ke server."); btnSubmit.disabled = false; txtBtn.innerText = "Kirim Pengajuan"; }
         });
 
-        function tutupModal() { modal.classList.add('opacity-0'); setTimeout(() => modal.classList.replace('flex','hidden'), 300); document.getElementById('pengajuanForm').reset(); toggleJalur(); }
+        function tutupModal() { 
+            document.getElementById('instruksiModal').classList.add('opacity-0'); 
+            setTimeout(() => document.getElementById('instruksiModal').classList.replace('flex','hidden'), 300); 
+            document.getElementById('pengajuanForm').reset(); 
+            promoMarginAktif = null; 
+            toggleJalur(); 
+            document.getElementById('msgVoucher').classList.add('hidden');
+            document.getElementById('inputVoucher').disabled = false;
+            document.getElementById('inputVoucher').classList.remove('border-emerald-50', 'bg-emerald-50');
+            document.getElementById('btnCekVoucher').classList.remove('hidden');
+        }
     </script>
-
 </body>
 </html>
+
