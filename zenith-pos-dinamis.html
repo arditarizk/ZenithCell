@@ -245,10 +245,48 @@
             }, 200);
         }
 
-        document.getElementById('btnShareWA').onclick = () => captureAndShare('wa');
-        document.getElementById('btnPrint').onclick = () => captureAndShare('print');
+                // FUNGSI KHUSUS PRINT RAWBT (TEKS MURNI BIAR TAJAM)
+        function cetakStrukTajam() {
+            if (!currentSavedData) return showToast("Data transaksi belum ada!", "error");
+
+            const p = currentSavedData;
+            const tgl = new Date().toLocaleString('id-ID');
+            const ketCicilan = p.cicilan === 'Pelunasan' ? 'Pelunasan Full' : 'Angsuran Ke-' + p.cicilan;
+            const barang = p.data.barang ? p.data.barang : '-';
+
+            // Menyusun struk bentuk teks (Lebar thermal 58mm biasanya muat 32 karakter)
+            let struk = "        ZENITH CELL         \n";
+            struk += " Gadget Syariah Kota Malang \n";
+            struk += "--------------------------------\n";
+            struk += "Tgl   : " + tgl + "\n";
+            struk += "Kasir : Admin Pusat\n";
+            struk += "--------------------------------\n";
+            struk += "No. Kntrk: " + p.data.idKontrak + "\n";
+            struk += "Pelanggan: " + p.data.nama.toUpperCase() + "\n";
+            struk += "Unit     : " + barang.toUpperCase() + "\n";
+            struk += "Ket      : " + ketCicilan + "\n";
+            struk += "--------------------------------\n";
+            struk += "BAYAR    : Rp " + formatRp(p.nominalVal) + "\n";
+            struk += "Sisa     : Rp " + formatRp(p.sisaBaru) + "\n";
+            struk += "--------------------------------\n";
+            struk += "     Alhamdulillah Sah!     \n";
+            struk += " Terima kasih, moga berkah! \n";
+            struk += "\n\n\n"; // Enter 3x biar gampang disobek
+
+            // Encode ke URL dan panggil RawBT Intent
+            let teksEncoded = encodeURIComponent(struk);
+            let rawbtIntent = "intent:" + teksEncoded + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
+            
+            // Eksekusi buka RawBT
+            window.location.href = rawbtIntent;
+        }
+
+        // SETTING TOMBOL
+        document.getElementById('btnShareWA').onclick = () => captureAndShare('wa'); // WA tetap pakai gambar (Canvas)
+        document.getElementById('btnPrint').onclick = () => cetakStrukTajam(); // Print pakai Teks RawBT
 
         fetchCustomersFromCloud();
     </script>
+
 </body>
 </html>
