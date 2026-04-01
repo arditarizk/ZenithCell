@@ -79,14 +79,12 @@
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Durasi Tenor (Maksimal 10 Bulan)</label>
-                        <div class="flex overflow-x-auto no-scrollbar gap-2 pb-1" id="tenorContainer">
-                            <script>
-                                for(let i=1; i<=10; i++) {
-                                    let isChecked = i === 5 ? 'checked' : '';
-                                    document.write(`<label class="cursor-pointer relative shrink-0"><input type="radio" name="tenor" value="${i} Bulan" class="radio-peer-tenor sr-only" ${isChecked}><div class="w-14 h-14 rounded-xl bg-slate-50 border-2 text-slate-600 font-black text-lg flex items-center justify-center shadow-sm transition-colors">${i}</div></label>`);
-                                }
-                            </script>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">Durasi Tenor</label>
+                        <div class="grid grid-cols-4 gap-2 sm:gap-3" id="tenorContainer">
+                            <label class="cursor-pointer relative shrink-0"><input type="radio" name="tenor" value="3" class="radio-peer-tenor sr-only"><div class="w-full py-3 rounded-xl bg-slate-50 border-2 text-slate-600 font-black text-lg flex flex-col items-center justify-center shadow-sm transition-colors"><span class="leading-none">3</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>
+                            <label class="cursor-pointer relative shrink-0"><input type="radio" name="tenor" value="5" class="radio-peer-tenor sr-only" checked><div class="w-full py-3 rounded-xl bg-slate-50 border-2 text-slate-600 font-black text-lg flex flex-col items-center justify-center shadow-sm transition-colors"><span class="leading-none">5</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>
+                            <label class="cursor-pointer relative shrink-0"><input type="radio" name="tenor" value="8" class="radio-peer-tenor sr-only"><div class="w-full py-3 rounded-xl bg-slate-50 border-2 text-slate-600 font-black text-lg flex flex-col items-center justify-center shadow-sm transition-colors"><span class="leading-none">8</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>
+                            <label class="cursor-pointer relative shrink-0"><input type="radio" name="tenor" value="10" class="radio-peer-tenor sr-only"><div class="w-full py-3 rounded-xl bg-slate-50 border-2 text-slate-600 font-black text-lg flex flex-col items-center justify-center shadow-sm transition-colors"><span class="leading-none">10</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>
                         </div>
                     </div>
 
@@ -110,7 +108,8 @@
                         </select>
                         <input type="text" id="jaminanLainnya" placeholder="Ketik jaminan di sini..." class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl font-bold outline-none mt-2 text-sm hidden">
                     </div>
-                    </div>
+
+                </div>
             </section>
 
             <div class="w-full h-32 shrink-0 pointer-events-none"></div>
@@ -171,7 +170,6 @@
         bersihkanNomorWA(document.getElementById('wa'));
         bersihkanNomorWA(document.getElementById('daruratWa'));
 
-        // FUNGSI JAMINAN 2 TAHAP
         function toggleJalur() {
             const jalur = document.getElementById('pilihJalur').value;
             const boxJaminan = document.getElementById('boxJaminan');
@@ -219,7 +217,7 @@
                         else { input.value = savedVal; }
                     }
                 });
-                toggleJalur(); // Refresh tampilan UI
+                toggleJalur();
             }
         }
         formInputs.forEach(input => input.addEventListener('input', saveDraft));
@@ -231,16 +229,13 @@
             if(urlParams.has('harga')) document.getElementById('hargaBarang').value = formatRupiah(parseInt(urlParams.get('harga')));
             if(urlParams.has('dp')) { let dpVal = parseInt(urlParams.get('dp')); if(dpVal > 0) document.getElementById('dpBarang').value = formatRupiah(dpVal); }
             if(urlParams.has('tenor')) {
-                let t = urlParams.get('tenor'); let radio = document.querySelector(`input[name="tenor"][value="${t} Bulan"]`);
+                let t = urlParams.get('tenor'); let radio = document.querySelector(`input[name="tenor"][value="${t}"]`);
                 if(radio) { radio.checked = true; }
             }
             if(urlParams.has('jalur')) {
                 const j = urlParams.get('jalur');
-                if(j === "Tanpa") { 
-                    document.getElementById('pilihJalur').value = "REGULER"; 
-                } else if(j === "Jaminan") { 
-                    document.getElementById('pilihJalur').value = "VIP"; 
-                }
+                if(j === "Tanpa") { document.getElementById('pilihJalur').value = "REGULER"; } 
+                else if(j === "Jaminan") { document.getElementById('pilihJalur').value = "VIP"; }
                 toggleJalur();
             }
         });
@@ -270,10 +265,8 @@
             const nikClean = document.getElementById('nik').value.replace(/[^0-9]/g, '');
             if (nikClean.length !== 16) { showToast("NIK harus 16 digit!"); return; }
 
-            // PENGGABUNGAN DATA JAMINAN AGAR SESUAI DENGAN FORMAT LAMA DI GOOGLE SHEETS
             const jalur = document.getElementById('pilihJalur').value;
             let jaminanFinal = "Tanpa Jaminan"; 
-            
             if (jalur === "VIP") {
                 let jenis = document.getElementById('jenisJaminan').value;
                 if (jenis === 'Lainnya') jenis = document.getElementById('jaminanLainnya').value;
@@ -305,7 +298,7 @@
                 
                 localStorage.removeItem('zenith_draft');
 
-                const teksPesan = `*PENGAJUAN KREDIT BARU* 📝\nID: ${idKontrakBaru}\nNama: ${data.nama}\nBarang: *${data.barang}*\nHarga: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor}\nJaminan: *${data.jaminan}*\nJatuh Tempo: Tgl ${data.jatuhTempo}\n\n_Mohon dilanjut Min. Berikut saya lampirkan KTP & Jaminan:_`;
+                const teksPesan = `*PENGAJUAN KREDIT BARU* 📝\nID: ${idKontrakBaru}\nNama: ${data.nama}\nBarang: *${data.barang}*\nHarga: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor} Bulan\nJaminan: *${data.jaminan}*\nJatuh Tempo: Tgl ${data.jatuhTempo}\n\n_Mohon dilanjut Min. Berikut saya lampirkan KTP & Jaminan:_`;
                 window.open(`https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(teksPesan)}`, '_blank');
 
                 btnSubmit.disabled = false; txtBtn.innerText = "Kirim Pengajuan";

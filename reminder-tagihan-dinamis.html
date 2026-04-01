@@ -198,7 +198,7 @@
                     data.forEach((p) => {
                         let hargaBersih = parseRupiah(p.harga.toString()) - parseRupiah(p.dp.toString());
                         
-                        // LOGIKA MARGIN KEMBALI KE 15% & 25%
+                        // LOGIKA MARGIN KEMBALI KE 15% & 25% (TIDAK PERLU DIUBAH LAGI)
                         let marginAktif = (p.jaminan && p.jaminan.includes("Tanpa Jaminan")) ? 25 : 15; 
                         
                         let rekTotal = hargaBersih + (hargaBersih * (marginAktif / 100)); 
@@ -215,7 +215,7 @@
                                         <p class="text-[9px] font-bold text-slate-500 mt-0.5">${p.barang}</p>
                                         <span class="text-[8px] font-black px-1.5 py-0.5 rounded mt-1 inline-block ${marginAktif === 15 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}">${marginAktif === 15 ? '🌟 VIP (Jaminan 15%)' : 'Reguler (Tanpa Jaminan 25%)'}</span>
                                     </div>
-                                    <div class="text-right"><p class="text-[9px] font-bold text-slate-400">Tenor</p><p class="font-black text-slate-900 text-[11px]">${p.tenor}</p></div>
+                                    <div class="text-right"><p class="text-[9px] font-bold text-slate-400">Tenor</p><p class="font-black text-slate-900 text-[11px]">${p.tenor} Bln</p></div>
                                 </div>
                                 <div class="grid grid-cols-2 gap-2 mt-1">
                                     <button onclick="tolakPengajuan('${p.idKontrak}')" class="py-2 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold">Tolak</button>
@@ -331,12 +331,21 @@
         }
 
         const modalWa = document.getElementById('waModal');
+        
         window.bukaPesanWA = function(nama, wa, cicilanKe, nominal, tglLengkap, namaBulanTarget) {
             const teksRekening = `💳 *BCA* - 8161292087\n👤 a/n Ardita Rizki Fauzi\n\n💳 *BRI* - 638501004971500\n👤 a/n Vivi Nur Damayanti\n\n💳 *SeaBank* - 901556541299\n👤 a/n Ardita Rizki Fauzi`;
             document.getElementById('pesanWA').value = `Assalamu'alaikum Kak ${nama} 🙏\n\nSekadar mengingatkan dari *Zenith Cell*, untuk cicilan gadget (Bulan Ke-${cicilanKe}) senilai *Rp ${formatRupiah(nominal)}* untuk tagihan bulan *${namaBulanTarget}* sudah memasuki jadwal pembayaran (${tglLengkap}).\n\nSilakan transfer ke salah satu rekening resmi kami:\n\n${teksRekening}\n\nJika sudah ditransfer, mohon fotokan buktinya ke chat ini ya Kak. Terima kasih banyak! ✨`;
-            targetWaLink = `https://api.whatsapp.com/send?phone=${wa}`;
+            
+            // PERBAIKAN BUG NOMOR WHATSAPP (Mengubah 0 menjadi 62)
+            let waFormatted = wa.toString();
+            if (waFormatted.startsWith('0')) {
+                waFormatted = '62' + waFormatted.substring(1);
+            }
+            
+            targetWaLink = `https://api.whatsapp.com/send?phone=${waFormatted}`;
             modalWa.classList.replace('hidden', 'flex'); setTimeout(() => { modalWa.classList.remove('opacity-0'); document.querySelector('#waModal > div').classList.remove('translate-y-full'); }, 10);
         };
+        
         window.closeWaModal = function() { modalWa.classList.add('opacity-0'); document.querySelector('#waModal > div').classList.add('translate-y-full'); setTimeout(() => modalWa.classList.replace('flex', 'hidden'), 300); };
         document.getElementById('btnKirimWA').addEventListener('click', () => { window.open(`${targetWaLink}&text=${encodeURIComponent(document.getElementById('pesanWA').value)}`, '_blank'); closeWaModal(); });
 
