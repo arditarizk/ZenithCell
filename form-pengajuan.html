@@ -299,13 +299,26 @@
 
             const btnSubmit = document.getElementById('btnSubmitForm'), txtBtn = document.getElementById('txtBtnSubmit');
             const data = {
-                nama: nama, nik: nikClean, wa: document.getElementById('wa').value, alamat: document.getElementById('alamat').value, 
-                pekerjaan: document.getElementById('pekerjaan').value, gaji: document.getElementById('gaji').value,
-                daruratNama: document.getElementById('daruratNama').value, daruratWa: document.getElementById('daruratWa').value,
-                barang: document.getElementById('barang').value, harga: document.getElementById('hargaBarang').value, dp: document.getElementById('dpBarang').value || "0",
-                tenor: document.querySelector('input[name="tenor"]:checked').value, jaminan: jaminanFinal, jatuhTempo: document.getElementById('jatuhTempo').value 
-            };
+    nama: nama,
+    nik: nikClean,
+    wa: document.getElementById('wa').value,
+    alamat: document.getElementById('alamat').value, 
+    pekerjaan: document.getElementById('pekerjaan').value,
+    gaji: document.getElementById('gaji').value,
+    daruratNama: document.getElementById('daruratNama').value,
+    daruratWa: document.getElementById('daruratWa').value,
+    barang: document.getElementById('barang').value,
+    harga: document.getElementById('hargaBarang').value,
+    dp: document.getElementById('dpBarang').value || "0",
+    tenor: document.querySelector('input[name="tenor"]:checked').value,
+    jaminan: jaminanFinal,
+    jatuhTempo: document.getElementById('jatuhTempo').value,
 
+    // ✅ TAMBAHAN INI (WAJIB)
+    margin: (promoMarginAktif !== null)
+        ? parseInt(promoMarginAktif)
+        : (jalur === "VIP" ? 15 : 25)
+};
             btnSubmit.disabled = true; txtBtn.innerText = "Memverifikasi...";
 
             try {
