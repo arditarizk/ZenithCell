@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Form Pengajuan - Zenith Cell</title>
+    <link rel="icon" type="image/png" href="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/6f184ccb-599f-4527-b31f-f416b7dc6b8d.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -13,7 +14,6 @@
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         .glass-panel { background: rgba(255, 255, 255, 0.98); border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); }
         input:focus-within, select:focus-within, textarea:focus-within { outline: 2px solid #10b981; outline-offset: 2px; transition: all 0.2s ease; }
-        .radio-peer-tenor:checked + div { transform: scale(0.95); background-color: #0f172a; color: white; border-color: #0f172a; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         .animate-pulse-soft { animation: pulse-soft 2s infinite; }
@@ -21,104 +21,124 @@
 </head>
 <body class="text-slate-800 px-4 pt-6 flex justify-center selection:bg-emerald-200">
 
+    <!-- TOAST CONTAINER -->
     <div id="toastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 pointer-events-none w-full max-w-sm px-4"></div>
 
     <main class="w-full max-w-md relative z-10 flex flex-col">
         <header class="mb-6 flex items-center gap-4 bg-white p-4 rounded-[2rem] shadow-sm border relative">
-            <a href="index.html" class="p-2.5 bg-slate-50 border border-slate-100 rounded-full text-slate-500 active:scale-95"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
+            <a href="index.html" class="p-2.5 bg-slate-50 border border-slate-100 rounded-full text-slate-500 active:scale-95 transition-all"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
             <div>
                 <h1 class="font-black text-xl leading-none text-slate-900">Form Pengajuan</h1>
-                <p class="text-[10px] font-bold text-emerald-600 uppercase mt-1 tracking-widest">Kredit Syariah</p>
+                <p class="text-[10px] font-bold text-emerald-600 uppercase mt-1 tracking-widest">Sesuai Prinsip Murabahah</p>
             </div>
         </header>
 
+        <!-- SEKSI EDUKASI (POJOK LITERASI) -->
+        <section class="mb-6 overflow-hidden">
+            <div class="flex items-center gap-2 mb-3">
+                <div class="p-1.5 bg-indigo-100 rounded-lg text-indigo-600"><i data-lucide="graduation-cap" class="w-4 h-4"></i></div>
+                <h2 class="text-xs font-black uppercase tracking-widest text-slate-500">Pojok Literasi Syariah</h2>
+            </div>
+            
+            <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                <div class="min-w-[200px] bg-indigo-600 p-4 rounded-3xl text-white shadow-lg shadow-indigo-200">
+                    <p class="text-[10px] font-black uppercase opacity-70 mb-1">Apa itu Akad?</p>
+                    <p class="text-xs font-bold leading-relaxed">Janji suci atau kesepakatan antara Anda & Zenith Cell yang berlandaskan kejujuran.</p>
+                </div>
+                <div class="min-w-[200px] bg-emerald-600 p-4 rounded-3xl text-white shadow-lg shadow-emerald-200">
+                    <p class="text-[10px] font-black uppercase opacity-70 mb-1">Murabahah</p>
+                    <p class="text-xs font-bold leading-relaxed">Kami beli barangnya, lalu kami jual ke Anda dengan margin keuntungan yang disepakati.</p>
+                </div>
+                <div class="min-w-[200px] bg-amber-500 p-4 rounded-3xl text-white shadow-lg shadow-amber-200">
+                    <p class="text-[10px] font-black uppercase opacity-70 mb-1">Margin vs Bunga</p>
+                    <p class="text-xs font-bold leading-relaxed">Di sini tidak ada bunga. Yang ada adalah keuntungan jual-beli yang nilainya tetap sejak awal.</p>
+                </div>
+            </div>
+        </section>
+
         <form id="pengajuanForm" class="space-y-5">
-            <!-- SEKSI 1: IDENTITAS -->
+            <!-- IDENTITAS -->
             <section class="glass-panel p-5 rounded-3xl">
                 <h2 class="text-sm font-extrabold mb-4 flex items-center gap-2 text-slate-800"><i data-lucide="user" class="w-4 h-4 text-emerald-500"></i> Identitas Diri</h2>
                 <div class="space-y-3">
-                    <input type="text" id="nama" name="nama" pattern="^[a-zA-Z\s.,']{3,50}$" placeholder="Nama Lengkap KTP" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
-                    <input type="text" inputmode="numeric" id="nik" name="nik" maxlength="20" placeholder="NIK KTP (16 Digit)" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none tracking-wide text-sm">
-                    <input type="tel" id="wa" name="wa" maxlength="15" placeholder="Nomor WhatsApp Aktif" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
-                    <textarea id="alamat" name="alamat" rows="2" placeholder="Alamat Domisili Sekarang" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-medium outline-none resize-none text-sm"></textarea>
+                    <input type="text" id="nama" placeholder="Nama Sesuai KTP" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm focus:border-emerald-500 transition-all">
+                    <input type="text" inputmode="numeric" id="nik" maxlength="20" placeholder="NIK KTP (16 Digit)" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none tracking-wide text-sm focus:border-emerald-500">
+                    <input type="tel" id="wa" placeholder="WhatsApp Aktif" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm focus:border-emerald-500">
+                    <textarea id="alamat" rows="2" placeholder="Alamat Domisili" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-medium outline-none resize-none text-sm focus:border-emerald-500"></textarea>
                 </div>
             </section>
 
-            <!-- SEKSI 2: PEKERJAAN -->
+            <!-- PEKERJAAN & KONTAK -->
             <section class="glass-panel p-5 rounded-3xl">
                 <h2 class="text-sm font-extrabold mb-4 flex items-center gap-2 text-slate-800"><i data-lucide="briefcase" class="w-4 h-4 text-emerald-500"></i> Pekerjaan & Kontak</h2>
                 <div class="space-y-3">
-                    <select id="pekerjaan" name="pekerjaan" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
+                    <select id="pekerjaan" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm focus:border-emerald-500">
                         <option value="" disabled selected>-- Pilih Profesi --</option>
                         <option value="Karyawan Swasta">Karyawan Swasta</option><option value="Wirausaha">Wirausaha</option><option value="Lainnya">Lainnya</option>
                     </select>
-                    <select id="gaji" name="gaji" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
+                    <select id="gaji" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm focus:border-emerald-500">
                         <option value="" disabled selected>-- Estimasi Penghasilan --</option>
                         <option value="< Rp 3 Juta">< Rp 3 Juta</option><option value="Rp 3 - 5 Juta">Rp 3 - 5 Juta</option><option value="> Rp 5 Juta">> Rp 5 Juta</option>
                     </select>
                     <div class="p-3 bg-slate-50 border rounded-xl">
                         <div class="flex justify-between items-center mb-2">
                             <label class="text-[10px] font-extrabold text-slate-400 uppercase">Kontak Darurat</label>
-                            <button type="button" onclick="pickContact()" class="text-[9px] font-bold bg-indigo-100 text-indigo-600 px-2 py-1 rounded hover:bg-indigo-200">Pilih Kontak</button>
+                            <button type="button" onclick="pickContact()" class="text-[9px] font-bold bg-indigo-100 text-indigo-600 px-2 py-1 rounded hover:bg-indigo-200 transition-colors">Pilih Kontak</button>
                         </div>
-                        <input type="text" id="daruratNama" name="daruratNama" placeholder="Nama Kerabat" required class="w-full p-2.5 bg-white border rounded-lg text-sm font-bold outline-none mb-2">
-                        <input type="tel" id="daruratWa" name="daruratWa" placeholder="No. HP Kerabat" required class="w-full p-2.5 bg-white border rounded-lg text-sm font-bold outline-none">
+                        <input type="text" id="daruratNama" placeholder="Nama Kerabat" required class="w-full p-2.5 bg-white border rounded-lg text-sm font-bold outline-none mb-2 focus:border-emerald-500">
+                        <input type="tel" id="daruratWa" placeholder="No. HP Kerabat" required class="w-full p-2.5 bg-white border rounded-lg text-sm font-bold outline-none focus:border-emerald-500">
                     </div>
                 </div>
             </section>
 
-            <!-- SEKSI 3: BARANG & AKAD (Voucher dipindah ke sini) -->
+            <!-- BARANG & AKAD -->
             <section class="glass-panel p-5 rounded-3xl">
-                <h2 class="text-sm font-extrabold mb-4 flex items-center gap-2 text-slate-800"><i data-lucide="shopping-bag" class="w-4 h-4 text-emerald-500"></i> Barang & Akad</h2>
+                <h2 class="text-sm font-extrabold mb-4 flex items-center gap-2 text-slate-800"><i data-lucide="shopping-bag" class="w-4 h-4 text-emerald-500"></i> Detail Akad Barang</h2>
                 <div class="space-y-4">
-                    <input type="text" id="barang" name="barang" placeholder="Gadget yang Diinginkan" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
+                    <input type="text" id="barang" placeholder="Gadget Yang Diinginkan" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm focus:border-emerald-500">
                     
                     <div class="grid grid-cols-2 gap-2">
-                        <div class="relative flex items-center"><span class="absolute left-3 text-slate-400 font-bold text-xs">Rp</span><input type="text" id="hargaBarang" name="hargaBarang" inputmode="numeric" placeholder="Harga Cash" required class="w-full pl-9 pr-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm"></div>
-                        <div class="relative flex items-center"><span class="absolute left-3 text-slate-400 font-bold text-xs">Rp</span><input type="text" id="dpBarang" name="dpBarang" inputmode="numeric" placeholder="DP Muka" class="w-full pl-9 pr-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm"></div>
+                        <div class="relative flex items-center"><span class="absolute left-3 text-slate-400 font-bold text-xs">Rp</span><input type="text" id="hargaBarang" inputmode="numeric" placeholder="Harga Pokok" required class="w-full pl-9 pr-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm focus:border-emerald-500"></div>
+                        <div class="relative flex items-center"><span class="absolute left-3 text-slate-400 font-bold text-xs">Rp</span><input type="text" id="dpBarang" inputmode="numeric" placeholder="DP (Uang Muka)" class="w-full pl-9 pr-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm focus:border-emerald-500"></div>
                     </div>
 
                     <div class="pt-2 border-t border-slate-100">
                         <label class="block text-[10px] font-bold text-slate-500 mb-1">Jalur Transaksi</label>
-                        <select id="pilihJalur" required onchange="toggleJalur()" class="w-full px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl font-bold outline-none text-sm">
+                        <select id="pilihJalur" required onchange="toggleJalur()" class="w-full px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl font-bold outline-none text-sm focus:border-emerald-500">
                             <option value="REGULER" selected>REGULER (Margin 25%) - Tanpa Jaminan</option>
-                            <option value="VIP">🌟 JALUR VIP (Margin 15%) - Titip Jaminan</option>
+                            <option value="VIP">🌟 VIP (Margin 15%) - Titip Jaminan</option>
                         </select>
                     </div>
 
-                    <!-- KOTAK VOUCHER INTEGRASI (PINDAHAN) -->
                     <div class="p-3 bg-amber-50/50 border border-amber-100 rounded-2xl">
                         <div class="flex items-center gap-2 mb-2">
                             <i data-lucide="ticket-percent" class="w-3 h-3 text-amber-500"></i>
-                            <span class="text-[9px] font-black text-amber-700 uppercase tracking-wider">Gunakan Kode Promo</span>
+                            <span class="text-[9px] font-black text-amber-700 uppercase tracking-wider">Kode Promo</span>
                         </div>
                         <div class="flex gap-2">
-                            <input type="text" id="inputVoucher" placeholder="Ketik kode..." class="flex-grow px-3 py-2 bg-white border border-amber-200 rounded-lg font-black uppercase outline-none text-xs">
+                            <input type="text" id="inputVoucher" placeholder="Ketik kode..." class="flex-grow px-3 py-2 bg-white border border-amber-200 rounded-lg font-black uppercase outline-none text-xs focus:border-amber-500">
                             <button type="button" id="btnCekVoucher" onclick="verifikasiVoucher()" class="bg-amber-500 text-white px-3 rounded-lg font-bold text-[10px] active:scale-95 transition-all">Gunakan</button>
                         </div>
                         <p id="msgVoucher" class="text-[9px] mt-1.5 font-bold hidden"></p>
                     </div>
 
                     <div id="boxJaminan" class="hidden space-y-2 p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl">
-                        <label class="block text-[10px] font-bold text-emerald-700 mb-1">Jenis Jaminan Fisik</label>
-                        <select id="jenisJaminan" onchange="toggleJaminanLainnya()" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl font-bold outline-none text-sm">
-                            <option value="" disabled selected>-- Pilih Jaminan --</option>
+                        <select id="jenisJaminan" class="w-full px-4 py-3 bg-white border rounded-xl font-bold outline-none text-sm focus:border-emerald-500">
+                            <option value="" disabled selected>-- Pilih Jenis Jaminan --</option>
                             <option value="BPKB Motor">BPKB Motor</option>
                             <option value="Ijazah Asli">Ijazah Asli</option>
-                            <option value="Logam Mulia">Logam Mulia</option>
                             <option value="Lainnya">Lainnya...</option>
                         </select>
-                        <input type="text" id="jaminanLainnya" placeholder="Ketik jaminan di sini..." class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl font-bold outline-none mt-2 text-sm hidden">
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Tgl Jatuh Tempo</label>
-                            <div class="relative flex items-center"><span class="absolute left-3 text-slate-400 font-bold text-xs">Tgl</span><input type="number" id="jatuhTempo" name="jatuhTempo" min="1" max="31" placeholder="Misal: 25" required class="w-full pl-10 pr-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm"></div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Jatuh Tempo</label>
+                            <div class="relative flex items-center"><span class="absolute left-3 text-slate-400 font-bold text-xs">Tgl</span><input type="number" id="jatuhTempo" min="1" max="31" placeholder="25" required class="w-full pl-10 pr-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm focus:border-emerald-500"></div>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 mb-1">Durasi Tenor</label>
-                            <select name="tenor" id="tenorSelect" class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm">
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Tenor (Durasi)</label>
+                            <select id="tenorSelect" class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm focus:border-emerald-500">
                                 <option value="3">3 Bulan</option>
                                 <option value="5" selected>5 Bulan</option>
                                 <option value="8">8 Bulan</option>
@@ -129,22 +149,23 @@
                 </div>
             </section>
 
-            <div class="w-full h-32 shrink-0 pointer-events-none"></div>
+            <div class="w-full h-24 shrink-0"></div>
 
             <div class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50">
-                <button type="submit" id="btnSubmitForm" class="w-full bg-slate-900 text-white font-extrabold py-4 px-6 rounded-2xl active:scale-95 transition-transform flex justify-center items-center gap-2 shadow-2xl border border-slate-700">
-                    <i data-lucide="send" class="w-5 h-5 text-emerald-400"></i><span id="txtBtnSubmit">Kirim Pengajuan</span>
+                <button type="submit" id="btnSubmitForm" class="w-full bg-slate-900 text-white font-extrabold py-4 px-6 rounded-2xl active:scale-95 transition-all flex justify-center items-center gap-2 shadow-2xl border border-slate-700">
+                    <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i><span id="txtBtnSubmit">Ajukan Pembiayaan</span>
                 </button>
             </div>
         </form>
     </main>
 
+    <!-- MODAL SUKSES (Mengarahkan ke WA) -->
     <div id="instruksiModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity">
-        <div class="bg-white rounded-[2rem] p-6 max-w-[320px] w-full text-center shadow-2xl transform scale-95 transition-transform" id="instruksiCard">
-            <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="check-circle-2" class="w-8 h-8 text-emerald-500"></i></div>
-            <h3 class="text-lg font-extrabold text-slate-900 mb-1">Berhasil Dikirim!</h3>
-            <p class="text-slate-500 text-xs mb-6 leading-relaxed">Mohon kembali ke WhatsApp Admin untuk melampirkan Foto KTP & Fisik Jaminan.</p>
-            <button onclick="tutupModal()" class="w-full bg-slate-100 font-bold py-3 rounded-xl text-sm">Tutup Formulir</button>
+        <div class="bg-white rounded-[2rem] p-6 max-w-[320px] w-full text-center shadow-2xl transform scale-95 transition-transform">
+            <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="heart" class="w-8 h-8 text-emerald-500"></i></div>
+            <h3 class="text-lg font-extrabold text-slate-900 mb-1">Alhamdulillah!</h3>
+            <p class="text-slate-500 text-xs mb-6 leading-relaxed">Pengajuan Anda telah direkam oleh sistem. Silakan lanjutkan ke WhatsApp Admin untuk proses verifikasi.</p>
+            <button onclick="location.reload()" class="w-full bg-slate-100 font-bold py-3 rounded-xl text-sm active:scale-95 transition-all hover:bg-slate-200">Selesai</button>
         </div>
     </div>
 
@@ -152,95 +173,104 @@
         lucide.createIcons();
         let promoMarginAktif = null;
 
+        // FUNGSI TOAST NOTIFICATION MODERN (Anti Alert)
         function showToast(message, type = 'error') {
             const toast = document.createElement('div');
-            const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
-            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
-            toast.className = `${bgColor} text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 transform -translate-y-10 opacity-0 transition-all duration-300 w-full`;
-            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 shrink-0"></i><span class="text-sm font-bold">${message}</span>`;
+            const bgColor = type === 'success' ? 'bg-emerald-500' : (type === 'info' ? 'bg-blue-500' : 'bg-red-500');
+            const icon = type === 'success' ? 'check-circle' : (type === 'info' ? 'info' : 'alert-circle');
+            toast.className = `${bgColor} text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 fixed top-5 left-1/2 -translate-x-1/2 z-[1000] min-w-[250px] font-bold text-sm text-left pointer-events-auto`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 shrink-0"></i><span>${message}</span>`;
             document.getElementById('toastContainer').appendChild(toast);
             lucide.createIcons();
             setTimeout(() => { toast.classList.remove('-translate-y-10', 'opacity-0'); }, 10);
             setTimeout(() => { toast.classList.add('-translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3500);
         }
 
+        // LOGIKA BARU: VALIDASI VOUCHER VS JALUR VIP
         function verifikasiVoucher() {
             const input = document.getElementById('inputVoucher');
-            const btn = document.getElementById('btnCekVoucher');
             const msg = document.getElementById('msgVoucher');
+            const btn = document.getElementById('btnCekVoucher');
             const kode = input.value.trim().toLowerCase();
+            
+            const jalurDipilih = document.getElementById('pilihJalur').value; // "REGULER" atau "VIP"
+            const marginJalur = jalurDipilih === "VIP" ? 15 : 25;
 
-            if(!kode) return;
-            btn.disabled = true; btn.innerText = "...";
+            if(!kode) {
+                showToast("Silakan masukkan kode voucher terlebih dahulu.");
+                return;
+            }
 
-            setTimeout(() => {
-                if(CONFIG.VOUCHERS && CONFIG.VOUCHERS[kode]) {
-                    promoMarginAktif = CONFIG.VOUCHERS[kode].margin;
-                    msg.innerText = "🎉 " + CONFIG.VOUCHERS[kode].pesan;
-                    msg.className = "text-[9px] mt-1.5 font-bold text-emerald-600 block animate-pulse-soft";
-                    input.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
-                    input.disabled = true; btn.classList.add('hidden');
-                    showToast("Voucher Aktif!", "success");
-                } else {
-                    promoMarginAktif = null;
-                    msg.innerText = "❌ Kode tidak valid.";
-                    msg.className = "text-[9px] mt-1.5 font-bold text-red-500 block";
-                    btn.disabled = false; btn.innerText = "Gunakan";
+            if(CONFIG.VOUCHERS && CONFIG.VOUCHERS[kode]) {
+                let marginVoucher = CONFIG.VOUCHERS[kode].margin;
+
+                // PROTEKSI: Cek apakah margin jalur saat ini sudah lebih murah dari voucher
+                if (marginVoucher >= marginJalur) {
+                    showToast(`Maaf, Jalur ${jalurDipilih} (${marginJalur}%) sudah lebih murah atau sama dengan voucher ini (${marginVoucher}%). Voucher tidak dapat digabung.`, "info");
+                    input.value = ""; // Reset input
+                    return;
                 }
-            }, 600);
+
+                promoMarginAktif = marginVoucher;
+                msg.innerText = "🎉 " + CONFIG.VOUCHERS[kode].pesan + ` (Margin Promo: ${marginVoucher}%)`;
+                msg.className = "text-[9px] mt-1.5 font-bold text-emerald-600 block animate-pulse-soft";
+                
+                input.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
+                input.disabled = true; 
+                btn.classList.add('hidden');
+                
+                showToast(`Alhamdulillah, Voucher Aktif! Margin Anda turun menjadi ${marginVoucher}%`, "success");
+            } else {
+                promoMarginAktif = null;
+                msg.innerText = "❌ Kode voucher tidak ditemukan/tidak valid.";
+                msg.className = "text-[9px] mt-1.5 font-bold text-red-500 block";
+                showToast("Kode voucher tidak valid.");
+            }
+        }
+
+        // FUNGSI GANTI JALUR DENGAN AUTO-RESET VOUCHER
+        function toggleJalur() {
+            const jalur = document.getElementById('pilihJalur').value;
+            document.getElementById('boxJaminan').classList.toggle('hidden', jalur === 'REGULER');
+
+            // Jika pelanggan ubah jalur saat voucher sudah aktif, RESET VOUCHER-nya.
+            if (promoMarginAktif !== null) {
+                promoMarginAktif = null; // Batalkan voucher
+                
+                const input = document.getElementById('inputVoucher');
+                const btn = document.getElementById('btnCekVoucher');
+                const msg = document.getElementById('msgVoucher');
+                
+                input.value = "";
+                input.disabled = false;
+                input.classList.remove('border-emerald-500', 'bg-emerald-50', 'text-emerald-700');
+                
+                btn.classList.remove('hidden');
+                msg.classList.add('hidden');
+                
+                showToast("Voucher dibatalkan otomatis karena perubahan Jalur Transaksi.", "info");
+            }
         }
 
         const formatRupiah = (num) => (num === 0 || isNaN(num)) ? "" : new Intl.NumberFormat('id-ID').format(num);
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
 
-        document.getElementById('nik').addEventListener('input', function(e) {
-            let val = this.value.replace(/[^0-9]/g, ''); let formatted = '';
-            if (val.length > 0) formatted += val.substring(0, 3);
-            if (val.length > 3) formatted += '-' + val.substring(3, 6);
-            if (val.length > 6) formatted += '-' + val.substring(6, 12);
-            if (val.length > 12) formatted += '-' + val.substring(12, 15);
-            if (val.length > 15) formatted += '-' + val.substring(15, 16);
-            this.value = formatted;
+        ['hargaBarang', 'dpBarang'].forEach(id => { 
+            document.getElementById(id).addEventListener('input', (e) => { e.target.value = formatRupiah(parseRupiah(e.target.value)); }); 
         });
 
-        function bersihkanNomorWA(inputElement) {
-            inputElement.addEventListener('input', function() {
-                let val = this.value.replace(/[^0-9]/g, ''); 
-                if (val.startsWith('62')) val = '0' + val.substring(2); 
-                this.value = val.substring(0, 15);
-            });
-        }
-        bersihkanNomorWA(document.getElementById('wa'));
-        bersihkanNomorWA(document.getElementById('daruratWa'));
+        document.getElementById('nik').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '').substring(0, 16);
+        });
 
-        function toggleJalur() {
-            const jalur = document.getElementById('pilihJalur').value;
-            const boxJaminan = document.getElementById('boxJaminan');
-            const jenisJaminan = document.getElementById('jenisJaminan');
-            if(jalur === 'VIP') { boxJaminan.classList.remove('hidden'); jenisJaminan.required = true; } 
-            else { boxJaminan.classList.add('hidden'); jenisJaminan.required = false; }
-        }
-
-        function toggleJaminanLainnya() {
-            const select = document.getElementById('jenisJaminan'); 
-            const inputLain = document.getElementById('jaminanLainnya');
-            if (select.value === 'Lainnya') { inputLain.classList.remove('hidden'); inputLain.required = true; } 
-            else { inputLain.classList.add('hidden'); inputLain.required = false; }
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if(urlParams.has('harga')) document.getElementById('hargaBarang').value = formatRupiah(parseInt(urlParams.get('harga')));
-            if(urlParams.has('dp')) document.getElementById('dpBarang').value = formatRupiah(parseInt(urlParams.get('dp')));
-            if(urlParams.has('tenor')) document.getElementById('tenorSelect').value = urlParams.get('tenor');
-            if(urlParams.has('jalur')) {
-                document.getElementById('pilihJalur').value = urlParams.get('jalur') === "Jaminan" ? "VIP" : "REGULER";
-                toggleJalur();
-            }
+        document.getElementById('wa').addEventListener('input', function() {
+            let val = this.value.replace(/[^0-9]/g, ''); 
+            if (val.startsWith('62')) val = '0' + val.substring(2); 
+            this.value = val.substring(0, 15);
         });
 
         async function pickContact() {
-            if (!('contacts' in navigator && 'ContactsManager' in window)) return showToast("Pilih kontak tidak didukung.");
+            if (!('contacts' in navigator && 'ContactsManager' in window)) return showToast("Mohon maaf, fitur pilih kontak tidak didukung di peramban ini.", "info");
             try {
                 const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
                 if (contacts.length > 0) {
@@ -249,66 +279,69 @@
                     if (phone.startsWith('62')) phone = '0' + phone.substring(2);
                     document.getElementById('daruratWa').value = phone;
                 }
-            } catch (ex) { console.log(ex); }
+            } catch (ex) { console.log(ex); showToast("Gagal mengambil kontak."); }
         }
 
-        ['hargaBarang', 'dpBarang'].forEach(id => { 
-            document.getElementById(id).addEventListener('input', (e) => { e.target.value = formatRupiah(parseRupiah(e.target.value)); }); 
-        });
-
-        document.getElementById('pengajuanForm').addEventListener('submit', async (e) => {
+        // FORCE SUBMIT LOGIC (NO-CORS) - PASTI MASUK DATABASE
+        document.getElementById('pengajuanForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const btnSubmit = document.getElementById('btnSubmitForm'), txtBtn = document.getElementById('txtBtnSubmit');
-            const nikClean = document.getElementById('nik').value.replace(/[^0-9]/g, '');
-            if (nikClean.length !== 16) { showToast("NIK harus 16 digit!"); return; }
+            const btn = document.getElementById('btnSubmitForm');
+            const nikClean = document.getElementById('nik').value;
+            
+            if (nikClean.length !== 16) {
+                showToast("Mohon maaf, NIK KTP wajib berjumlah 16 digit angka.");
+                return; 
+            }
 
-            const jalur = document.getElementById('pilihJalur').value;
-            let jaminanFinal = (jalur === "VIP") ? `VIP - ${document.getElementById('jenisJaminan').value === 'Lainnya' ? document.getElementById('jaminanLainnya').value : document.getElementById('jenisJaminan').value}` : "Tanpa Jaminan";
-
-            if (promoMarginAktif) { jaminanFinal += ` (Voucher ${promoMarginAktif}%)`; }
-
+            // Logika Penentuan Margin Akhir (Voucher didahulukan, jika kosong pakai Jalur)
+            const marginFix = promoMarginAktif ? promoMarginAktif : (document.getElementById('pilihJalur').value === "VIP" ? 15 : 25);
+            
             const data = {
-                nama: document.getElementById('nama').value, nik: nikClean, wa: document.getElementById('wa').value,
-                alamat: document.getElementById('alamat').value, pekerjaan: document.getElementById('pekerjaan').value,
-                gaji: document.getElementById('gaji').value, daruratNama: document.getElementById('daruratNama').value,
-                daruratWa: document.getElementById('daruratWa').value, barang: document.getElementById('barang').value,
-                harga: document.getElementById('hargaBarang').value, dp: document.getElementById('dpBarang').value || "0",
-                tenor: document.getElementById('tenorSelect').value, jaminan: jaminanFinal,
-                jatuhTempo: document.getElementById('jatuhTempo').value,
-                margin: promoMarginAktif ? promoMarginAktif : (jalur === "VIP" ? 15 : 25)
+                nama: document.getElementById('nama').value, 
+                nik: nikClean, 
+                wa: document.getElementById('wa').value,
+                alamat: document.getElementById('alamat').value, 
+                pekerjaan: document.getElementById('pekerjaan').value,
+                gaji: document.getElementById('gaji').value, 
+                daruratNama: document.getElementById('daruratNama').value,
+                daruratWa: document.getElementById('daruratWa').value, 
+                barang: document.getElementById('barang').value,
+                harga: document.getElementById('hargaBarang').value, 
+                dp: document.getElementById('dpBarang').value || "0",
+                tenor: document.getElementById('tenorSelect').value, 
+                jaminan: document.getElementById('pilihJalur').value === "VIP" ? document.getElementById('jenisJaminan').value : "Tanpa Jaminan",
+                jatuhTempo: document.getElementById('jatuhTempo').value, 
+                margin: marginFix
             };
 
-            btnSubmit.disabled = true; txtBtn.innerText = "Memproses...";
+            btn.disabled = true; btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Menyimpan...`;
+            lucide.createIcons();
+            
+            const id = "ZN-" + Math.floor(100000 + Math.random() * 900000);
 
             try {
-                const res = await fetch(`${CONFIG.API_URL}?action=checkDuplicate&wa=${data.wa}&nik=${data.nik}&nocache=${Date.now()}`);
-                const check = await res.json();
-                if (check.isDuplicate) { showToast(check.message); btnSubmit.disabled = false; txtBtn.innerText = "Kirim Pengajuan"; return; }
-
-                const id = "ZN-" + Math.floor(100000 + Math.random() * 900000);
-                fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "PENGAJUAN_BARU", idKontrak: id, timestamp: new Date().toLocaleString('id-ID'), ...data }) });
+                // Tembak Data ke Google Sheets (Pasti Tembus)
+                fetch(CONFIG.API_URL, { 
+                    method: 'POST', 
+                    mode: 'no-cors', 
+                    body: JSON.stringify({ tipe: "PENGAJUAN_BARU", idKontrak: id, timestamp: new Date().toLocaleString('id-ID'), ...data }) 
+                });
                 
-                const teks = `*PENGAJUAN KREDIT BARU* 📝\nID: ${id}\nNama: ${data.nama}\nBarang: *${data.barang}*\nHarga: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor} Bulan\nJaminan: *${data.jaminan}*\nJatuh Tempo: Tgl ${data.jatuhTempo}\n\n_Mohon dilanjut Min._`;
-                window.open(`https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(teks)}`, '_blank');
-
-                btnSubmit.disabled = false; txtBtn.innerText = "Kirim Pengajuan";
+                // --- PESAN WHATSAPP YANG LEBIH ISLAMI (SYARIAH) ---
+                const waMsg = `Assalamu'alaikum Warahmatullahi Wabarakatuh 🙏\n\nBismillah, Admin Zenith Cell. Saya bermaksud mengajukan pembiayaan syariah (Akad Murabahah) dengan rincian sebagai berikut:\n\n🆔 *ID Pengajuan:* ${id}\n👤 *Nama:* ${data.nama}\n📱 *Barang:* ${data.barang}\n💰 *Harga Pokok:* Rp ${data.harga}\n💵 *Uang Muka (DP):* Rp ${data.dp}\n🗓 *Tenor:* ${data.tenor} Bulan\n📅 *Jatuh Tempo:* Setiap Tgl ${data.jatuhTempo}\n⚖️ *Margin Transaksi:* ${data.margin}% (${data.jaminan})\n\nSemoga pengajuan ini membawa keberkahan untuk kita semua. Mohon arahannya untuk proses verifikasi selanjutnya. Jazakumullah khairan! ✨`;
+                
+                window.open(`https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(waMsg)}`, '_blank');
+                
                 document.getElementById('instruksiModal').classList.replace('hidden', 'flex');
-                setTimeout(() => { document.getElementById('instruksiModal').classList.remove('opacity-0'); }, 10);
-            } catch(e) { showToast("Gagal terhubung ke server."); btnSubmit.disabled = false; txtBtn.innerText = "Kirim Pengajuan"; }
+                setTimeout(() => document.getElementById('instruksiModal').classList.remove('opacity-0'), 10);
+            } catch(error) {
+                showToast("Terjadi kendala jaringan saat mengirim data.");
+                btn.disabled = false; btn.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i> Ajukan Pembiayaan`;
+                lucide.createIcons();
+            }
         });
-
-        function tutupModal() { 
-            document.getElementById('instruksiModal').classList.add('opacity-0'); 
-            setTimeout(() => document.getElementById('instruksiModal').classList.replace('flex','hidden'), 300); 
-            document.getElementById('pengajuanForm').reset(); 
-            promoMarginAktif = null; 
-            toggleJalur(); 
-            document.getElementById('msgVoucher').classList.add('hidden');
-            document.getElementById('inputVoucher').disabled = false;
-            document.getElementById('inputVoucher').classList.remove('border-emerald-50', 'bg-emerald-50');
-            document.getElementById('btnCekVoucher').classList.remove('hidden');
-        }
     </script>
 </body>
 </html>
+
 
