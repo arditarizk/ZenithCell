@@ -17,53 +17,45 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="text-slate-800 pb-24 pt-4 px-4 flex justify-center selection:bg-amber-200">
+<body class="text-slate-800 lg:p-8 min-h-screen flex selection:bg-amber-200">
 
     <div id="toastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 w-full max-w-sm px-4 pointer-events-none"></div>
 
-    <main class="w-full max-w-md relative z-10 flex flex-col min-h-[90vh]">
-        <header class="mb-5 flex items-center justify-between bg-white p-3.5 rounded-2xl shadow-sm border relative">
-            <a href="index.html" class="p-2 bg-slate-50 rounded-xl text-slate-500 mr-2 active:scale-90 transition-transform"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
+    <main class="m-auto w-full max-w-7xl bg-transparent lg:bg-white/50 lg:rounded-[2.5rem] lg:p-8 lg:shadow-xl relative z-10 flex flex-col min-h-screen lg:min-h-[85vh]">
+        <header class="mb-5 flex items-center justify-between bg-white p-3.5 lg:p-5 rounded-2xl shadow-sm border mx-4 mt-4 lg:m-0">
+            <a href="index.html" class="p-2.5 bg-slate-50 rounded-xl text-slate-500 mr-3 hover:bg-slate-100 transition-colors"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
             <div class="flex items-center gap-3 flex-grow">
-                <div class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center"><i data-lucide="layout-dashboard" class="w-5 h-5 text-amber-400"></i></div>
-                <div><h1 class="font-black text-base leading-none">Server Admin</h1><p class="text-[9px] font-bold text-amber-600 uppercase mt-0.5 tracking-wider">Monitoring Panel</p></div>
+                <div class="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center"><i data-lucide="layout-dashboard" class="w-6 h-6 text-amber-400"></i></div>
+                <div><h1 class="font-black text-lg lg:text-xl leading-none">Server Admin</h1><p class="text-[10px] font-bold text-amber-600 uppercase mt-1 tracking-wider">Monitoring Panel</p></div>
             </div>
-            <button onclick="refreshData()" class="p-2 bg-amber-50 rounded-xl text-amber-600 active:rotate-180 transition-all duration-500"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
+            <button onclick="refreshData()" class="p-3 bg-amber-50 rounded-xl text-amber-700 hover:bg-amber-100 transition-colors"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
         </header>
 
-        <div class="flex gap-2 mb-4 bg-white p-1 rounded-xl shadow-sm border border-slate-100">
-            <button onclick="switchTab('antrean')" id="tab-antrean" class="flex-1 py-2 rounded-lg text-[11px] tab-active transition-all">Antrean ACC</button>
-            <button onclick="switchTab('tagihan')" id="tab-tagihan" class="flex-1 py-2 rounded-lg text-[11px] tab-inactive transition-all">Tagihan Aktif</button>
-        </div>
-
-        <div id="viewAntrean" class="flex flex-col flex-grow">
-            <div id="pendingList" class="space-y-3 pb-10"></div>
-        </div>
-
-        <div id="viewTagihan" class="hidden flex flex-col flex-grow">
-            <div class="relative mb-4">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i></div>
-                <input type="text" id="searchInput" oninput="filterTagihan()" placeholder="Cari nama pelanggan..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold outline-none focus:border-amber-400 transition-all shadow-sm">
+        <div class="px-4 lg:px-0 flex flex-col flex-grow">
+            <div class="flex gap-2 mb-6 bg-white p-1.5 rounded-xl shadow-sm border border-slate-200 max-w-md mx-auto lg:mx-0 w-full">
+                <button onclick="switchTab('antrean')" id="tab-antrean" class="flex-1 py-2.5 rounded-lg text-xs tab-active transition-all">Antrean ACC</button>
+                <button onclick="switchTab('tagihan')" id="tab-tagihan" class="flex-1 py-2.5 rounded-lg text-xs tab-inactive transition-all">Tagihan Aktif</button>
             </div>
-            <div id="customerList" class="space-y-3 pb-10"></div>
+
+            <div id="viewAntrean" class="flex flex-col flex-grow">
+                <div id="pendingList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-10"></div>
+            </div>
+
+            <div id="viewTagihan" class="hidden flex flex-col flex-grow">
+                <div class="relative mb-6 max-w-md">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i></div>
+                    <input type="text" id="searchInput" oninput="filterTagihan()" placeholder="Cari nama pelanggan..." class="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-amber-400 shadow-sm">
+                </div>
+                <div id="customerList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-10"></div>
+            </div>
         </div>
     </main>
 
-    <div id="accModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end px-2 pb-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white w-full max-w-md mx-auto rounded-[2rem] p-6 shadow-2xl transform translate-y-full transition-transform" id="accModalContent">
-            <div class="flex justify-between items-center mb-5 pb-3 border-b">
-                <h2 class="font-black text-base text-slate-900">Finalisasi Akad</h2>
-                <button onclick="closeModalAcc()" class="p-2 bg-slate-50 rounded-full"><i data-lucide="x" class="w-4 h-4 text-slate-400"></i></button>
-            </div>
+    <div id="accModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-center items-center px-4 opacity-0 transition-opacity">
+        <div class="bg-white w-full max-w-md rounded-[2rem] p-6 shadow-2xl transform scale-95 transition-transform" id="accModalContent">
+            <div class="flex justify-between items-center mb-5 pb-3 border-b"><h2 class="font-black text-base text-slate-900">Finalisasi Akad</h2><button onclick="closeModalAcc()" class="p-2 bg-slate-50 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div>
             <div class="space-y-4">
-                <div class="bg-slate-50 p-4 rounded-2xl border">
-                    <div class="flex justify-between items-center mb-1">
-                        <p class="text-[9px] text-slate-400 font-black uppercase" id="accIdKontrak">...</p>
-                        <span id="badgeMarginFinal" class="text-[8px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 border border-amber-200">MARGIN: --%</span>
-                    </div>
-                    <p class="font-black text-slate-800 text-base" id="accNama">...</p>
-                    <p class="text-[11px] font-semibold text-slate-500" id="accBarang">...</p>
-                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl border"><p class="text-[9px] text-slate-400 font-black uppercase mb-1" id="accIdKontrak">...</p><p class="font-black text-slate-800 text-base" id="accNama">...</p><p class="text-[11px] font-semibold text-slate-500" id="accBarang">...</p></div>
                 <div class="grid grid-cols-2 gap-3">
                     <div><label class="block text-[10px] font-extrabold text-slate-500 mb-1">Tgl Tempo</label><input type="number" id="accJatuhTempo" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div>
                     <div><label class="block text-[10px] font-extrabold text-slate-500 mb-1">Tenor (Bln)</label><input type="number" id="accTenor" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none" disabled></div>
@@ -71,316 +63,52 @@
                 <div><label class="block text-[10px] font-extrabold text-slate-500 mb-1">Total Harga Jual</label><input type="text" id="accTotalHutang" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div>
                 <div><label class="block text-[10px] font-extrabold text-slate-500 mb-1">Cicilan Per Bulan</label><input type="text" id="accCicilan" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div>
             </div>
-            <button id="btnKonfirmasiAcc" class="w-full mt-6 bg-emerald-500 text-white font-extrabold py-4 rounded-xl active:scale-95 transition-all shadow-lg shadow-emerald-500/20">ACC & NOTIFIKASI WA</button>
-        </div>
-    </div>
-
-    <div id="tolakModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-[2rem] p-6 max-w-[320px] w-full text-center shadow-2xl transform scale-95 transition-transform" id="tolakCard">
-            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="alert-triangle" class="w-8 h-8 text-red-500"></i></div>
-            <h3 class="text-lg font-extrabold text-slate-900 mb-1">Tolak Pengajuan?</h3>
-            <p class="text-slate-500 text-xs mb-6 leading-relaxed">Pengajuan atas nama <strong id="tolakNamaUser" class="text-slate-700"></strong> akan ditolak dan disembunyikan dari antrean.</p>
-            <div class="flex gap-3">
-                <button onclick="closeTolakModal()" class="flex-1 bg-slate-100 font-bold py-3.5 rounded-xl text-slate-600 text-sm active:scale-95 transition-all">Batal</button>
-                <button id="btnConfirmTolak" class="flex-1 bg-red-500 text-white font-bold py-3.5 rounded-xl text-sm active:scale-95 transition-all">Ya, Tolak</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="waModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-end transition-opacity duration-300 opacity-0 px-2 sm:px-0">
-        <div class="bg-white w-full max-w-md mx-auto rounded-t-[2rem] p-5 pb-8 shadow-2xl transform translate-y-full transition-transform">
-            <div class="flex justify-between items-center mb-4 pb-2 border-b">
-                <h2 class="font-black text-base text-slate-900 flex items-center gap-2" id="waHeaderTitle"><i data-lucide="send" class="w-4 h-4 text-emerald-500"></i> Pesan Tagihan</h2>
-                <button onclick="closeWaModal()" class="p-2 bg-slate-50 rounded-full"><i data-lucide="x" class="w-4 h-4 text-slate-400"></i></button>
-            </div>
-            <textarea id="pesanWA" rows="8" class="w-full p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl text-xs font-medium outline-none resize-none"></textarea>
-            <button id="btnKirimWA" class="w-full mt-4 bg-[#25D366] text-white font-bold py-3 rounded-xl active:scale-95 flex justify-center gap-2 shadow-lg shadow-green-500/20"><i data-lucide="message-circle" class="w-4 h-4"></i> Kirim ke WhatsApp</button>
+            <button id="btnKonfirmasiAcc" class="w-full mt-6 bg-emerald-500 text-white font-extrabold py-4 rounded-xl shadow-lg">ACC & NOTIFIKASI WA</button>
         </div>
     </div>
 
     <script>
         lucide.createIcons();
-        const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num);
-        const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
-        
-        let currentTab = 'antrean', allTagihanData = [], currentActiveData = null, dataTolakSementara = null, targetWaLink = "";
+        const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num), parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, ''))||0;
+        let currentTab = 'antrean', allTagihanData = [], currentActiveData = null;
 
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
-            toast.className = `${bgColor} text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 transform -translate-y-10 opacity-0 transition-all duration-300 w-full pointer-events-auto`;
-            toast.innerHTML = `<span class="text-sm font-bold">${message}</span>`;
-            document.getElementById('toastContainer').appendChild(toast);
-            setTimeout(() => { toast.classList.remove('-translate-y-10', 'opacity-0'); }, 10);
-            setTimeout(() => { toast.classList.add('-translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3500);
-        }
-
-        const formatNomorWA = (wa) => {
-            let n = (wa || "").toString().replace(/[^0-9]/g, '');
-            if (n.startsWith('0')) return '62' + n.substring(1);
-            if (n.startsWith('8')) return '62' + n;
-            return n;
-        };
-
-        const getErrorTemplate = (title, message) => `
-            <div class="bg-red-50 border border-red-200 rounded-3xl p-6 text-center m-2 shadow-sm">
-                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 text-red-500"><i data-lucide="alert-triangle" class="w-6 h-6"></i></div>
-                <h3 class="font-black text-sm text-red-900 mb-1">${title}</h3>
-                <p class="text-[10px] text-red-600 font-bold uppercase tracking-wide mb-3">${message}</p>
-            </div>`;
-
-        function refreshData() { 
-            if (typeof CONFIG === 'undefined' || !CONFIG.API_URL) return showToast("Error: API_URL tidak ditemukan!", "error");
-            currentTab === 'antrean' ? fetchAntrean() : fetchTagihan(); 
-        }
-        
-        function switchTab(tab) {
-            currentTab = tab;
-            document.getElementById('tab-antrean').className = tab === 'antrean' ? 'flex-1 py-2 rounded-lg text-[11px] tab-active' : 'flex-1 py-2 rounded-lg text-[11px] tab-inactive';
-            document.getElementById('tab-tagihan').className = tab === 'tagihan' ? 'flex-1 py-2 rounded-lg text-[11px] tab-active' : 'flex-1 py-2 rounded-lg text-[11px] tab-inactive';
-            if (tab === 'antrean') { 
-                document.getElementById('viewAntrean').classList.remove('hidden'); 
-                document.getElementById('viewTagihan').classList.add('hidden'); 
-                fetchAntrean(); 
-            } else { 
-                document.getElementById('viewTagihan').classList.remove('hidden'); 
-                document.getElementById('viewAntrean').classList.add('hidden'); 
-                fetchTagihan(); 
-            }
-        }
+        function showToast(msg) { const t = document.createElement('div'); t.className = "bg-emerald-500 text-white px-5 py-3.5 rounded-2xl shadow-xl fixed top-5 left-1/2 -translate-x-1/2 z-[1000] font-bold text-sm"; t.innerText = msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 3000); }
+        function switchTab(t) { currentTab=t; document.getElementById('tab-antrean').className = t==='antrean'?'flex-1 py-2.5 rounded-lg text-xs tab-active':'flex-1 py-2.5 rounded-lg text-xs tab-inactive'; document.getElementById('tab-tagihan').className = t==='tagihan'?'flex-1 py-2.5 rounded-lg text-xs tab-active':'flex-1 py-2.5 rounded-lg text-xs tab-inactive'; document.getElementById('viewAntrean').style.display = t==='antrean'?'flex':'none'; document.getElementById('viewTagihan').style.display = t==='tagihan'?'flex':'none'; refreshData(); }
+        function refreshData() { currentTab==='antrean'?fetchAntrean():fetchTagihan(); }
 
         async function fetchAntrean() {
-            const container = document.getElementById('pendingList');
-            container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-2"></div><p class="text-[10px] font-bold text-slate-400">Loading Antrean...</p></div>`;
+            const c = document.getElementById('pendingList'); c.innerHTML = `<div class="col-span-full text-center py-10"><div class="spinner mx-auto mb-2"></div></div>`;
             try {
-                const res = await fetch(`${CONFIG.API_URL}?action=getPending&nocache=${Date.now()}`);
-                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-                const result = await res.json();
-                if (result.status === "error") throw new Error(result.msg);
-                
-                const data = result.data || [];
-                container.innerHTML = data.length === 0 ? `<div class="text-center py-10 bg-white rounded-2xl border border-dashed text-slate-400 font-bold text-xs uppercase">Antrean Kosong</div>` : '';
-                
-                data.forEach((p) => {
-                    let hClean = parseRupiah(p.harga) - parseRupiah(p.dp);
-                    let marginVal = parseInt(p.margin) || 25; 
-                    let rekTotal = hClean + (hClean * (marginVal / 100)); 
-                    let rekBulan = Math.round(rekTotal / (parseInt(p.tenor) || 5));
-                    let dataJson = encodeURIComponent(JSON.stringify({ ...p, rekTotal, rekBulan, marginAktif: marginVal }));
-
-                    container.innerHTML += `
-                        <div class="bg-white p-4 rounded-2xl border shadow-sm mb-3">
-                            <div class="flex justify-between items-start mb-3">
-                                <div>
-                                    <h3 class="font-black text-slate-900 text-sm leading-tight">${p.nama || "No Name"}</h3>
-                                    <p class="text-[10px] font-bold text-slate-500 mt-0.5">${p.barang || "-"}</p>
-                                    <span class="text-[8px] font-black px-1.5 py-0.5 rounded mt-2 inline-block bg-amber-100 text-amber-700 border border-amber-200">MARGIN: ${marginVal}%</span>
-                                </div>
-                                <div class="text-right"><span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">${p.tenor || 0} BLN</span></div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <button onclick="bukaModalTolak('${p.idKontrak}', '${p.nama}', '${p.wa}', '${p.barang}')" class="py-2.5 bg-red-50 text-red-600 rounded-xl text-[10px] font-black active:scale-95 transition-all">TOLAK</button>
-                                <button onclick="bukaModalAcc('${dataJson}')" class="py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-[10px] font-black active:scale-95 transition-all">HITUNG ACC</button>
-                            </div>
-                        </div>`;
+                const res = await fetch(`${CONFIG.API_URL}?action=getPending&nocache=${Date.now()}`); const data = (await res.json()).data || [];
+                c.innerHTML = data.length===0 ? `<div class="col-span-full text-center py-10 bg-white rounded-2xl border text-slate-400 font-bold text-xs">Kosong</div>` : '';
+                data.forEach(p => {
+                    let m=p.margin||25, rT=(p.harga-p.dp)+(p.harga-p.dp)*(m/100), rB=Math.round(rT/p.tenor);
+                    c.innerHTML += `<div class="bg-white p-5 rounded-2xl border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow"><div><div class="flex justify-between"><h3 class="font-black text-sm">${p.nama}</h3><span class="text-[10px] bg-slate-100 px-2 py-1 rounded font-bold">${p.tenor} Bln</span></div><p class="text-xs text-slate-500 mt-1">${p.barang}</p></div><div class="mt-4 pt-4 border-t border-slate-50 flex gap-2"><button onclick="tolak('${p.idKontrak}')" class="flex-1 bg-red-50 text-red-600 py-2.5 rounded-xl text-[10px] font-black">TOLAK</button><button onclick="bukaModalAcc('${encodeURIComponent(JSON.stringify({...p,rT,rB}))}')" class="flex-1 bg-emerald-50 text-emerald-600 py-2.5 rounded-xl text-[10px] font-black">ACC</button></div></div>`;
                 });
-                lucide.createIcons();
-            } catch(e) { 
-                container.innerHTML = getErrorTemplate("Gagal Memuat Antrean", e.message);
-                lucide.createIcons();
-            }
-        }
-
-        function renderTagihanCard(p, namaBulan, targetBulan, targetTahun) {
-            let sisaBulanIni = p.cicilanPerBulan > 0 ? p.cicilanPerBulan : Math.round(p.hutang / 6);
-            let angkaTanggal = parseInt(p.jatuhTempo) || 1;
-            let tglLengkap = `${angkaTanggal} ${namaBulan[targetBulan]} ${targetTahun}`;
-            
-            // LOGIKA BADGE SKOR KREDIT (DIAMBIL DARI API BE)
-            let statusBe = p.statusPembayaran || "LANCAR";
-            let isTelat = statusBe.includes("TELAT");
-            
-            let badgeHtml = isTelat 
-                ? `<span class="bg-red-100 text-red-600 px-1.5 py-0.5 rounded text-[8px] font-black animate-pulse border border-red-200 shrink-0">${statusBe}</span>`
-                : `<span class="bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded text-[8px] font-black border border-emerald-200 shrink-0">LANCAR</span>`;
-            
-            // Tampilan tombol disesuaikan jika telat
-            let btnBg = isTelat ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700";
-            let btnIcon = isTelat ? "alert-circle" : "bell";
-            let btnText = isTelat ? "KIRIM TEGURAN WA" : "KIRIM PENGINGAT WA";
-
-            return `
-                <div class="bg-white p-4 rounded-2xl border shadow-sm flex flex-col gap-3">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="font-black text-xs text-slate-800 uppercase leading-none flex items-center gap-2 flex-wrap">${p.nama} ${badgeHtml}</h3>
-                            <p class="text-[9px] font-bold text-slate-400 mt-2">ID: ${p.idKontrak} • Ke-${p.cicilanKe}</p>
-                        </div>
-                        <div class="text-right shrink-0">
-                            <p class="font-black text-slate-900 text-xs">Rp ${formatRupiah(sisaBulanIni)}</p>
-                            <p class="text-[8px] font-bold text-slate-400 mt-1">Tempo: Tgl ${angkaTanggal}</p>
-                        </div>
-                    </div>
-                    <button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${tglLengkap}', '${namaBulan[targetBulan]}', ${isTelat})" class="w-full py-3 ${btnBg} rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 active:scale-95 transition-all"><i data-lucide="${btnIcon}" class="w-3.5 h-3.5"></i> ${btnText}</button>
-                </div>`;
+            } catch(e) { c.innerHTML = `<div class="col-span-full text-red-500 text-center">Gagal Muat</div>`; }
         }
 
         async function fetchTagihan() {
-            const container = document.getElementById('customerList');
-            container.innerHTML = `<div class="text-center py-10"><div class="spinner mx-auto mb-2"></div><p class="text-[10px] font-bold text-slate-400 uppercase">Syncing Tagihan...</p></div>`;
+            const c = document.getElementById('customerList'); c.innerHTML = `<div class="col-span-full text-center py-10"><div class="spinner mx-auto mb-2"></div></div>`;
             try {
-                const res = await fetch(`${CONFIG.API_URL}?action=getAll&nocache=${Date.now()}`);
-                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-                const result = await res.json();
-                if (result.status === "error") throw new Error(result.msg);
-
-                allTagihanData = (result.data || []).filter(c => (parseRupiah(c.hutang) - parseRupiah(c.terbayar)) > 0);
-                
-                container.innerHTML = '';
-                if(allTagihanData.length === 0) {
-                    container.innerHTML = `<div class="text-center py-10 bg-white rounded-2xl border border-dashed text-slate-400 font-bold text-xs uppercase">Tidak Ada Tagihan Aktif</div>`;
-                    return;
-                }
-                
-                const tglSekarang = new Date().getDate();
-                const bulanSekarang = new Date().getMonth() + 1;
-                const namaBulan = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-
-                allTagihanData.forEach(p => {
-                    let angkaTanggal = parseInt(p.jatuhTempo) || 1;
-                    let bulanTerakhir = parseInt(p.bulanTerakhirBayar) || 0;
-                    
-                    let targetBulan = bulanTerakhir === 0 ? bulanSekarang : bulanTerakhir + 1;
-                    if (p.cicilanKe == 1 && bulanTerakhir === 0 && (angkaTanggal - tglSekarang < 20)) { targetBulan = bulanSekarang + 1; }
-                    let targetTahun = new Date().getFullYear(); 
-                    if (targetBulan > 12) { targetBulan -= 12; targetTahun++; }
-                    
-                    container.innerHTML += renderTagihanCard(p, namaBulan, targetBulan, targetTahun);
-                });
-                lucide.createIcons();
-            } catch(e) { 
-                container.innerHTML = getErrorTemplate("Gagal Memuat Pelanggan", e.message);
-                lucide.createIcons();
-            }
+                const res = await fetch(`${CONFIG.API_URL}?action=getAll&nocache=${Date.now()}`); allTagihanData = (await res.json()).data.filter(x=>(x.hutang-x.terbayar)>0); filterTagihan();
+            } catch(e) { c.innerHTML = `<div class="col-span-full text-red-500 text-center">Gagal Muat</div>`; }
         }
 
         function filterTagihan() {
-            const k = (document.getElementById('searchInput').value || "").toLowerCase();
-            const filtered = allTagihanData.filter(p => (p.nama || "").toLowerCase().includes(k));
-            
-            const container = document.getElementById('customerList'); container.innerHTML = '';
-            if(filtered.length === 0) { container.innerHTML = `<div class="text-center py-10 bg-white rounded-2xl border border-dashed text-slate-400 font-bold text-xs uppercase">Tidak Ada Data</div>`; return; }
-            
-            const tglSekarang = new Date().getDate();
-            const bulanSekarang = new Date().getMonth() + 1;
-            const namaBulan = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-
-            filtered.forEach(p => {
-                let angkaTanggal = parseInt(p.jatuhTempo) || 1;
-                let bulanTerakhir = parseInt(p.bulanTerakhirBayar) || 0;
-                
-                let targetBulan = bulanTerakhir === 0 ? bulanSekarang : bulanTerakhir + 1;
-                if (p.cicilanKe == 1 && bulanTerakhir === 0 && (angkaTanggal - tglSekarang < 20)) { targetBulan = bulanSekarang + 1; }
-                let targetTahun = new Date().getFullYear(); if (targetBulan > 12) { targetBulan -= 12; targetTahun++; }
-                
-                container.innerHTML += renderTagihanCard(p, namaBulan, targetBulan, targetTahun);
-            });
-            lucide.createIcons();
+            const c = document.getElementById('customerList'), k = document.getElementById('searchInput').value.toLowerCase();
+            const f = allTagihanData.filter(x=>x.nama.toLowerCase().includes(k)); c.innerHTML = f.length===0?`<div class="col-span-full text-center py-10 bg-white border rounded-2xl">Kosong</div>`:'';
+            f.forEach(p => {
+                let badge = (p.statusPembayaran||"LANCAR").includes("TELAT") ? `<span class="bg-red-100 text-red-600 px-1.5 py-0.5 rounded text-[9px] font-black animate-pulse">TELAT</span>` : `<span class="bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded text-[9px] font-black">LANCAR</span>`;
+                c.innerHTML += `<div class="bg-white p-5 rounded-2xl border shadow-sm hover:shadow-md flex flex-col justify-between"><div class="flex justify-between items-start"><div><h3 class="font-black text-sm flex items-center gap-2">${p.nama} ${badge}</h3><p class="text-[10px] text-slate-400 mt-1">ID: ${p.idKontrak} • Ke-${p.cicilanKe}</p></div><div class="text-right"><p class="font-black text-sm">Rp ${formatRupiah(p.cicilanPerBulan)}</p><p class="text-[9px] font-bold text-slate-400 mt-0.5">Tgl ${p.jatuhTempo}</p></div></div><button onclick="window.open('https://api.whatsapp.com/send?phone=${p.wa.startsWith('0')?'62'+p.wa.slice(1):p.wa}&text=Halo', '_blank')" class="w-full mt-4 py-3 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 hover:bg-amber-100"><i data-lucide="bell" class="w-4 h-4"></i> WA TAGIHAN</button></div>`;
+            }); lucide.createIcons();
         }
 
-        window.bukaModalAcc = function(encoded) {
-            const data = JSON.parse(decodeURIComponent(encoded)); currentActiveData = data;
-            document.getElementById('accIdKontrak').innerText = data.idKontrak; 
-            document.getElementById('accNama').innerText = data.nama; 
-            document.getElementById('accBarang').innerText = data.barang;
-            document.getElementById('badgeMarginFinal').innerText = `MARGIN: ${data.marginAktif}%`;
-            document.getElementById('accJatuhTempo').value = data.jatuhTempo || 25; 
-            document.getElementById('accTenor').value = data.tenor;
-            document.getElementById('accTotalHutang').value = formatRupiah(data.rekTotal); 
-            document.getElementById('accCicilan').value = formatRupiah(data.rekBulan);
-            document.getElementById('accModal').classList.replace('hidden', 'flex'); 
-            setTimeout(() => { document.getElementById('accModal').classList.remove('opacity-0'); document.getElementById('accModalContent').classList.remove('translate-y-full'); }, 10);
-        };
-
-        window.closeModalAcc = function() { document.getElementById('accModal').classList.add('opacity-0'); document.getElementById('accModalContent').classList.add('translate-y-full'); setTimeout(() => document.getElementById('accModal').classList.replace('flex', 'hidden'), 300); };
-
-        document.getElementById('btnKonfirmasiAcc').addEventListener('click', () => {
-            const payload = { tipe: "ACC_PENGAJUAN", idKontrak: currentActiveData.idKontrak, wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: document.getElementById('accJatuhTempo').value, totalHutang: parseRupiah(document.getElementById('accTotalHutang').value), cicilanBulan: parseRupiah(document.getElementById('accCicilan').value) };
-            
-            fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            
-            const msg = `Assalamu'alaikum Kak ${payload.nama}.\n\nAlhamdulillah, pengajuan pembiayaan ${payload.barang} Kakak di Zenith Cell telah disetujui (ACC).\n\nUntuk memantau sisa tagihan dan jadwal pembayaran bulanan, silakan cek secara berkala melalui tautan berikut:\nhttps://zenith-cell.netlify.app/cek-tagihan-live\n\nTerima kasih atas kepercayaannya.`;
-            window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent(msg)}`, '_blank');
-            
-            closeModalAcc(); showToast("Berhasil di-ACC!");
-            setTimeout(fetchAntrean, 1500);
-        });
-
-        window.bukaModalTolak = function(id, nama, wa, barang) {
-            dataTolakSementara = { id, nama, wa, barang };
-            document.getElementById('tolakNamaUser').innerText = nama;
-            const modal = document.getElementById('tolakModal');
-            modal.classList.replace('hidden', 'flex');
-            setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('tolakCard').classList.remove('scale-95'); }, 10);
-        }
-
-        window.closeTolakModal = function() {
-            const modal = document.getElementById('tolakModal');
-            modal.classList.add('opacity-0');
-            document.getElementById('tolakCard').classList.add('scale-95');
-            setTimeout(() => modal.classList.replace('flex', 'hidden'), 300);
-        }
-
-        document.getElementById('btnConfirmTolak').addEventListener('click', () => {
-            if (!dataTolakSementara) return;
-            const { id, nama, wa, barang } = dataTolakSementara;
-            const btn = document.getElementById('btnConfirmTolak');
-            btn.disabled = true; btn.innerText = "Memproses...";
-
-            fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", idKontrak: id }) });
-            
-            const msg = `Assalamu'alaikum Kak ${nama}.\n\nTerima kasih telah mempercayakan pengajuan ${barang} di Zenith Cell.\n\nMohon maaf, setelah melalui proses verifikasi, untuk saat ini pengajuan Kakak belum dapat kami proses lebih lanjut.\n\nTerima kasih atas pengertiannya, semoga sehat selalu.`;
-            window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}&text=${encodeURIComponent(msg)}`, '_blank');
-            
-            closeTolakModal();
-            showToast("Pengajuan berhasil ditolak", "error");
-            
-            setTimeout(() => { 
-                btn.disabled = false; btn.innerText = "Ya, Tolak"; 
-                fetchAntrean(); 
-            }, 1000);
-        });
-
-        window.bukaPesanWA = function(nama, wa, ke, nominal, tglLengkap, bulanTagihan, isTelat) {
-            const rek = `BCA - 8161292087 (a.n. Ardita Rizki Fauzi)\nBRI - 638501004971500 (a.n. Vivi Nur Damayanti)\nSeaBank - 901556541299 (a.n. Ardita Rizki Fauzi)`;
-            
-            // Format Pesan Berubah jika TELAT
-            let m = "";
-            if(isTelat) {
-                m = `Assalamu'alaikum Kak ${nama}.\n\nPermisi Kak, dari Zenith Cell izin menginformasikan bahwa tagihan angsuran (Bulan Ke-${ke}) senilai Rp ${formatRupiah(nominal)} untuk bulan ${bulanTagihan} *telah melewati jatuh tempo* (Tgl ${tglLengkap}).\n\nMohon kerjasamanya untuk segera melakukan pelunasan angsuran melalui salah satu rekening berikut:\n\n${rek}\n\nJika sudah melakukan pembayaran, mohon abaikan pesan ini. Terima kasih.`;
-                document.getElementById('waHeaderTitle').innerHTML = `<i data-lucide="alert-circle" class="w-4 h-4 text-red-500"></i> Surat Peringatan WA`;
-                document.getElementById('pesanWA').className = "w-full p-3 bg-red-50/50 border border-red-100 rounded-xl text-xs font-medium outline-none resize-none text-red-900";
-            } else {
-                m = `Assalamu'alaikum Kak ${nama}.\n\nPermisi Kak, dari Zenith Cell izin menginformasikan bahwa tagihan angsuran (Bulan Ke-${ke}) senilai Rp ${formatRupiah(nominal)} untuk bulan ${bulanTagihan} akan jatuh tempo pada tanggal ${tglLengkap}.\n\nPembayaran dapat dilakukan melalui salah satu rekening berikut:\n\n${rek}\n\nTerima kasih atas kerja samanya.`;
-                document.getElementById('waHeaderTitle').innerHTML = `<i data-lucide="send" class="w-4 h-4 text-emerald-500"></i> Pesan Tagihan`;
-                document.getElementById('pesanWA').className = "w-full p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl text-xs font-medium outline-none resize-none";
-            }
-            
-            document.getElementById('pesanWA').value = m;
-            targetWaLink = `https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}`;
-            
-            document.getElementById('waModal').classList.replace('hidden', 'flex');
-            lucide.createIcons();
-            setTimeout(() => { document.getElementById('waModal').classList.remove('opacity-0'); document.querySelector('#waModal > div').classList.remove('translate-y-full'); }, 10);
-        }
+        window.bukaModalAcc=function(e){ const d=JSON.parse(decodeURIComponent(e)); currentActiveData=d; document.getElementById('accIdKontrak').innerText=d.idKontrak; document.getElementById('accNama').innerText=d.nama; document.getElementById('accBarang').innerText=d.barang; document.getElementById('accJatuhTempo').value=d.jatuhTempo; document.getElementById('accTenor').value=d.tenor; document.getElementById('accTotalHutang').value=formatRupiah(d.rT); document.getElementById('accCicilan').value=formatRupiah(d.rB); document.getElementById('accModal').classList.replace('hidden','flex'); setTimeout(()=>{document.getElementById('accModal').classList.remove('opacity-0');document.getElementById('accModalContent').classList.remove('scale-95')},10); }
+        window.closeModalAcc=function(){ document.getElementById('accModal').classList.add('opacity-0'); document.getElementById('accModalContent').classList.add('scale-95'); setTimeout(()=>document.getElementById('accModal').classList.replace('flex','hidden'),300); }
+        window.tolak=function(id){ fetch(CONFIG.API_URL, {method:'POST',mode:'no-cors',body:JSON.stringify({tipe:"TOLAK_PENGAJUAN",idKontrak:id})}); showToast("Ditolak"); setTimeout(fetchAntrean, 1000); }
         
-        window.closeWaModal = function() { document.getElementById('waModal').classList.add('opacity-0'); document.querySelector('#waModal > div').classList.add('translate-y-full'); setTimeout(() => document.getElementById('waModal').classList.replace('flex', 'hidden'), 300); };
-
-        document.getElementById('btnKirimWA').addEventListener('click', () => {
-            window.open(`${targetWaLink}&text=${encodeURIComponent(document.getElementById('pesanWA').value)}`, '_blank');
-            closeWaModal();
-        });
-
+        document.getElementById('btnKonfirmasiAcc').onclick=()=> { fetch(CONFIG.API_URL, {method:'POST',mode:'no-cors',body:JSON.stringify({tipe:"ACC_PENGAJUAN",idKontrak:currentActiveData.idKontrak,nama:currentActiveData.nama,wa:currentActiveData.wa,barang:currentActiveData.barang,jatuhTempo:document.getElementById('accJatuhTempo').value,totalHutang:parseRupiah(document.getElementById('accTotalHutang').value),cicilanBulan:parseRupiah(document.getElementById('accCicilan').value)})}); closeModalAcc(); showToast("Sukses ACC!"); setTimeout(fetchAntrean,1500); }
         refreshData();
     </script>
 </body>
