@@ -1,6 +1,6 @@
 const CONFIG = {
     // Link API Google Script (Baru)
-    API_URL: "https://script.google.com/macros/s/AKfycbyDDriZXDqS9YWwp0QcBlFtYt1_yOj9unnGdzFZ6LF9y-085tmP-dt6YpvsZND2VjxObQ/exec",
+    API_URL: "https://script.google.com/macros/s/AKfycbxSfBFlpsaWy52bNA65BtV6CaWHtfDlVgX7Bpo80I3MTQQZUJ6sBDm-z5-ChZVwdvOzXw/exec",
     
     // Nomor WA Admin Zenith Cell
     WA_ADMIN: "62895410571547",
