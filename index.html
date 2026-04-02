@@ -234,12 +234,22 @@
             <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mx-auto mb-3"><i data-lucide="lock" class="w-5 h-5 text-emerald-600"></i></div>
             <h3 class="text-lg font-extrabold mb-1">Akses Admin</h3>
             <p id="pinMsg" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest transition-colors">Verifikasi Keamanan</p>
-            <form id="pinForm">
-                <input type="password" id="pinInput" placeholder="Sandi Admin" class="w-full text-center py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-base outline-none mt-5 focus:border-emerald-500 tracking-widest transition-all">
-                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl mt-4 active:scale-95 transition-all shadow-sm">Masuk</button>
-            </form>
-        </div>
+           <div id="pinModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden items-center justify-center p-4 opacity-0 transition-opacity">
+    <div class="bg-white rounded-[2rem] p-6 max-w-[300px] w-full text-center shadow-2xl transform scale-95 transition-transform" id="pinCard">
+        <button onclick="closePin()" class="absolute top-4 right-4 p-1.5 bg-slate-100 rounded-full text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+        <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mx-auto mb-3"><i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i></div>
+        <h3 class="text-lg font-extrabold mb-1">Akses Admin</h3>
+        <p id="pinMsg" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest transition-colors">Masuk untuk melanjutkan</p>
+        
+        <form id="pinForm">
+            <input type="text" id="usernameInput" placeholder="ID Pengguna" required class="w-full text-center py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm outline-none mt-5 focus:border-emerald-500 transition-all uppercase">
+            
+            <input type="password" id="pinInput" placeholder="Sandi Admin" required class="w-full text-center py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-base outline-none mt-3 focus:border-emerald-500 tracking-widest transition-all">
+            
+            <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl mt-4 active:scale-95 transition-all shadow-sm">Masuk Sistem</button>
+        </form>
     </div>
+</div>
 
     <script>
         lucide.createIcons();
@@ -347,21 +357,44 @@
             setTimeout(() => { pinModal.classList.replace('flex', 'hidden'); }, 300); 
         }
         
-        document.getElementById('pinForm').addEventListener('submit', (e) => { 
-            e.preventDefault(); 
-            if (pinInput.value === CONFIG.PIN_ADMIN) { 
-                window.location.href = pendingUrl; 
-            } else { 
-                pinCard.classList.add('shake-anim');
-                pinInput.classList.remove('border-slate-200');
-                pinInput.classList.add('border-red-500', 'text-red-600', 'bg-red-50', 'placeholder-red-400');
-                pinMsg.innerHTML = '<span class="text-red-500">Sandi tidak valid.</span>';
-                
-                setTimeout(() => { pinCard.classList.remove('shake-anim'); }, 400);
-                pinInput.value = ""; 
-                pinInput.focus(); 
-            } 
-        });
+       // DAFTAR ADMIN ZENITH CELL (Bisa kamu tambah/ubah sendiri)
+const DAFTAR_ADMIN = {
+    "ARDITA": { sandi: "123456", namaLengkap: "Ardita Rizki F." },
+    "VIVI": { sandi: "654321", namaLengkap: "Vivi Nur D." }
+};
+
+document.getElementById('pinForm').addEventListener('submit', (e) => { 
+    e.preventDefault(); 
+    
+    const user = document.getElementById('usernameInput').value.trim().toUpperCase();
+    const pass = document.getElementById('pinInput').value;
+
+    // Cek apakah username ada dan sandinya cocok
+    if (DAFTAR_ADMIN[user] && DAFTAR_ADMIN[user].sandi === pass) { 
+        // Simpan nama admin ke penyimpanan browser (localStorage)
+        localStorage.setItem('kasirZenithAktif', DAFTAR_ADMIN[user].namaLengkap);
+        window.location.href = pendingUrl; 
+    } else { 
+        pinCard.classList.add('shake-anim');
+        pinInput.classList.remove('border-slate-200');
+        pinInput.classList.add('border-red-500', 'text-red-600', 'bg-red-50');
+        pinMsg.innerHTML = '<span class="text-red-500">ID atau Sandi tidak valid!</span>';
+        
+        setTimeout(() => { pinCard.classList.remove('shake-anim'); }, 400);
+        pinInput.value = ""; 
+        pinInput.focus(); 
+    } 
+});
+
+// Reset warna saat mengetik
+document.getElementById('usernameInput').addEventListener('input', resetLoginStyle);
+document.getElementById('pinInput').addEventListener('input', resetLoginStyle);
+
+function resetLoginStyle() {
+    pinInput.classList.remove('border-red-500', 'bg-red-50', 'text-red-600');
+    pinInput.classList.add('border-slate-200');
+    pinMsg.innerHTML = 'Masuk untuk melanjutkan';
+}
 
         pinInput.addEventListener('input', () => {
             pinInput.classList.remove('border-red-500', 'bg-red-50', 'text-red-600', 'placeholder-red-400');
