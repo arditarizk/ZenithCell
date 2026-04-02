@@ -49,12 +49,20 @@
             <form id="posForm" class="space-y-6 flex-grow">
                 <div>
                     <label class="block text-[11px] font-extrabold text-slate-400 mb-2 uppercase tracking-widest px-1">1. Pilih Pelanggan Aktif</label>
+                    
+                    <div class="relative mb-3">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i></div>
+                        <input type="text" id="searchCustomer" oninput="filterCustomer()" placeholder="Cari nama pelanggan..." class="w-full pl-10 pr-4 py-3 bg-white border-2 border-slate-100 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all shadow-sm">
+                    </div>
+
                     <div id="customerGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 lg:max-h-64 overflow-y-auto no-scrollbar p-1"></div>
                 </div>
+
                 <div id="cicilanArea" class="hidden">
                     <label class="block text-[11px] font-extrabold text-slate-400 mb-2 uppercase tracking-widest px-1">2. Opsi Pembayaran</label>
                     <div class="flex overflow-x-auto no-scrollbar gap-2 pb-1" id="cicilanGrid"></div>
                 </div>
+
                 <div id="nominalArea" class="hidden">
                     <label class="block text-[11px] font-extrabold text-slate-400 mb-2 uppercase tracking-widest px-1">3. Nominal Angsuran Pokok</label>
                     <div class="relative flex items-center">
@@ -137,9 +145,28 @@
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
-            toast.className = `${bgColor} text-white px-6 py-4 rounded-2xl shadow-2xl fixed top-5 left-1/2 -translate-x-1/2 z-[1000] font-bold text-sm text-center min-w-[250px] transition-all`;
+            toast.className = `${bgColor} text-white px-6 py-4 rounded-2xl shadow-2xl fixed top-5 left-1/2 -translate-x-1/2 z-[1000] font-bold text-sm text-center min-w-[250px] transition-all pointer-events-auto`;
             toast.innerText = message; document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
+        }
+
+        // FUNGSI RENDER & PENCARIAN PELANGGAN
+        function renderCustomerGrid(dataList) {
+            const grid = document.getElementById('customerGrid');
+            grid.innerHTML = '';
+            if (dataList.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center text-slate-400 text-xs font-bold py-4">Pelanggan tidak ditemukan.</div>`;
+                return;
+            }
+            dataList.forEach(c => {
+                grid.innerHTML += `<label class="cursor-pointer"><input type="radio" name="pelanggan" value="${c.idKontrak}" class="peer sr-only" onchange="selectCustomer('${c.idKontrak}')"><div class="w-full py-4 px-2 rounded-2xl bg-white border-2 border-slate-100 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 text-slate-600 font-bold text-[11px] text-center truncate transition-all shadow-sm">${c.nama}</div></label>`;
+            });
+        }
+
+        function filterCustomer() {
+            const k = document.getElementById('searchCustomer').value.toLowerCase();
+            const filtered = dbCustomers.filter(c => c.nama.toLowerCase().includes(k));
+            renderCustomerGrid(filtered);
         }
 
         async function fetchCustomersFromCloud() {
@@ -149,12 +176,8 @@
                 const res = await fetch(CONFIG.API_URL + "?action=getAll&nocache=" + Date.now());
                 const result = await res.json();
                 dbCustomers = (result.data || []).filter(c => c.nama && (c.hutang - c.terbayar) > 0);
-                grid.innerHTML = '';
-                if (dbCustomers.length === 0) return grid.innerHTML = `<div class="col-span-full text-center text-slate-400 text-xs font-bold py-4">Kosong</div>`;
-                dbCustomers.forEach(c => {
-                    grid.innerHTML += `<label class="cursor-pointer"><input type="radio" name="pelanggan" value="${c.idKontrak}" class="peer sr-only" onchange="selectCustomer('${c.idKontrak}')"><div class="w-full py-4 px-2 rounded-2xl bg-white border-2 border-slate-100 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 text-slate-600 font-bold text-[11px] text-center truncate transition-all shadow-sm">${c.nama}</div></label>`;
-                });
-            } catch(e) { grid.innerHTML = `<div class="col-span-full text-red-500 text-xs font-bold py-4 text-center">Gagal Terhubung</div>`; }
+                renderCustomerGrid(dbCustomers);
+            } catch(e) { grid.innerHTML = `<div class="col-span-full text-red-500 text-xs font-bold py-4 text-center">Gagal Terhubung Jaringan</div>`; }
         }
 
         window.selectCustomer = function(id) {
@@ -219,7 +242,7 @@
 
         ['nominal', 'denda'].forEach(id => document.getElementById(id).addEventListener('input', (e) => { if(isSaved) return; e.target.value = formatRp(parseRp(e.target.value)); renderPreview(); }));
 
-        // PERBAIKAN: OPTIMISTIC UI BEBAS LOADING LAMA & ERROR JARINGAN
+        // OPTIMISTIC UI: SAT SET TANPA AWAIT FETCH
         const eksekusiSimpan = (e) => {
             if(e) e.preventDefault();
             const p = renderPreview(); 
@@ -227,9 +250,8 @@
             
             const btnP = document.getElementById('btnProses');
             const btnM = document.getElementById('btnProsesMobile');
-            btnP.disabled = true; btnM.disabled = true;
-            btnP.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Memproses...</span>`;
-            btnM.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Memproses...</span>`;
+            if(btnP) { btnP.disabled = true; btnP.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Memproses...</span>`; }
+            if(btnM) { btnM.disabled = true; btnM.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Memproses...</span>`; }
             lucide.createIcons();
             
             let payload = { 
@@ -246,11 +268,10 @@
                 catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru) 
             };
             
-            // Bypass CORS block: Tembak dan Lupakan (Fire and Forget)
-            fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
-            .catch(err => console.log("Fetch info:", err));
+            // FIRE AND FORGET (Kirim background, biarkan browser lanjut tanpa peduli respons)
+            fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
             
-            // Memunculkan struk super cepat hanya dalam 0.4 detik
+            // MUNCULKAN STRUK HANYA DALAM 0.3 DETIK (SAT-SET)
             setTimeout(() => {
                 isSaved = true; 
                 currentSavedData = p;
@@ -259,13 +280,13 @@
                 document.getElementById('denda').disabled = true;
                 document.getElementById('formSection').style.opacity = '0.3';
                 document.getElementById('btnProsesContainer').classList.add('hidden'); 
-                document.getElementById('btnProsesContainerMobile').classList.add('hidden');
+                if(document.getElementById('btnProsesContainerMobile')) document.getElementById('btnProsesContainerMobile').classList.add('hidden');
                 document.getElementById('actionButtons').classList.replace('hidden', 'flex');
                 
                 showToast(p.isLunas ? "LUNAS! Riwayat telah dicatat." : "Berhasil Disimpan!", "success");
                 
                 if(window.innerWidth < 1024) document.getElementById('previewPanel').scrollIntoView({behavior: 'smooth'});
-            }, 400); 
+            }, 300); 
         };
 
         document.getElementById('btnProses').addEventListener('click', eksekusiSimpan);
@@ -307,17 +328,21 @@
             let struk = "        ZENITH CELL         \n";
             struk += " Gadget Syariah Kota Malang \n";
             struk += "--------------------------------\n";
-            struk += "Tgl   : " + tgl + "\n";
-            struk += "Kasir : Admin Pusat\n";
+            struk += "Tgl     : " + tgl + "\n";
+            struk += "No.Trans: " + p.idTransaksi + "\n";
+            struk += "Kasir   : Admin Pusat\n";
             struk += "--------------------------------\n";
-            struk += "No. Kntrk: " + p.data.idKontrak + "\n";
-            struk += "Pelanggan: " + p.data.nama.toUpperCase() + "\n";
-            struk += "Unit     : " + barang.toUpperCase() + "\n";
-            struk += "Ket      : " + ketCicilan + "\n";
-            if(p.isLunas) struk += "Diskon   : Rp " + formatRp(window.currentDiskon) + "\n";
+            struk += "No.Kntrk: " + p.data.idKontrak + "\n";
+            struk += "Customer: " + p.data.nama.toUpperCase() + "\n";
+            struk += "Unit    : " + barang.toUpperCase() + "\n";
+            struk += "Ket     : " + ketCicilan + "\n";
             struk += "--------------------------------\n";
-            struk += "BAYAR    : Rp " + formatRp(p.nominalVal) + "\n";
-            struk += "Sisa     : Rp " + formatRp(p.sisaBaru) + "\n";
+            struk += "Angsuran: Rp " + formatRp(p.nominalVal) + "\n";
+            if(p.dendaVal > 0) struk += "Denda   : Rp " + formatRp(p.dendaVal) + "\n";
+            if(p.isLunas) struk += "Diskon  : Rp " + formatRp(window.currentDiskon) + "\n";
+            struk += "--------------------------------\n";
+            struk += "TOTAL   : Rp " + formatRp(p.totalBayarPlusDenda) + "\n";
+            struk += "Sisa Utg: Rp " + formatRp(p.sisaBaru) + "\n";
             struk += "--------------------------------\n";
             struk += "     Alhamdulillah Sah!     \n";
             struk += " Terima kasih, moga berkah! \n";
