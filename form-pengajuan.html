@@ -116,22 +116,20 @@
         lucide.createIcons(); 
         let promoMarginAktif = null;
         
-        function buatIdKontrak(nama) { 
+        // FORMAT KONTRAK: ZN + YYMM + 2 DIGIT WA TERAKHIR
+        // CONTOH: ZN260489 (Jika WA berakhiran 89 di bulan April 2026)
+        function buatIdKontrak(waStr) { 
             const d = new Date(); 
-            let inisial = "XX";
-            if(nama) {
-                const cleanName = nama.replace(/[^a-zA-Z]/g, '').toUpperCase();
-                if(cleanName.length >= 2) inisial = cleanName.substring(0, 2);
-                else if(cleanName.length === 1) inisial = cleanName + "X";
-            }
-            const dd = String(d.getDate()).padStart(2, '0');
+            const yy = String(d.getFullYear()).slice(-2);
             const mm = String(d.getMonth() + 1).padStart(2, '0');
             
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            let randomStr = '';
-            for (let i = 0; i < 3; i++) randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+            let waClean = (waStr || "").toString().replace(/[^0-9]/g, '');
+            let waAkhir = "00";
+            if(waClean.length >= 2) {
+                waAkhir = waClean.slice(-2);
+            }
             
-            return `ZN${inisial}${dd}${mm}${randomStr}`; 
+            return `ZN${yy}${mm}${waAkhir}`; 
         }
 
         const fr = (n) => (n===0||isNaN(n))?"":new Intl.NumberFormat('id-ID').format(n);
@@ -146,7 +144,6 @@
             setTimeout(()=>d.remove(), 3000); 
         }
         
-        // OTOMATIS BACA DATA DARI KALKULATOR & TERAPKAN VOUCHER
         window.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
             if(params.has('harga')) { document.getElementById('hargaBarang').value = fr(parseInt(params.get('harga'))); }
@@ -157,7 +154,6 @@
                 document.getElementById('pilihJalur').value = j;
                 toggleJalur();
             }
-            // Otomatis verifikasi voucher jika ada di URL
             if(params.has('voucher')) {
                 document.getElementById('inputVoucher').value = decodeURIComponent(params.get('voucher'));
                 setTimeout(() => verifikasiVoucher(), 500); 
@@ -182,24 +178,14 @@
             const k = i.value.trim().toLowerCase(), targetM = j === "VIP" ? 15 : 25;
             if(!k) return showToast("Masukkan kode promo.");
             if(CONFIG.VOUCHERS && CONFIG.VOUCHERS[k]) {
-                if(CONFIG.VOUCHERS[k].margin >= targetM) return showToast(`Jalur ${j} sudah lebih murah dari promo ini.`, "info");
-                promoMarginAktif = CONFIG.VOUCHERS[k].margin; 
-                m.innerText = "Aktif (Margin "+promoMarginAktif+"%)"; 
-                m.className = "text-[9px] mt-1.5 font-bold text-emerald-600 block"; 
-                i.disabled=true; 
-                showToast("Voucher berhasil diaplikasikan!", "success");
-            } else { 
-                m.innerText = "Tidak valid."; 
-                m.className = "text-[9px] mt-1.5 font-bold text-red-500 block"; 
-            }
+                if(CONFIG.VOUCHERS[k].margin >= targetM) return showToast(`Jalur ${j} sudah lebih murah.`, "info");
+                promoMarginAktif = CONFIG.VOUCHERS[k].margin; m.innerText = "Aktif (Margin "+promoMarginAktif+"%)"; m.className = "text-[9px] mt-1.5 font-bold text-emerald-600 block"; i.disabled=true; showToast("Voucher Aktif", "success");
+            } else { m.innerText = "Tidak valid."; m.className = "text-[9px] mt-1.5 font-bold text-red-500 block"; }
         }
 
         function toggleJalur() { 
             document.getElementById('boxJaminan').classList.toggle('hidden', document.getElementById('pilihJalur').value === 'REGULER'); 
-            promoMarginAktif=null; 
-            document.getElementById('inputVoucher').disabled=false; 
-            document.getElementById('inputVoucher').value=''; 
-            document.getElementById('msgVoucher').classList.add('hidden'); 
+            promoMarginAktif=null; document.getElementById('inputVoucher').disabled=false; document.getElementById('inputVoucher').value=''; document.getElementById('msgVoucher').classList.add('hidden'); 
         }
         
         ['hargaBarang', 'dpBarang'].forEach(id => document.getElementById(id).addEventListener('input', e => e.target.value = fr(pr(e.target.value))));
@@ -220,14 +206,13 @@
                 nama:document.getElementById('nama').value, nik:n, wa:document.getElementById('wa').value, alamat:document.getElementById('alamat').value, pekerjaan:document.getElementById('pekerjaan').value, gaji:document.getElementById('gaji').value, daruratNama:document.getElementById('daruratNama').value, daruratWa:document.getElementById('daruratWa').value, barang:document.getElementById('barang').value, harga:document.getElementById('hargaBarang').value, dp:document.getElementById('dpBarang').value||"0", tenor:document.getElementById('tenorSelect').value, jaminan:document.getElementById('pilihJalur').value==="VIP"?document.getElementById('jenisJaminan').value:"Tanpa Jaminan", jatuhTempo:document.getElementById('jatuhTempo').value, margin: promoMarginAktif || (document.getElementById('pilihJalur').value==="VIP"?15:25) 
             };
             
-            const id = buatIdKontrak(data.nama);
+            // GENERATE ID KONTRAK DENGAN WA
+            const id = buatIdKontrak(data.wa);
             
-            // Sat-Set: Kirim data tanpa menunggu
             fetch(CONFIG.API_URL, { 
                 method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "PENGAJUAN_BARU", idKontrak: id, timestamp: new Date().toLocaleString('id-ID'), ...data }) 
             }).catch(err => console.log("Silent error"));
 
-            // Langsung Buka WhatsApp
             const waMsg = `Assalamu'alaikum Admin Zenith Cell.\n\nPermisi, saya bermaksud mengajukan pembiayaan dengan rincian sebagai berikut:\n\nID Pengajuan: ${id}\nNama: ${data.nama}\nBarang: ${data.barang}\nHarga Pokok: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor} Bulan\nJatuh Tempo: Tgl ${data.jatuhTempo}\nSkema: ${data.margin}% (${data.jaminan})\n\nBerikut saya lampirkan foto KTP dan jaminan fisik (jika ada).\nMohon arahannya untuk proses verifikasi lebih lanjut. Terima kasih.`;
             window.open(`https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(waMsg)}`, '_blank');
             
