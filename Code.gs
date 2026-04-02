@@ -1,5 +1,5 @@
 // ==========================================
-// MASTER API ZENITH CELL (V16 - SOFT DELETE & DATABASE AMAN)
+// MASTER API ZENITH CELL (V16 + MITIGASI RISIKO)
 // ==========================================
 
 function getOrCreateSheet(ss, sheetName) {
@@ -17,70 +17,67 @@ function doPost(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var payload = JSON.parse(e.postData.contents);
-    
-    // 1. PENGAJUAN BARU Masuk Antrean
+
+    // 1. PENGAJUAN BARU
     if (payload.tipe === "PENGAJUAN_BARU") {
       var s = getOrCreateSheet(ss, "Pengajuan");
       if (s.getLastRow() === 0) {
         s.appendRow(["ID Kontrak", "Tanggal", "Nama Lengkap", "NIK", "No WA", "Alamat", "Pekerjaan", "Gaji", "Darurat Nama", "Darurat WA", "Barang", "Harga", "DP", "Tenor", "Jaminan", "Jatuh Tempo", "Margin", "Status"]);
         s.getRange("A1:R1").setFontWeight("bold").setBackground("#fef3c7");
       }
-      // Status otomatis diisi "PENDING"
       s.appendRow([
         payload.idKontrak, payload.timestamp || new Date().toLocaleString('id-ID'), payload.nama, "'" + payload.nik, "'" + payload.wa, payload.alamat, payload.pekerjaan, payload.gaji, payload.daruratNama, "'" + payload.daruratWa, payload.barang, payload.harga, payload.dp, payload.tenor, payload.jaminan, payload.jatuhTempo, payload.margin || 25, "PENDING"
       ]);
       return createJsonResponse({status: "success"});
     }
 
-    // 2. ACC PENGAJUAN (Ubah Status Pengajuan jadi "ACC", Copy ke Pelanggan)
+    // 2. ACC PENGAJUAN
     if (payload.tipe === "ACC_PENGAJUAN") {
       var sP = ss.getSheetByName("Pengajuan");
       var sL = getOrCreateSheet(ss, "Pelanggan");
       
-      // Update status di Pengajuan (TIDAK DIHAPUS, DATA AMAN)
       if (sP) {
         var dP = sP.getDataRange().getValues();
         for (var i = 1; i < dP.length; i++) {
           if (dP[i][0] === payload.idKontrak) { 
-            sP.getRange(i + 1, 18).setValue("ACC"); // Isi Kolom R dengan ACC
-            break; 
+            sP.getRange(i + 1, 18).setValue("ACC"); 
+            break;
           }
         }
       }
 
-      // Copy ke Tab Pelanggan (Tagihan Aktif)
       if (sL.getLastRow() === 0) {
         sL.appendRow(["ID Kontrak", "Nama Pelanggan", "No WA", "Barang", "Total Hutang", "Sudah Terbayar", "Cicilan Per Bulan", "Tgl Jatuh Tempo", "Cicilan Ke", "Bulan Terakhir Bayar"]);
         sL.getRange("A1:J1").setFontWeight("bold").setBackground("#e0e7ff");
       }
       sL.appendRow([payload.idKontrak, payload.nama, "'" + payload.wa, payload.barang, payload.totalHutang, 0, payload.cicilanBulan, payload.jatuhTempo, 1, 0]);
-      
       return createJsonResponse({status: "success"});
     }
 
-    // 3. TOLAK PENGAJUAN (Ubah Status Pengajuan jadi "DITOLAK")
+    // 3. TOLAK PENGAJUAN
     if (payload.tipe === "TOLAK_PENGAJUAN") {
       var sP = ss.getSheetByName("Pengajuan");
       if (sP) {
         var dP = sP.getDataRange().getValues();
         for (var i = 1; i < dP.length; i++) {
           if (dP[i][0] === payload.idKontrak) { 
-            sP.getRange(i + 1, 18).setValue("DITOLAK"); // Isi Kolom R dengan DITOLAK
-            break; 
+            sP.getRange(i + 1, 18).setValue("DITOLAK"); 
+            break;
           }
         }
       }
       return createJsonResponse({status: "success"});
     }
 
-    // 4. KASIR POS - BAYAR CICILAN BIASA
+    // 4. KASIR POS - BAYAR CICILAN BIASA (UPDATE: + Dana Kebajikan)
     if (payload.tipe === "KAS_MASUK_CICILAN") {
       var sT = getOrCreateSheet(ss, "Transaksi");
       if (sT.getLastRow() === 0) { 
-        sT.appendRow(["Waktu", "ID Kontrak", "Nama", "WA", "Pembayaran Ke", "Nominal Kas Masuk", "Catatan"]); 
-        sT.getRange("A1:G1").setFontWeight("bold").setBackground("#f3e8ff");
+        // HEADER DIPERBARUI: Ditambah "Dana Kebajikan" (Kolom H)
+        sT.appendRow(["ID Transaksi", "Waktu", "ID Kontrak", "Nama", "WA", "Pembayaran Ke", "Angsuran Pokok Masuk", "Dana Kebajikan (Denda)", "Catatan"]);
+        sT.getRange("A1:I1").setFontWeight("bold").setBackground("#f3e8ff");
       }
-      sT.appendRow([payload.waktu, payload.idKontrak, payload.nama, "'"+payload.whatsapp, payload.cicilanKe, payload.nominalMasuk, payload.catatan]);
+      sT.appendRow([payload.idTransaksi, payload.waktu, payload.idKontrak, payload.nama, "'"+payload.whatsapp, payload.cicilanKe, payload.nominalMasuk, payload.dendaMasuk || 0, payload.catatan]);
       
       var sL = ss.getSheetByName("Pelanggan");
       if (sL) {
@@ -97,20 +94,18 @@ function doPost(e) {
       return createJsonResponse({status: "success"});
     }
 
-    // 5. KASIR POS - PELUNASAN AWAL (MUROQOSHOH)
+    // 5. KASIR POS - PELUNASAN AWAL
     if (payload.tipe === "PELUNASAN_AWAL") {
       var sT = getOrCreateSheet(ss, "Transaksi");
       var sL = ss.getSheetByName("Pelanggan");
       var sR = getOrCreateSheet(ss, "Riwayat");
       
-      // Catat di Transaksi
       if (sT.getLastRow() === 0) { 
-        sT.appendRow(["Waktu", "ID Kontrak", "Nama", "WA", "Pembayaran Ke", "Nominal Kas Masuk", "Catatan"]); 
-        sT.getRange("A1:G1").setFontWeight("bold").setBackground("#f3e8ff");
+        sT.appendRow(["ID Transaksi", "Waktu", "ID Kontrak", "Nama", "WA", "Pembayaran Ke", "Angsuran Pokok Masuk", "Dana Kebajikan (Denda)", "Catatan"]);
+        sT.getRange("A1:I1").setFontWeight("bold").setBackground("#f3e8ff");
       }
-      sT.appendRow([payload.waktu, payload.idKontrak, payload.nama, "'"+payload.whatsapp, "LUNAS FULL", payload.nominalMasuk, payload.catatan]);
-
-      // Catat di Riwayat (Credit Score / Riwayat Lunas)
+      sT.appendRow([payload.idTransaksi, payload.waktu, payload.idKontrak, payload.nama, "'"+payload.whatsapp, "LUNAS FULL", payload.nominalMasuk, payload.dendaMasuk || 0, payload.catatan]);
+      
       if (sR.getLastRow() === 0) {
         sR.appendRow(["ID Kontrak", "Nama Pelanggan", "No WA", "Barang", "Total Hutang Awal", "Status Kredit"]);
         sR.getRange("A1:F1").setFontWeight("bold").setBackground("#dcfce7");
@@ -121,7 +116,7 @@ function doPost(e) {
         for (var i = 1; i < dL.length; i++) {
           if (dL[i][0] === payload.idKontrak) {
             sR.appendRow([dL[i][0], dL[i][1], "'" + dL[i][2], dL[i][3], dL[i][4], "LUNAS EXCELLENT (Muroqoshoh)"]);
-            sL.deleteRow(i + 1); // Wajar dihapus dari Tagihan Aktif karena sudah lunas
+            sL.deleteRow(i + 1); 
             break;
           }
         }
@@ -131,7 +126,7 @@ function doPost(e) {
 
     return createJsonResponse({status: "error", message: "Tipe POST tidak valid"});
   } catch (e) { 
-    return createJsonResponse({status: "error", msg: "Server Error: " + e.toString()}); 
+    return createJsonResponse({status: "error", msg: "Server Error: " + e.toString()});
   }
 }
 
@@ -139,18 +134,16 @@ function doGet(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var action = e.parameter.action;
-    
     if (action === "ping") return createJsonResponse({status: "online"});
 
-    // A. AMBIL ANTREAN (SEMBUNYIKAN YANG SUDAH ACC / DITOLAK)
+    // A. AMBIL ANTREAN 
     if (action === "getPending") {
       var s = ss.getSheetByName("Pengajuan");
       if (!s || s.getLastRow() < 2) return createJsonResponse({status: "success", data: []});
       var d = s.getDataRange().getValues();
       var res = [];
       for (var i = 1; i < d.length; i++) {
-        var statusPengajuan = (d[i][17] || "").toString().toUpperCase(); // Kolom R
-        // Jika sudah ACC atau DITOLAK, lewati (jangan kirim ke UI Admin)
+        var statusPengajuan = (d[i][17] || "").toString().toUpperCase();
         if (statusPengajuan === "ACC" || statusPengajuan === "DITOLAK") continue;
         
         res.push({ 
@@ -162,18 +155,35 @@ function doGet(e) {
       return createJsonResponse({status: "success", data: res});
     }
 
-    // B. AMBIL TAGIHAN AKTIF
+    // B. AMBIL TAGIHAN AKTIF (Update: Fitur Credit Score / Status Telat)
     if (action === "getAll") {
       var s = ss.getSheetByName("Pelanggan");
       if (!s || s.getLastRow() < 2) return createJsonResponse({status: "success", data: []});
       var d = s.getDataRange().getValues();
       var res = [];
+      
+      // Ambil tanggal hari ini (angka 1-31)
+      var tglSekarang = new Date().getDate(); 
+      var blnSekarang = new Date().getMonth() + 1; // 1-12
+
       for (var i = 1; i < d.length; i++) {
+        var jatuhTempoDB = parseInt(d[i][7]) || 1;
+        var bulanTerakhirDB = parseInt(d[i][9]) || 0;
+        var statusSkor = "LANCAR"; // Default Hijau
+
+        // Logika Deteksi Telat Bayar (Bulan ini belum bayar, padahal tgl sekarang > tgl jatuh tempo)
+        if (bulanTerakhirDB !== blnSekarang) {
+           if (tglSekarang > jatuhTempoDB) {
+               statusSkor = "TELAT " + (tglSekarang - jatuhTempoDB) + " HARI"; // SKOR MERAH
+           }
+        }
+
         res.push({ 
           idKontrak: d[i][0] || "", nama: d[i][1] || "", wa: (d[i][2] || "").toString().replace(/[^0-9]/g, ''), 
           barang: d[i][3] || "", hutang: parseInt(d[i][4]) || 0, terbayar: parseInt(d[i][5]) || 0, 
-          cicilanPerBulan: parseInt(d[i][6]) || 0, jatuhTempo: d[i][7] || 1, 
-          cicilanKe: parseInt(d[i][8]) || 1, bulanTerakhirBayar: parseInt(d[i][9]) || 0 
+          cicilanPerBulan: parseInt(d[i][6]) || 0, jatuhTempo: jatuhTempoDB, 
+          cicilanKe: parseInt(d[i][8]) || 1, bulanTerakhirBayar: bulanTerakhirDB,
+          statusPembayaran: statusSkor // API akan mengirim status deteksi ini
         });
       }
       return createJsonResponse({status: "success", data: res});
@@ -195,7 +205,6 @@ function doGet(e) {
         }
       }
       
-      // Jika tidak ada di Tagihan Aktif, cek apakah masih di Antrean Pengajuan
       var sP = ss.getSheetByName("Pengajuan");
       if(sP && sP.getLastRow() >= 2) {
           var dP = sP.getDataRange().getValues();
