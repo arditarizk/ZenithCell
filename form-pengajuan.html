@@ -116,19 +116,28 @@
         lucide.createIcons(); 
         let promoMarginAktif = null;
         
-        // KODE KONTRAK BARU: ZCK (TANPA SETRIP/SIMBOL)
-        function buatIdKontrak() { 
-            const d=new Date(); 
-            return `ZCK${String(d.getFullYear()).slice(-2)}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}${Math.floor(Math.random()*90+10)}`; 
+        // FORMAT KONTRAK: ZN + 2 INISIAL NAMA + TANGGAL/BULAN + 3 HURUF ACAK
+        // CONTOH: ZNVI0204XYZ 
+        function buatIdKontrak(nama) { 
+            const d = new Date(); 
+            let inisial = "XX";
+            if(nama) {
+                const cleanName = nama.replace(/[^a-zA-Z]/g, '').toUpperCase();
+                if(cleanName.length >= 2) inisial = cleanName.substring(0, 2);
+                else if(cleanName.length === 1) inisial = cleanName + "X";
+            }
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let randomStr = '';
+            for (let i = 0; i < 3; i++) randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+            
+            return `ZN${inisial}${dd}${mm}${randomStr}`; 
         }
 
         function showToast(m, t='error') { 
-            const d=document.createElement('div'); 
-            d.className=`${t==='success'?'bg-emerald-500':(t==='info'?'bg-blue-500':'bg-red-500')} text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 fixed top-5 left-1/2 -translate-x-1/2 z-[1000] min-w-[250px] font-bold text-sm`; 
-            d.innerHTML=`<i data-lucide="info" class="w-5 h-5 shrink-0"></i><span>${m}</span>`; 
-            document.getElementById('toastContainer').appendChild(d); 
-            lucide.createIcons(); 
-            setTimeout(()=>d.remove(), 3000); 
+            const d=document.createElement('div'); d.className=`${t==='success'?'bg-emerald-500':(t==='info'?'bg-blue-500':'bg-red-500')} text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 fixed top-5 left-1/2 -translate-x-1/2 z-[1000] min-w-[250px] font-bold text-sm`; d.innerHTML=`<i data-lucide="info" class="w-5 h-5 shrink-0"></i><span>${m}</span>`; document.getElementById('toastContainer').appendChild(d); lucide.createIcons(); setTimeout(()=>d.remove(), 3000); 
         }
         
         async function pickContact() {
@@ -150,23 +159,13 @@
             if(!k) return showToast("Masukkan kode.");
             if(CONFIG.VOUCHERS && CONFIG.VOUCHERS[k]) {
                 if(CONFIG.VOUCHERS[k].margin >= targetM) return showToast(`Jalur ${j} sudah lebih murah.`, "info");
-                promoMarginAktif = CONFIG.VOUCHERS[k].margin; 
-                m.innerText = "Aktif (Margin "+promoMarginAktif+"%)"; 
-                m.className = "text-[9px] mt-1.5 font-bold text-emerald-600 block"; 
-                i.disabled=true; 
-                showToast("Voucher Aktif", "success");
-            } else { 
-                m.innerText = "Tidak valid."; 
-                m.className = "text-[9px] mt-1.5 font-bold text-red-500 block"; 
-            }
+                promoMarginAktif = CONFIG.VOUCHERS[k].margin; m.innerText = "Aktif (Margin "+promoMarginAktif+"%)"; m.className = "text-[9px] mt-1.5 font-bold text-emerald-600 block"; i.disabled=true; showToast("Voucher Aktif", "success");
+            } else { m.innerText = "Tidak valid."; m.className = "text-[9px] mt-1.5 font-bold text-red-500 block"; }
         }
 
         function toggleJalur() { 
             document.getElementById('boxJaminan').classList.toggle('hidden', document.getElementById('pilihJalur').value === 'REGULER'); 
-            promoMarginAktif=null; 
-            document.getElementById('inputVoucher').disabled=false; 
-            document.getElementById('inputVoucher').value=''; 
-            document.getElementById('msgVoucher').classList.add('hidden'); 
+            promoMarginAktif=null; document.getElementById('inputVoucher').disabled=false; document.getElementById('inputVoucher').value=''; document.getElementById('msgVoucher').classList.add('hidden'); 
         }
         
         const fr = (n) => (n===0||isNaN(n))?"":new Intl.NumberFormat('id-ID').format(n), pr = (s) => parseInt(s.toString().replace(/[^0-9]/g, ''))||0;
@@ -174,7 +173,7 @@
         document.getElementById('nik').addEventListener('input', function() { this.value = this.value.replace(/[^0-9]/g, '').substring(0, 16); });
         document.getElementById('wa').addEventListener('input', function() { let v = this.value.replace(/[^0-9]/g, ''); if(v.startsWith('62')) v='0'+v.substring(2); this.value=v.substring(0,15); });
 
-        // PERBAIKAN: DIRECT KE WHATSAPP (FIRE AND FORGET)
+        // DIRECT KE WHATSAPP (FIRE AND FORGET)
         document.getElementById('pengajuanForm').addEventListener('submit', (e) => {
             e.preventDefault(); 
             const n = document.getElementById('nik').value; 
@@ -186,37 +185,20 @@
             lucide.createIcons();
             
             const data = { 
-                nama:document.getElementById('nama').value, 
-                nik:n, 
-                wa:document.getElementById('wa').value, 
-                alamat:document.getElementById('alamat').value, 
-                pekerjaan:document.getElementById('pekerjaan').value, 
-                gaji:document.getElementById('gaji').value, 
-                daruratNama:document.getElementById('daruratNama').value, 
-                daruratWa:document.getElementById('daruratWa').value, 
-                barang:document.getElementById('barang').value, 
-                harga:document.getElementById('hargaBarang').value, 
-                dp:document.getElementById('dpBarang').value||"0", 
-                tenor:document.getElementById('tenorSelect').value, 
-                jaminan:document.getElementById('pilihJalur').value==="VIP"?document.getElementById('jenisJaminan').value:"Tanpa Jaminan", 
-                jatuhTempo:document.getElementById('jatuhTempo').value, 
-                margin: promoMarginAktif || (document.getElementById('pilihJalur').value==="VIP"?15:25) 
+                nama:document.getElementById('nama').value, nik:n, wa:document.getElementById('wa').value, alamat:document.getElementById('alamat').value, pekerjaan:document.getElementById('pekerjaan').value, gaji:document.getElementById('gaji').value, daruratNama:document.getElementById('daruratNama').value, daruratWa:document.getElementById('daruratWa').value, barang:document.getElementById('barang').value, harga:document.getElementById('hargaBarang').value, dp:document.getElementById('dpBarang').value||"0", tenor:document.getElementById('tenorSelect').value, jaminan:document.getElementById('pilihJalur').value==="VIP"?document.getElementById('jenisJaminan').value:"Tanpa Jaminan", jatuhTempo:document.getElementById('jatuhTempo').value, margin: promoMarginAktif || (document.getElementById('pilihJalur').value==="VIP"?15:25) 
             };
             
-            const id = buatIdKontrak();
+            const id = buatIdKontrak(data.nama);
             
-            // 1. Tembak data ke Google Sheets (Bypass loading/error)
+            // Tembak data ke Google Sheets
             fetch(CONFIG.API_URL, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: JSON.stringify({ tipe: "PENGAJUAN_BARU", idKontrak: id, timestamp: new Date().toLocaleString('id-ID'), ...data }) 
+                method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "PENGAJUAN_BARU", idKontrak: id, timestamp: new Date().toLocaleString('id-ID'), ...data }) 
             });
 
-            // 2. Langsung Buka WhatsApp tanpa menunggu
+            // Langsung Buka WhatsApp
             const waMsg = `Assalamu'alaikum Admin Zenith Cell.\n\nPermisi, saya bermaksud mengajukan pembiayaan dengan rincian sebagai berikut:\n\nID Pengajuan: ${id}\nNama: ${data.nama}\nBarang: ${data.barang}\nHarga Pokok: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor} Bulan\nJatuh Tempo: Tgl ${data.jatuhTempo}\nSkema: ${data.margin}% (${data.jaminan})\n\nBerikut saya lampirkan foto KTP dan jaminan fisik (jika ada).\nMohon arahannya untuk proses verifikasi lebih lanjut. Terima kasih.`;
             window.open(`https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(waMsg)}`, '_blank');
             
-            // 3. Tampilkan Modal Sukses
             document.getElementById('instruksiModal').classList.replace('hidden', 'flex'); 
             setTimeout(()=>document.getElementById('instruksiModal').classList.remove('opacity-0'), 10);
         });
