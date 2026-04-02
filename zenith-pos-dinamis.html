@@ -77,15 +77,18 @@
                             <span class="absolute left-3 text-red-500 font-bold text-sm">Rp</span>
                             <input type="text" id="denda" inputmode="numeric" placeholder="0" class="w-full pl-9 pr-3 py-3 bg-white border border-red-200 rounded-xl text-red-700 font-bold text-sm outline-none focus:border-red-500 transition-all">
                         </div>
+                        <p class="text-[8px] font-bold text-red-500/80 leading-tight">*Catatan: Uang denda ini tidak diakui sebagai keuntungan Zenith Cell, melainkan disalurkan untuk kepentingan sosial.</p>
                     </div>
                 </div>
             </form>
             
-            <div id="btnProsesContainer" class="mt-6 hidden lg:block sticky bottom-0 lg:static bg-white pt-2 pb-4">
-                <button type="button" id="btnProses" class="w-full bg-slate-900 text-white font-extrabold py-4 rounded-[1.5rem] active:scale-95 flex justify-center items-center gap-2 shadow-2xl transition-all">
-                    <i data-lucide="save" class="w-5 h-5 text-emerald-400"></i><span>Simpan & Buat Struk</span>
+            <div id="btnProsesContainer" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] z-50 lg:static lg:transform-none lg:w-full lg:mt-6">
+                <button type="button" id="btnProses" class="w-full bg-slate-900 text-white font-extrabold py-4 rounded-[1.5rem] active:scale-95 flex justify-center items-center gap-2 shadow-2xl lg:shadow-md border border-slate-700 lg:border-none transition-all">
+                    <i data-lucide="save" class="w-5 h-5 text-emerald-400"></i><span id="txtBtnProses">Simpan & Buat Struk</span>
                 </button>
             </div>
+            
+            <div class="h-24 lg:hidden block shrink-0"></div>
         </section>
 
         <section class="w-full lg:w-5/12 bg-slate-50 p-4 lg:p-8 flex flex-col relative" id="previewPanel">
@@ -102,6 +105,7 @@
                         <div class="text-center mt-2">
                             <p class="text-sm font-black uppercase tracking-widest brand-color">Terima Kasih!</p>
                             <div class="my-4 brand-bg py-2 px-3"><p class="text-[10px] font-black uppercase brand-color italic">Layanan Gadget Syariah</p></div>
+                            <p class="text-[8px] font-bold leading-relaxed opacity-60 uppercase">Barang yang sudah dibeli tidak dapat ditukar/dikembalikan. Simpan struk ini sebagai bukti sah.</p>
                         </div>
                     </div>
                 </div>
@@ -114,13 +118,6 @@
                     <button onclick="window.location.reload()" class="w-full mt-2 bg-white text-slate-500 border border-slate-200 font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all"><i data-lucide="plus-circle" class="w-5 h-5"></i> <span class="text-xs uppercase tracking-wider">Transaksi Baru</span></button>
                 </div>
             </div>
-            
-            <div id="btnProsesContainerMobile" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] z-50 lg:hidden hidden">
-                <button type="button" id="btnProsesMobile" class="w-full bg-slate-900 text-white font-extrabold py-4 rounded-[1.5rem] active:scale-95 flex justify-center items-center gap-2 shadow-2xl border-t border-slate-700 transition-all">
-                    <i data-lucide="save" class="w-5 h-5 text-emerald-400"></i><span>Simpan & Buat Struk</span>
-                </button>
-            </div>
-            <div class="h-24 lg:hidden block shrink-0"></div>
         </section>
     </main>
 
@@ -128,14 +125,15 @@
         lucide.createIcons();
         let dbCustomers = [], isSaved = false, currentSavedData = null; window.currentDiskon = 0;
         
-        // PENGGUNAAN KODE TRANSAKSI BARU: TRX
+        // FORMAT ID PROFESIONAL (TANPA SIMBOL / SETRIP)
         function buatIdTransaksi() {
             const now = new Date(); const yy = String(now.getFullYear()).slice(-2);
             const mm = String(now.getMonth() + 1).padStart(2, '0'); const dd = String(now.getDate()).padStart(2, '0');
             const hh = String(now.getHours()).padStart(2, '0'); const mins = String(now.getMinutes()).padStart(2, '0');
             const random = Math.floor(Math.random() * 90 + 10);
-            return `TRX-${yy}${mm}${dd}-${hh}${mins}-${random}`;
+            return `TRX${yy}${mm}${dd}${hh}${mins}${random}`;
         }
+        
         const formatRp = (n) => new Intl.NumberFormat('id-ID').format(n);
         const parseRp = (s) => parseInt(s.toString().replace(/[^0-9]/g, '')) || 0;
 
@@ -187,11 +185,8 @@
             document.getElementById('nominal').value = formatRp(c.cicilanPerBulan);
             document.getElementById('denda').value = "";
             
-            // Tampilkan kembali tombol Container (menggunakan style.display agar tidak kalah sama Tailwind lg:block)
-            document.getElementById('btnProsesContainer').style.display = 'block';
-            if(document.getElementById('btnProsesContainerMobile')) {
-                document.getElementById('btnProsesContainerMobile').style.display = 'block';
-            }
+            // Tampilkan Tombol Tunggal
+            document.getElementById('btnProsesContainer').classList.remove('hidden');
             
             document.getElementById('cicilanGrid').innerHTML = `
                 <label class="flex-1"><input type="radio" name="cicilan" value="${c.cicilanKe}" class="peer sr-only" checked onchange="document.getElementById('nominal').value='${formatRp(c.cicilanPerBulan)}'; renderPreview()"><div class="px-5 py-3 rounded-xl bg-white border-2 border-slate-200 peer-checked:bg-slate-900 peer-checked:text-white text-slate-600 font-black text-xs text-center transition-all flex flex-col items-center"><span>Bulan Ke-${c.cicilanKe}</span><span class="text-[8px] font-bold opacity-70 mt-0.5">Bulanan</span></div></label>
@@ -208,8 +203,6 @@
             
             const data = dbCustomers.find(c => c.idKontrak === custRadio.value);
             let isLunas = cicilanEl.value === 'Pelunasan';
-            
-            // GENERATE ID TRANSAKSI
             if (!window.tempIdTransaksi || window.isLunasTemp !== isLunas) { window.tempIdTransaksi = buatIdTransaksi(); window.isLunasTemp = isLunas; }
             
             let sisaHutangAsli = data.hutang - data.terbayar;
@@ -217,7 +210,7 @@
             const tBayar = nominalVal + dendaVal;
 
             let strukDiskonHtml = isLunas ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-emerald-600">Diskon Ibra':</span><span class="text-[10px] font-black text-right uppercase text-emerald-600">- Rp ${formatRp(window.currentDiskon)}</span></div>` : '';
-            let strukDendaHtml = dendaVal > 0 ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-red-600">Denda / Dana Kebajikan:</span><span class="text-[10px] font-black text-right uppercase text-red-600">+ Rp ${formatRp(dendaVal)}</span></div>` : '';
+            let strukDendaHtml = dendaVal > 0 ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-red-600">Denda Syariah:</span><span class="text-[10px] font-black text-right uppercase text-red-600">+ Rp ${formatRp(dendaVal)}</span></div>` : '';
 
             document.getElementById('isiStruk').innerHTML = `
                 <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold">Tgl/Waktu:</span><span class="text-[10px] font-bold text-right">${new Date().toLocaleString('id-ID')}</span></div>
@@ -244,16 +237,15 @@
 
         ['nominal', 'denda'].forEach(id => document.getElementById(id).addEventListener('input', (e) => { if(isSaved) return; e.target.value = formatRp(parseRp(e.target.value)); renderPreview(); }));
 
-        // OPTIMISTIC UI: SAT-SET & FORCED DISPLAY NONE
+        // OPTIMISTIC UI: SAT-SET MURNI (BEBAS MACET)
         const eksekusiSimpan = (e) => {
             if(e) e.preventDefault();
             const p = renderPreview(); 
             if (!p) return showToast("Lengkapi data nominal!", "error");
             
             const btnP = document.getElementById('btnProses');
-            const btnM = document.getElementById('btnProsesMobile');
-            if(btnP) { btnP.disabled = true; btnP.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Memproses...</span>`; }
-            if(btnM) { btnM.disabled = true; btnM.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Memproses...</span>`; }
+            btnP.disabled = true; 
+            document.getElementById('txtBtnProses').innerText = "Memproses...";
             lucide.createIcons();
             
             let payload = { 
@@ -281,13 +273,10 @@
                 document.getElementById('denda').disabled = true;
                 document.getElementById('formSection').style.opacity = '0.3';
                 
-                // MENGGUNAKAN STYLE DISPLAY NONE SECARA PAKSA AGAR TIDAK KALAH SAMA CSS TAILWIND (lg:block)
-                document.getElementById('btnProsesContainer').style.display = 'none';
-                if(document.getElementById('btnProsesContainerMobile')) {
-                    document.getElementById('btnProsesContainerMobile').style.display = 'none';
-                }
-
-                // Tampilkan Navigasi Struk & WA (Menggunakan class flex)
+                // Sembunyikan container tombol secara absolut
+                document.getElementById('btnProsesContainer').classList.add('hidden');
+                
+                // Tampilkan Navigasi Struk & WA
                 const actionBtns = document.getElementById('actionButtons');
                 actionBtns.classList.remove('hidden');
                 actionBtns.classList.add('flex');
@@ -299,7 +288,6 @@
         };
 
         document.getElementById('btnProses').addEventListener('click', eksekusiSimpan);
-        if(document.getElementById('btnProsesMobile')) document.getElementById('btnProsesMobile').addEventListener('click', eksekusiSimpan);
 
         async function captureAndShare(mode) {
             if(!currentSavedData) return;
@@ -328,6 +316,7 @@
             }, 200);
         }
 
+        // FORMAT RAWBT
         function cetakStrukTajam() {
             if (!currentSavedData) return showToast("Data transaksi belum ada!", "error");
             const p = currentSavedData;
