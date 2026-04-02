@@ -87,7 +87,7 @@
                     </div>
                 </div>
 
-                <button onclick="tambahkanKalenderIcs()" id="btnKalender" class="w-full mt-4 bg-white border-2 border-emerald-500 text-emerald-600 font-extrabold py-3.5 rounded-2xl active:scale-95 transition-all flex justify-center items-center gap-2 shadow-sm hover:bg-emerald-50">
+                <button onclick="bukaKalenderNative()" id="btnKalender" class="w-full mt-4 bg-white border-2 border-emerald-500 text-emerald-600 font-extrabold py-3.5 rounded-2xl active:scale-95 transition-all flex justify-center items-center gap-2 shadow-sm hover:bg-emerald-50">
                     <i data-lucide="calendar-plus" class="w-5 h-5"></i> Tambahkan ke Kalender HP
                 </button>
             </div>
@@ -176,52 +176,40 @@
             lucide.createIcons();
         }
 
-        // FUNGSI MEMBUAT FILE .ICS UNTUK APLIKASI KALENDER BAWAAN
-        function tambahkanKalenderIcs() {
+        // FUNGSI MEMBUKA APLIKASI KALENDER BAWAAN INSTAN
+        function bukaKalenderNative() {
             if(!currentData) return;
             const d = new Date();
             let targetBulan = d.getMonth();
-            if (d.getDate() > currentData.jatuhTempo) targetBulan++; 
+            if (d.getDate() > currentData.jatuhTempo) targetBulan++; // Geser ke bulan depan jika tanggal sudah lewat
             
             const eventDate = new Date(d.getFullYear(), targetBulan, currentData.jatuhTempo);
-            const yyyy = eventDate.getFullYear();
-            const mm = String(eventDate.getMonth() + 1).padStart(2, '0');
-            const dd = String(eventDate.getDate()).padStart(2, '0');
-            
-            // Format waktu kalender mengambang (Floating time) agar menyesuaikan zona waktu HP pelanggan
-            const tglMulai = `${yyyy}${mm}${dd}T080000`; // Mulai jam 08:00 Pagi
-            const tglSelesai = `${yyyy}${mm}${dd}T090000`; // Selesai jam 09:00 Pagi
             
             const judul = `Bayar Angsuran ${currentData.barang}`;
             const detail = `Halo ${currentData.nama}, ini pengingat untuk membayar angsuran Zenith Cell bulan ini senilai Rp ${formatRp(currentData.cicilanPerBulan)} agar status Anda tetap "VVIP Lancar".`;
-            
-            // Menyusun format standar iCalendar (.ics)
-            let icsContent = "BEGIN:VCALENDAR\n";
-            icsContent += "VERSION:2.0\n";
-            icsContent += "PRODID:-//Zenith Cell//ID\n";
-            icsContent += "BEGIN:VEVENT\n";
-            icsContent += `DTSTART:${tglMulai}\n`;
-            icsContent += `DTEND:${tglSelesai}\n`;
-            icsContent += `SUMMARY:${judul}\n`;
-            icsContent += `DESCRIPTION:${detail}\n`;
-            icsContent += "BEGIN:VALARM\n";
-            icsContent += "TRIGGER:-PT15M\n"; // Alarm 15 menit sebelumnya
-            icsContent += "ACTION:DISPLAY\n";
-            icsContent += "DESCRIPTION:Pengingat Angsuran\n";
-            icsContent += "END:VALARM\n";
-            icsContent += "END:VEVENT\n";
-            icsContent += "END:VCALENDAR";
 
-            // Membuat file dan memicu download otomatis untuk dibuka kalender bawaan
-            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Tagihan_Zenith_Cell_${currentData.nama.replace(/\s/g, '_')}.ics`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            // Deteksi jenis Perangkat (Android atau Bukan)
+            const isAndroid = /Android/i.test(navigator.userAgent);
+
+            if (isAndroid) {
+                // Konversi waktu ke Epoch Milliseconds (Jam 08:00 Pagi)
+                const startTime = new Date(eventDate.getFullYear(), targetBulan, currentData.jatuhTempo, 8, 0, 0).getTime();
+                const endTime = startTime + (60 * 60 * 1000); // Durasi 1 Jam (09:00)
+
+                // Intent Native Android (Buka Aplikasi Kalender Langsung, Tanpa Browser/Download)
+                const intentUrl = `intent:#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.item/event;S.title=${encodeURIComponent(judul)};S.description=${encodeURIComponent(detail)};l.beginTime=${startTime};l.endTime=${endTime};end`;
+                window.location.href = intentUrl;
+            } else {
+                // Fallback untuk Pengguna iPhone (iOS) / PC (Membuka Google Calendar di Tab Baru)
+                const yyyy = eventDate.getFullYear();
+                const mm = String(eventDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(eventDate.getDate()).padStart(2, '0');
+                const tglMulai = `${yyyy}${mm}${dd}T080000`; 
+                const tglSelesai = `${yyyy}${mm}${dd}T090000`;
+                
+                const gCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(judul)}&dates=${tglMulai}/${tglSelesai}&details=${encodeURIComponent(detail)}`;
+                window.open(gCalUrl, '_blank');
+            }
         }
     </script>
 </body>
