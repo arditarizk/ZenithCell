@@ -132,7 +132,6 @@
         let dbCustomers = [], isSaved = false, currentSavedData = null; window.currentDiskon = 0;
         
         // FORMAT ID TRANSAKSI: INV + YYMMDD + HHMM
-        // CONTOH: INV2604021653
         function buatIdTransaksi() {
             const d = new Date(); 
             const yy = String(d.getFullYear()).slice(-2);
@@ -140,7 +139,6 @@
             const dd = String(d.getDate()).padStart(2, '0');
             const hh = String(d.getHours()).padStart(2, '0');
             const mins = String(d.getMinutes()).padStart(2, '0');
-            
             return `INV${yy}${mm}${dd}${hh}${mins}`;
         }
         
@@ -246,49 +244,47 @@
 
         ['nominal', 'denda'].forEach(id => document.getElementById(id).addEventListener('input', (e) => { if(isSaved) return; e.target.value = formatRp(parseRp(e.target.value)); renderPreview(); }));
 
-        // SAT-SET SIMPAN
+        // OPTIMISTIC UI: KODE FIX BUG SILUMAN
         const eksekusiSimpan = (e) => {
             if(e) e.preventDefault();
+            const p = renderPreview(); 
+            if (!p) return showToast("Lengkapi data nominal!", "error");
             
-            try {
-                const p = renderPreview(); 
-                if (!p) return showToast("Lengkapi data nominal!", "error");
+            const btnP = document.getElementById('btnProses');
+            btnP.disabled = true; 
+            btnP.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Memproses...</span>`;
+            lucide.createIcons();
+            
+            let payload = { 
+                tipe: p.isLunas ? "PELUNASAN_AWAL" : "KAS_MASUK_CICILAN", 
+                idTransaksi: p.idTransaksi, idKontrak: p.data.idKontrak, waktu: new Date().toLocaleString('id-ID'), 
+                bulanIni: new Date().getMonth() + 1, nama: p.data.nama, whatsapp: p.data.wa, 
+                cicilanKe: p.cicilan, nominalMasuk: p.nominalVal, dendaMasuk: p.dendaVal, 
+                catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru) 
+            };
+            
+            // Kirim tanpa peduli error block CORS
+            fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(e=>{});
+            
+            // Munculkan struk dalam 0.3 detik
+            setTimeout(() => {
+                isSaved = true; currentSavedData = p;
                 
-                const btnP = document.getElementById('btnProses');
-                btnP.disabled = true; 
-                document.getElementById('btnProsesIcon').outerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>`;
-                document.getElementById('txtBtnProses').innerText = "Memproses...";
-                lucide.createIcons();
-                
-                let payload = { 
-                    tipe: p.isLunas ? "PELUNASAN_AWAL" : "KAS_MASUK_CICILAN", 
-                    idTransaksi: p.idTransaksi, idKontrak: p.data.idKontrak, waktu: new Date().toLocaleString('id-ID'), 
-                    bulanIni: new Date().getMonth() + 1, nama: p.data.nama, whatsapp: p.data.wa, 
-                    cicilanKe: p.cicilan, nominalMasuk: p.nominalVal, dendaMasuk: p.dendaVal, 
-                    catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru) 
-                };
-                
-                fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(e=>{});
-                
-                setTimeout(() => {
-                    isSaved = true; currentSavedData = p;
-                    document.getElementById('nominal').disabled = true; document.getElementById('denda').disabled = true;
-                    document.getElementById('formSection').style.opacity = '0.3';
-                    
-                    document.getElementById('btnProsesContainer').style.setProperty('display', 'none', 'important');
+                document.getElementById('nominal').disabled = true; 
+                document.getElementById('denda').disabled = true;
 
-                    const actionBtns = document.getElementById('actionButtons');
-                    actionBtns.classList.remove('hidden'); actionBtns.classList.add('flex');
-                    
-                    showToast(p.isLunas ? "LUNAS! Riwayat dicatat." : "Berhasil Disimpan!", "success");
-                    if(window.innerWidth < 1024) document.getElementById('previewPanel').scrollIntoView({behavior: 'smooth'});
-                }, 300); 
+                // BUG FIX UTAMA: ID yang benar adalah posForm
+                const formEl = document.getElementById('posForm');
+                if(formEl) formEl.style.opacity = '0.3';
+                
+                document.getElementById('btnProsesContainer').style.setProperty('display', 'none', 'important');
 
-            } catch (err) {
-                document.getElementById('txtBtnProses').innerText = "Simpan & Buat Struk";
-                document.getElementById('btnProses').disabled = false;
-                showToast("Terjadi kesalahan internal.", "error");
-            }
+                const actionBtns = document.getElementById('actionButtons');
+                actionBtns.classList.remove('hidden'); actionBtns.classList.add('flex');
+                
+                showToast(p.isLunas ? "LUNAS! Riwayat dicatat." : "Berhasil Disimpan!", "success");
+                if(window.innerWidth < 1024) document.getElementById('previewPanel').scrollIntoView({behavior: 'smooth'});
+            }, 300); 
         };
 
         document.getElementById('btnProses').addEventListener('click', eksekusiSimpan);
@@ -316,7 +312,6 @@
             }, 200);
         }
 
-        // PRINT RAWBT (HP) & WINDOWS PRINT (PC)
         function cetakStrukTajam() {
             if (!currentSavedData) return showToast("Data transaksi belum ada!", "error");
             const p = currentSavedData;
