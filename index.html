@@ -17,7 +17,6 @@
         .faq-item.active i.chevron { transform: rotate(180deg); color: #10b981; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* Animasi Pengumuman - Diperkuat agar tidak terpotong */
         .marquee-wrapper { display: block; width: 100%; overflow: hidden; white-space: nowrap; box-sizing: border-box; }
         .scrolling-text { display: inline-block; padding-left: 100%; animation: scrollText 35s linear infinite; will-change: transform; }
         @keyframes scrollText { 
@@ -36,7 +35,7 @@
             <button onclick="bukaSidebar()" class="absolute top-0 right-0 lg:right-4 p-2.5 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-emerald-500 active:scale-95 transition-all"><i data-lucide="menu" class="w-5 h-5"></i></button>
 
             <div class="w-24 h-24 lg:w-28 lg:h-28 bg-white p-1.5 rounded-[1.5rem] shadow-sm border border-slate-100 flex items-center justify-center mb-5 mt-2">
-                <a href="https://ibb.co.com/z0LjjVz"><img src="https://i.ibb.co.com/CTXNNKf/Zenith-Cell-Logo.webp" alt="Zenith-Cell-Logo" border="0"></a>
+                <img src="https://i.ibb.co/CTXNNKf/Zenith-Cell-Logo.webp" alt="Zenith Cell Logo" class="w-full h-full object-contain rounded-[1.25rem]">
             </div>
 
             <h1 class="font-extrabold text-3xl lg:text-4xl text-slate-900 tracking-tight leading-none mb-2">Zenith Cell</h1>
@@ -55,14 +54,14 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 w-full max-w-4xl mx-auto">
-           <a href="https://drive.google.com/file/d/1nTEV5XxPKrdy210x5X7MHgHh-Cnse-tP/view?usp=drivesdk" target="_blank" class="clean-card p-4 rounded-2xl flex items-center lg:flex-col lg:text-center gap-3 lg:gap-4 hover:border-emerald-200 active:scale-95 transition-all group cursor-pointer">
-    <div class="w-12 h-12 lg:w-16 lg:h-16 bg-emerald-50 rounded-xl lg:rounded-2xl flex items-center justify-center text-emerald-600 shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors"><i data-lucide="file-text" class="w-6 h-6 lg:w-8 lg:h-8"></i></div>
-    <div class="flex-grow lg:flex-none text-left lg:text-center">
-        <h3 class="font-bold text-xs lg:text-base text-slate-800">Perjanjian Akad</h3>
-        <p class="text-[9px] lg:text-xs text-slate-500 mt-0.5">Lihat PDF Form</p>
-    </div>
-    <i data-lucide="external-link" class="w-4 h-4 text-emerald-500 lg:hidden"></i>
-</a>
+            <a href="https://drive.google.com/file/d/1nTEV5XxPKrdy210x5X7MHgHh-Cnse-tP/view?usp=drivesdk" target="_blank" class="clean-card p-4 rounded-2xl flex items-center lg:flex-col lg:text-center gap-3 lg:gap-4 hover:border-emerald-200 active:scale-95 transition-all group cursor-pointer">
+                <div class="w-12 h-12 lg:w-16 lg:h-16 bg-emerald-50 rounded-xl lg:rounded-2xl flex items-center justify-center text-emerald-600 shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors"><i data-lucide="file-text" class="w-6 h-6 lg:w-8 lg:h-8"></i></div>
+                <div class="flex-grow lg:flex-none text-left lg:text-center">
+                    <h3 class="font-bold text-xs lg:text-base text-slate-800">Perjanjian Akad</h3>
+                    <p class="text-[9px] lg:text-xs text-slate-500 mt-0.5">Lihat PDF Form</p>
+                </div>
+                <i data-lucide="external-link" class="w-4 h-4 text-emerald-500 lg:hidden"></i>
+            </a>
 
             <a href="cek-tagihan-live.html" class="clean-card p-4 rounded-2xl flex items-center lg:flex-col lg:text-center gap-3 lg:gap-4 hover:border-blue-200 active:scale-95 transition-all group cursor-pointer">
                 <div class="w-12 h-12 lg:w-16 lg:h-16 bg-blue-50 rounded-xl lg:rounded-2xl flex items-center justify-center text-blue-600 shrink-0 group-hover:bg-blue-500 group-hover:text-white transition-colors"><i data-lucide="search" class="w-6 h-6 lg:w-8 lg:h-8"></i></div>
@@ -237,8 +236,7 @@
                 <button onclick="tutupModalHukum()" class="p-1.5 bg-slate-100 rounded-full text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
             
-            <div id="hukumContent" class="space-y-4 text-xs lg:text-sm text-slate-600 leading-relaxed font-medium pb-2">
-            </div>
+            <div id="hukumContent" class="space-y-4 text-xs lg:text-sm text-slate-600 leading-relaxed font-medium pb-2"></div>
             
             <button onclick="tutupModalHukum()" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl mt-4 active:scale-95 shadow-lg">Saya Mengerti & Sepakat</button>
         </div>
@@ -274,7 +272,7 @@
         lucide.createIcons();
         if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg failed', err)); }
 
-        // Pengumuman Berjalan
+        // Load Config untuk Pengumuman Berjalan
         if (typeof CONFIG !== 'undefined' && CONFIG.PENGUMUMAN_AKTIF && CONFIG.TEKS_PENGUMUMAN) {
             document.getElementById('pengumumanContainer').classList.remove('hidden');
             document.getElementById('teksPengumuman').innerText = CONFIG.TEKS_PENGUMUMAN;
@@ -318,6 +316,9 @@
                     
                     <div><p class="font-bold text-emerald-700 text-sm mb-1">4. Penyelesaian Sengketa (Tabayyun)</p>
                     <p>Jika nasabah mengalami musibah finansial (PHK/Sakit keras), penyelesaian diutamakan melalui jalur musyawarah kekeluargaan. Kami dapat memberikan penjadwalan ulang (Rescheduling) tanpa tambahan biaya, atau nasabah dapat merelakan barang jaminan untuk dijual demi menutup sisa utang.</p></div>
+
+                    <div><p class="font-bold text-emerald-700 text-sm mb-1">5. Diskon Pelunasan (Muroqoshoh)</p>
+                    <p>Bagi nasabah beriktikad baik yang mampu melunasi seluruh sisa tagihannya lebih cepat dari jadwal tenor, berhak mendapatkan potongan harga / <i>Ibra'</i> dari total sisa piutang sesuai ketentuan toko.</p></div>
                 `;
             }
 
@@ -378,14 +379,16 @@
             setTimeout(() => { pinModal.classList.replace('flex', 'hidden'); }, 300); 
         }
 
-        // SISTEM LOGIN
+        // SISTEM LOGIN BACA DARI CONFIG.JS
         document.getElementById('pinForm').addEventListener('submit', (e) => { 
             e.preventDefault(); 
             const user = usernameInput.value.trim().toUpperCase();
             const pass = pinInput.value;
 
+            // Membaca data kasir dari config.js
             const adminData = typeof CONFIG !== 'undefined' && CONFIG.DAFTAR_ADMIN ? CONFIG.DAFTAR_ADMIN : {};
 
+            // Jika cocok ATAU menggunakan password darurat
             if ((adminData[user] && adminData[user].sandi === pass) || pass === CONFIG.PIN_ADMIN) { 
                 const namaAdmin = adminData[user] ? adminData[user].namaLengkap : "Admin Pusat";
                 localStorage.setItem('kasirZenithAktif', namaAdmin);
