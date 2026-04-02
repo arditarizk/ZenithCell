@@ -28,6 +28,15 @@
         .is-printer .dashed-line { border-top: 2px dashed #000000 !important; }
         .solid-line { border-top: 3px solid #000000; margin: 15px 0; }
         .flex-between { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+
+        /* CSS KHUSUS UNTUK PRINT DI PC */
+        @media print {
+            body { background: white; }
+            body * { visibility: hidden; }
+            #strukCard, #strukCard * { visibility: visible; }
+            #strukCard { position: absolute; left: 0; top: 0; width: 100%; max-width: 380px; margin: 0 auto; border: none !important; box-shadow: none !important; padding: 0; }
+            .glass-panel, main, section { box-shadow: none !important; background: transparent !important; border: none !important; }
+        }
     </style>
 </head>
 <body class="text-slate-800 lg:p-8 min-h-screen flex selection:bg-emerald-200">
@@ -36,7 +45,7 @@
 
     <main class="m-auto w-full max-w-5xl bg-white lg:rounded-[2.5rem] lg:shadow-2xl overflow-hidden flex flex-col lg:flex-row relative z-10 min-h-screen lg:min-h-[85vh]">
         
-        <section id="formSection" class="w-full lg:w-7/12 p-4 lg:p-8 flex flex-col border-r border-slate-100 transition-all duration-300">
+        <section class="w-full lg:w-7/12 p-4 lg:p-8 flex flex-col border-r border-slate-100">
             <header class="mb-5 flex items-center justify-between bg-slate-50 p-4 rounded-[2rem] shadow-sm border relative">
                 <a href="index.html" class="p-2 bg-white rounded-full text-slate-500 mr-2 active:scale-95 transition-all shadow-sm"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
                 <div class="flex items-center gap-3 flex-grow">
@@ -77,16 +86,16 @@
                             <span class="absolute left-3 text-red-500 font-bold text-sm">Rp</span>
                             <input type="text" id="denda" inputmode="numeric" placeholder="0" class="w-full pl-9 pr-3 py-3 bg-white border border-red-200 rounded-xl text-red-700 font-bold text-sm outline-none focus:border-red-500 transition-all">
                         </div>
-                        <p class="text-[8px] font-bold text-red-500/80 leading-tight">*Catatan: Uang denda ini tidak diakui sebagai keuntungan Zenith Cell, melainkan disalurkan untuk kepentingan sosial.</p>
+                        <p class="text-[8px] font-bold text-red-500/80 leading-tight">*Catatan: Uang denda ini disalurkan untuk kepentingan sosial.</p>
                     </div>
                 </div>
+
+                <div id="btnProsesContainer" class="hidden pt-2 pb-6 lg:pb-0">
+                    <button type="button" id="btnProses" class="w-full bg-slate-900 text-white font-extrabold py-4 rounded-[1.5rem] active:scale-95 flex justify-center items-center gap-2 shadow-xl transition-all">
+                        <i data-lucide="save" class="w-5 h-5 text-emerald-400"></i><span id="txtBtnProses">Simpan & Buat Struk</span>
+                    </button>
+                </div>
             </form>
-            
-            <div id="btnProsesContainer" class="mt-6 hidden lg:block sticky bottom-0 lg:static bg-white pt-2 pb-4">
-                <button type="button" id="btnProses" class="w-full bg-slate-900 text-white font-extrabold py-4 rounded-[1.5rem] active:scale-95 flex justify-center items-center gap-2 shadow-2xl transition-all">
-                    <i data-lucide="save" class="w-5 h-5 text-emerald-400"></i><span>Simpan & Buat Struk</span>
-                </button>
-            </div>
         </section>
 
         <section class="w-full lg:w-5/12 bg-slate-50 p-4 lg:p-8 flex flex-col relative" id="previewPanel">
@@ -111,18 +120,11 @@
                 <div id="actionButtons" class="hidden flex-col gap-3 mt-6 w-full max-w-[340px] mx-auto">
                     <div class="grid grid-cols-2 gap-3">
                         <button id="btnShareWA" class="bg-[#25D366] text-white font-bold py-4 rounded-2xl flex flex-col items-center justify-center gap-1 active:scale-95 shadow-lg border-b-4 border-green-700 transition-all"><i data-lucide="share-2" class="w-6 h-6"></i><span class="text-[11px] uppercase tracking-wider">Share WA</span></button>
-                        <button id="btnPrint" class="bg-slate-800 text-white font-bold py-4 rounded-2xl flex flex-col items-center justify-center gap-1 active:scale-95 shadow-lg border-b-4 border-slate-900 transition-all"><i data-lucide="printer" class="w-6 h-6"></i><span class="text-[11px] uppercase tracking-wider">Thermal</span></button>
+                        <button id="btnPrint" class="bg-slate-800 text-white font-bold py-4 rounded-2xl flex flex-col items-center justify-center gap-1 active:scale-95 shadow-lg border-b-4 border-slate-900 transition-all"><i data-lucide="printer" class="w-6 h-6"></i><span class="text-[11px] uppercase tracking-wider">Print Struk</span></button>
                     </div>
                     <button onclick="window.location.reload()" class="w-full mt-2 bg-white text-slate-500 border border-slate-200 font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all"><i data-lucide="plus-circle" class="w-5 h-5"></i> <span class="text-xs uppercase tracking-wider">Transaksi Baru</span></button>
                 </div>
             </div>
-            
-            <div id="btnProsesContainerMobile" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] z-50 lg:hidden hidden">
-                <button type="button" id="btnProsesMobile" class="w-full bg-slate-900 text-white font-extrabold py-4 rounded-[1.5rem] active:scale-95 flex justify-center items-center gap-2 shadow-2xl border-t border-slate-700 transition-all">
-                    <i data-lucide="save" class="w-5 h-5 text-emerald-400"></i><span>Simpan & Buat Struk</span>
-                </button>
-            </div>
-            <div class="h-24 lg:hidden block shrink-0"></div>
         </section>
     </main>
 
@@ -130,13 +132,21 @@
         lucide.createIcons();
         let dbCustomers = [], isSaved = false, currentSavedData = null; window.currentDiskon = 0;
         
+        // FORMAT TRANSAKSI: TRX + TAHUN/BULAN/TANGGAL + 3 HURUF ACAK
+        // CONTOH: TRX260402ABC
         function buatIdTransaksi() {
-            const now = new Date(); const yy = String(now.getFullYear()).slice(-2);
-            const mm = String(now.getMonth() + 1).padStart(2, '0'); const dd = String(now.getDate()).padStart(2, '0');
-            const hh = String(now.getHours()).padStart(2, '0'); const mins = String(now.getMinutes()).padStart(2, '0');
-            const random = Math.floor(Math.random() * 90 + 10);
-            return `TRX${yy}${mm}${dd}${hh}${mins}${random}`;
+            const d = new Date(); 
+            const yy = String(d.getFullYear()).slice(-2);
+            const mm = String(d.getMonth() + 1).padStart(2, '0'); 
+            const dd = String(d.getDate()).padStart(2, '0');
+            
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let randomStr = '';
+            for (let i = 0; i < 3; i++) randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+            
+            return `TRX${yy}${mm}${dd}${randomStr}`;
         }
+        
         const formatRp = (n) => new Intl.NumberFormat('id-ID').format(n);
         const parseRp = (s) => parseInt(s.toString().replace(/[^0-9]/g, '')) || 0;
 
@@ -188,12 +198,7 @@
             document.getElementById('nominal').value = formatRp(c.cicilanPerBulan);
             document.getElementById('denda').value = "";
             
-            document.getElementById('btnProsesContainer').classList.remove('hidden');
             document.getElementById('btnProsesContainer').style.display = 'block';
-            if(document.getElementById('btnProsesContainerMobile')) {
-                document.getElementById('btnProsesContainerMobile').classList.remove('hidden');
-                document.getElementById('btnProsesContainerMobile').style.display = 'block';
-            }
             
             document.getElementById('cicilanGrid').innerHTML = `
                 <label class="flex-1"><input type="radio" name="cicilan" value="${c.cicilanKe}" class="peer sr-only" checked onchange="document.getElementById('nominal').value='${formatRp(c.cicilanPerBulan)}'; renderPreview()"><div class="px-5 py-3 rounded-xl bg-white border-2 border-slate-200 peer-checked:bg-slate-900 peer-checked:text-white text-slate-600 font-black text-xs text-center transition-all flex flex-col items-center"><span>Bulan Ke-${c.cicilanKe}</span><span class="text-[8px] font-bold opacity-70 mt-0.5">Bulanan</span></div></label>
@@ -244,15 +249,15 @@
 
         ['nominal', 'denda'].forEach(id => document.getElementById(id).addEventListener('input', (e) => { if(isSaved) return; e.target.value = formatRp(parseRp(e.target.value)); renderPreview(); }));
 
+        // OPTIMISTIC UI: SAT-SET MURNI (BEBAS MACET)
         const eksekusiSimpan = (e) => {
             if(e) e.preventDefault();
             const p = renderPreview(); 
             if (!p) return showToast("Lengkapi data nominal!", "error");
             
             const btnP = document.getElementById('btnProses');
-            const btnM = document.getElementById('btnProsesMobile');
-            if(btnP) { btnP.disabled = true; btnP.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Memproses...</span>`; }
-            if(btnM) { btnM.disabled = true; btnM.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Memproses...</span>`; }
+            btnP.disabled = true; 
+            document.getElementById('txtBtnProses').innerText = "Memproses...";
             lucide.createIcons();
             
             let payload = { 
@@ -269,42 +274,32 @@
                 catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru) 
             };
             
+            // FIRE AND FORGET (Langsung tembak)
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
             
             setTimeout(() => {
-                isSaved = true; 
-                currentSavedData = p;
+                isSaved = true; currentSavedData = p;
+                document.getElementById('nominal').disabled = true; document.getElementById('denda').disabled = true;
+                document.getElementById('formSection').style.opacity = '0.3';
                 
-                document.getElementById('nominal').disabled = true; 
-                document.getElementById('denda').disabled = true;
-                
-                // Mencegah error null dengan memastikan ID formSection ada
-                const formSection = document.getElementById('formSection');
-                if (formSection) formSection.style.opacity = '0.3';
-                
-                // Menyembunyikan tombol secara paksa tanpa terpengaruh Tailwind
+                // MENGHILANGKAN TOMBOL SECARA PAKSA 
                 document.getElementById('btnProsesContainer').style.display = 'none';
-                if(document.getElementById('btnProsesContainerMobile')) {
-                    document.getElementById('btnProsesContainerMobile').style.display = 'none';
-                }
 
+                // Tampilkan Navigasi Struk & WA 
                 const actionBtns = document.getElementById('actionButtons');
-                actionBtns.classList.remove('hidden');
-                actionBtns.classList.add('flex');
+                actionBtns.classList.remove('hidden'); actionBtns.classList.add('flex');
                 
                 showToast(p.isLunas ? "LUNAS! Riwayat telah dicatat." : "Berhasil Disimpan!", "success");
-                
                 if(window.innerWidth < 1024) document.getElementById('previewPanel').scrollIntoView({behavior: 'smooth'});
             }, 300); 
         };
 
         document.getElementById('btnProses').addEventListener('click', eksekusiSimpan);
-        if(document.getElementById('btnProsesMobile')) document.getElementById('btnProsesMobile').addEventListener('click', eksekusiSimpan);
 
-        async function captureAndShare(mode) {
+        async function captureAndShare() {
             if(!currentSavedData) return;
             const wrapper = document.getElementById('strukWrapper');
-            wrapper.className = mode === 'wa' ? "is-whatsapp mx-auto" : "is-printer mx-auto";
+            wrapper.className = "is-whatsapp mx-auto";
             showToast("Mempersiapkan Struk...");
             
             setTimeout(async () => {
@@ -315,11 +310,7 @@
                         const file = new File([blob], fileName, { type: "image/png" });
 
                         if (navigator.share && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ 
-                                files: [file], 
-                                title: 'Kuitansi Zenith Cell', 
-                                text: `Assalamu'alaikum Kak ${currentSavedData.data.nama}.\n\nBerikut dilampirkan kuitansi bukti pembayaran angsurannya. Dana telah kami terima dan dicatat di sistem.\n\nTerima kasih atas kepercayaannya kepada Zenith Cell.` 
-                            });
+                            await navigator.share({ files: [file], title: 'Kuitansi Zenith Cell', text: `Assalamu'alaikum Kak ${currentSavedData.data.nama}.\n\nBerikut dilampirkan kuitansi bukti pembayaran angsurannya. Dana telah kami terima dan dicatat di sistem.\n\nTerima kasih atas kepercayaannya kepada Zenith Cell.` });
                         } else {
                             const a = document.createElement('a'); a.download = fileName; a.href = URL.createObjectURL(blob); a.click();
                         }
@@ -328,42 +319,34 @@
             }, 200);
         }
 
+        // FUNGSI PRINT PINTAR (RAWBT DI HP, WINDOWS PRINT DI PC)
         function cetakStrukTajam() {
             if (!currentSavedData) return showToast("Data transaksi belum ada!", "error");
             const p = currentSavedData;
-            const tgl = new Date().toLocaleString('id-ID');
-            const ketCicilan = p.isLunas ? 'Pelunasan Full' : 'Angsuran Ke-' + p.cicilan;
-            const barang = p.data.barang ? p.data.barang : '-';
+            
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                // RAWBT UNTUK ANDROID
+                const tgl = new Date().toLocaleString('id-ID');
+                const ketCicilan = p.isLunas ? 'Pelunasan Full' : 'Angsuran Ke-' + p.cicilan;
+                const barang = p.data.barang ? p.data.barang : '-';
 
-            let struk = "        ZENITH CELL         \n";
-            struk += " Gadget Syariah Kota Malang \n";
-            struk += "--------------------------------\n";
-            struk += "Tgl     : " + tgl + "\n";
-            struk += "No.Trans: " + p.idTransaksi + "\n";
-            struk += "Kasir   : Admin Pusat\n";
-            struk += "--------------------------------\n";
-            struk += "No.Kntrk: " + p.data.idKontrak + "\n";
-            struk += "Customer: " + p.data.nama.toUpperCase() + "\n";
-            struk += "Unit    : " + barang.toUpperCase() + "\n";
-            struk += "Ket     : " + ketCicilan + "\n";
-            struk += "--------------------------------\n";
-            struk += "Angsuran: Rp " + formatRp(p.nominalVal) + "\n";
-            if(p.dendaVal > 0) struk += "Denda   : Rp " + formatRp(p.dendaVal) + "\n";
-            if(p.isLunas) struk += "Diskon  : Rp " + formatRp(window.currentDiskon) + "\n";
-            struk += "--------------------------------\n";
-            struk += "TOTAL   : Rp " + formatRp(p.totalBayarPlusDenda) + "\n";
-            struk += "Sisa Utg: Rp " + formatRp(p.sisaBaru) + "\n";
-            struk += "--------------------------------\n";
-            struk += "     Alhamdulillah Sah!     \n";
-            struk += " Terima kasih, moga berkah! \n";
-            struk += "\n\n\n"; 
-
-            let teksEncoded = encodeURIComponent(struk);
-            window.location.href = "intent:" + teksEncoded + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
+                let struk = "        ZENITH CELL         \n Gadget Syariah Kota Malang \n--------------------------------\n";
+                struk += "Tgl     : " + tgl + "\nNo.Trans: " + p.idTransaksi + "\nKasir   : Admin Pusat\n--------------------------------\n";
+                struk += "No.Kntrk: " + p.data.idKontrak + "\nCustomer: " + p.data.nama.toUpperCase() + "\nUnit    : " + barang.toUpperCase() + "\nKet     : " + ketCicilan + "\n--------------------------------\n";
+                struk += "Angsuran: Rp " + formatRp(p.nominalVal) + "\n";
+                if(p.dendaVal > 0) struk += "Denda   : Rp " + formatRp(p.dendaVal) + "\n";
+                if(p.isLunas) struk += "Diskon  : Rp " + formatRp(window.currentDiskon) + "\n";
+                struk += "--------------------------------\nTOTAL   : Rp " + formatRp(p.totalBayarPlusDenda) + "\nSisa Utg: Rp " + formatRp(p.sisaBaru) + "\n--------------------------------\n     Alhamdulillah Sah!     \n Terima kasih, moga berkah! \n\n\n\n"; 
+                window.location.href = "intent:" + encodeURIComponent(struk) + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
+            } else {
+                // BUKA JENDELA PRINT UNTUK PC/LAPTOP
+                window.print();
+            }
         }
 
-        document.getElementById('btnShareWA').onclick = () => captureAndShare('wa'); 
-        document.getElementById('btnPrint').onclick = () => cetakStrukTajam();
+        document.getElementById('btnShareWA').onclick = captureAndShare; 
+        document.getElementById('btnPrint').onclick = cetakStrukTajam;
         
         fetchCustomersFromCloud();
     </script>
