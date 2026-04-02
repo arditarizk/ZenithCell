@@ -10,6 +10,11 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="config.js"></script>
+    <script>
+        // FITUR KEAMANAN PROFESIONAL: Blokir akses langsung via URL (Pintu Belakang)
+        const KASIR_AKTIF = localStorage.getItem('kasirZenithAktif');
+        if (!KASIR_AKTIF) { window.location.replace('index.html'); }
+    </script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); }
@@ -57,15 +62,20 @@
                     <div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shrink-0"><i data-lucide="smartphone-charging" class="w-6 h-6 text-emerald-400"></i></div>
                     <div><h1 class="font-black text-xl leading-none">Kasir POS</h1><p class="text-[10px] font-bold text-emerald-600 uppercase" id="labelNamaKasir">Input & Pelunasan</p></div>
                 </div>
-                <button onclick="fetchCustomersFromCloud()" class="p-2.5 bg-emerald-100 rounded-xl text-emerald-700 active:rotate-180 transition-all shadow-sm"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
+                <button onclick="logoutKasir()" class="p-2.5 bg-red-50 rounded-xl text-red-600 active:scale-95 transition-all shadow-sm flex items-center gap-1" title="Keluar dari sesi Kasir">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
             </header>
 
             <form id="posForm" class="space-y-6 flex-grow">
                 <div>
                     <label class="block text-[11px] font-extrabold text-slate-400 mb-2 uppercase tracking-widest px-1">1. Pilih Pelanggan Aktif</label>
-                    <div class="relative mb-3">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i></div>
-                        <input type="text" id="searchCustomer" oninput="filterCustomer()" placeholder="Cari nama pelanggan..." class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all shadow-sm">
+                    <div class="relative mb-3 flex gap-2">
+                        <div class="relative flex-grow">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i></div>
+                            <input type="text" id="searchCustomer" oninput="filterCustomer()" placeholder="Cari nama pelanggan..." class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all shadow-sm">
+                        </div>
+                        <button type="button" onclick="fetchCustomersFromCloud()" class="p-3 bg-emerald-100 rounded-xl text-emerald-700 active:rotate-180 transition-all shadow-sm shrink-0" title="Sinkron Ulang Data"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
                     </div>
                     <div id="customerGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 lg:max-h-64 overflow-y-auto no-scrollbar p-1"></div>
                 </div>
@@ -138,12 +148,15 @@
     <script>
         lucide.createIcons();
         
-        // PENGAMBILAN NAMA KASIR DARI LOGIN INDEX
-        const NAMA_KASIR_AKTIF = localStorage.getItem('kasirZenithAktif') || 'Admin Pusat';
-        
+        // LOGOUT FUNCTION
+        function logoutKasir() {
+            localStorage.removeItem('kasirZenithAktif');
+            window.location.replace('index.html');
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('labelNamaKasir').innerText = `KASIR: ${NAMA_KASIR_AKTIF.toUpperCase()}`;
-            document.getElementById('previewNamaKasir').innerText = `Kasir: ${NAMA_KASIR_AKTIF}`;
+            document.getElementById('labelNamaKasir').innerText = `KASIR: ${KASIR_AKTIF.toUpperCase()}`;
+            document.getElementById('previewNamaKasir').innerText = `Kasir: ${KASIR_AKTIF}`;
         });
 
         let dbCustomers = [], isSaved = false, currentSavedData = null; window.currentDiskon = 0;
@@ -230,7 +243,7 @@
             const tBayar = nominalVal + dendaVal;
 
             let strukDiskonHtml = isLunas ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-emerald-600">Diskon Ibra':</span><span class="text-[10px] font-black text-right uppercase text-emerald-600">- Rp ${formatRp(window.currentDiskon)}</span></div>` : '';
-            let strukDendaHtml = dendaVal > 0 ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-red-600">Denda Syariah:</span><span class="text-[10px] font-black text-right uppercase text-red-600">+ Rp ${formatRp(dendaVal)}</span></div>` : '';
+            let strukDendaHtml = dendaVal > 0 ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-red-600">Denda / Dana Kebajikan:</span><span class="text-[10px] font-black text-right uppercase text-red-600">+ Rp ${formatRp(dendaVal)}</span></div>` : '';
 
             document.getElementById('isiStruk').innerHTML = `
                 <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold">Tgl/Waktu:</span><span class="text-[10px] font-bold text-right">${new Date().toLocaleString('id-ID')}</span></div>
@@ -326,7 +339,6 @@
             }, 200);
         }
 
-        // TULISAN NAMA KASIR DI CETAKAN RAWBT
         function cetakStrukTajam() {
             if (!currentSavedData) return showToast("Data transaksi belum ada!", "error");
             const p = currentSavedData;
@@ -338,7 +350,7 @@
                 const barang = p.data.barang ? p.data.barang : '-';
 
                 let struk = "        ZENITH CELL         \n Gadget Syariah Kota Malang \n--------------------------------\n";
-                struk += "Tgl     : " + tgl + "\nNo.Trans: " + p.idTransaksi + "\nKasir   : " + NAMA_KASIR_AKTIF + "\n--------------------------------\n";
+                struk += "Tgl     : " + tgl + "\nNo.Trans: " + p.idTransaksi + "\nKasir   : " + KASIR_AKTIF + "\n--------------------------------\n";
                 struk += "No.Kntrk: " + p.data.idKontrak + "\nCustomer: " + p.data.nama.toUpperCase() + "\nUnit    : " + barang.toUpperCase() + "\nKet     : " + ketCicilan + "\n--------------------------------\n";
                 struk += "Angsuran: Rp " + formatRp(p.nominalVal) + "\n";
                 if(p.dendaVal > 0) struk += "Denda   : Rp " + formatRp(p.dendaVal) + "\n";
