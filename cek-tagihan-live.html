@@ -173,9 +173,7 @@
                     err.classList.remove('hidden');
                 }
             } catch(e) {
-                console.error("Error System:", e);
-                // Menampilkan error secara mendetail jika terjadi crash sistem
-                err.innerHTML = `<i data-lucide="wifi-off" class="w-3.5 h-3.5 inline"></i> Sistem Error: ${e.message}`; 
+                err.innerHTML = `<i data-lucide="wifi-off" class="w-3.5 h-3.5 inline"></i> Gagal terhubung ke server.`; 
                 err.classList.remove('hidden');
             }
             btn.disabled = false; btn.innerHTML = `<i data-lucide="search" class="w-5 h-5 text-emerald-400"></i> Cek Status Pembayaran`; lucide.createIcons();
@@ -185,8 +183,6 @@
             currentData = data;
             document.getElementById('resNama').innerText = data.nama;
             document.getElementById('resBarang').innerText = data.barang;
-            
-            // BUGFIX: Menugaskan innerText ke span yang benar agar tidak menimpa total tenor
             document.getElementById('resCicilanKe').innerText = data.cicilanKe;
             
             let totalHutang = parseInt(data.totalHutang) || 0;
@@ -261,7 +257,7 @@
             lucide.createIcons();
         }
 
-        // FUNGSI NATIVE INTENT KALENDER
+        // FUNGSI NATIVE INTENT KALENDER FIX
         function bukaKalenderNative() {
             if(!currentData) return;
             
@@ -274,10 +270,16 @@
 
             if (isAndroid) {
                 const startTime = eventDate.getTime();
-                const endTime = startTime + (60 * 60 * 1000); // 1 Jam
+                const endTime = startTime + (60 * 60 * 1000); 
                 
-                const intentUrl = `intent:#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.item/event;S.title=${encodeURIComponent(judul)};S.description=${encodeURIComponent(detail)};l.beginTime=${startTime};l.endTime=${endTime};end`;
-                window.location.href = intentUrl;
+                // DEEP LINK STANDAR ANDROID UNTUK MEMBUKA APLIKASI KALENDER
+                const intentUrl = `intent://events#Intent;scheme=content;action=android.intent.action.INSERT;type=vnd.android.cursor.dir/event;S.title=${encodeURIComponent(judul)};S.description=${encodeURIComponent(detail)};l.beginTime=${startTime};l.endTime=${endTime};end;`;
+                
+                const a = document.createElement('a');
+                a.href = intentUrl;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
             } else {
                 const yyyy = eventDate.getFullYear();
                 const mm = String(eventDate.getMonth() + 1).padStart(2, '0');
