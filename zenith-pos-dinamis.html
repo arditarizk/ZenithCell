@@ -55,16 +55,28 @@
                     <div class="flex overflow-x-auto no-scrollbar gap-2 pb-1" id="cicilanGrid"></div>
                 </div>
                 <div id="nominalArea" class="hidden">
-                    <label class="block text-[11px] font-extrabold text-slate-400 mb-2 uppercase tracking-widest px-1">3. Masukkan Nominal</label>
+                    <label class="block text-[11px] font-extrabold text-slate-400 mb-2 uppercase tracking-widest px-1">3. Masukkan Nominal (Angsuran)</label>
                     <div class="relative flex items-center">
                         <span class="absolute left-5 text-emerald-500 font-black text-xl">Rp</span>
                         <input type="text" id="nominal" inputmode="numeric" class="w-full pl-14 pr-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-slate-900 font-black text-2xl outline-none focus:border-emerald-500 transition-all">
                     </div>
+                    
+                    <div id="dendaArea" class="mt-4 p-4 bg-red-50 border border-red-100 rounded-2xl hidden">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-[10px] font-black text-red-600 uppercase">Denda Syariah / Dana Kebajikan</label>
+                            <i data-lucide="alert-circle" class="w-4 h-4 text-red-400"></i>
+                        </div>
+                        <div class="relative flex items-center mb-1">
+                            <span class="absolute left-3 text-red-500 font-bold text-sm">Rp</span>
+                            <input type="text" id="denda" inputmode="numeric" placeholder="0" class="w-full pl-9 pr-3 py-3 bg-white border border-red-200 rounded-xl text-red-700 font-bold text-sm outline-none focus:border-red-500 transition-all">
+                        </div>
+                        <p class="text-[8px] font-bold text-red-500/80 leading-tight">*Catatan: Uang denda ini tidak diakui sebagai keuntungan Zenith Cell, melainkan disalurkan untuk kepentingan sosial.</p>
+                    </div>
+
                 </div>
             </form>
         </section>
 
-        <!-- AREA PREVIEW STRUK -->
         <section class="mb-4 opacity-0 translate-y-2 transition-all duration-500 hidden" id="previewContainer">
             <div id="strukWrapper" class="is-whatsapp"> 
                 <div id="strukCard" class="receipt-paper">
@@ -120,6 +132,18 @@
         let dbCustomers = [], isSaved = false, currentSavedData = null;
         window.currentDiskon = 0;
         
+        // FUNGSI BUAT ID TRANSAKSI BARU
+        function buatIdTransaksi(kodeTipe) {
+            const now = new Date();
+            const yy = String(now.getFullYear()).slice(-2);
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const random = Math.floor(Math.random() * 90 + 10);
+            return `${kodeTipe}${yy}${mm}${dd}${hh}${mins}${random}`;
+        }
+
         const formatRp = (n) => new Intl.NumberFormat('id-ID').format(n);
         const parseRp = (s) => parseInt(s.toString().replace(/[^0-9]/g, '')) || 0;
 
@@ -166,17 +190,23 @@
 
             document.getElementById('cicilanArea').classList.remove('hidden');
             document.getElementById('nominalArea').classList.remove('hidden');
+            document.getElementById('dendaArea').classList.remove('hidden'); // Tampilkan fitur Denda
+            
             document.getElementById('nominal').value = formatRp(c.cicilanPerBulan);
+            document.getElementById('denda').value = ""; // Reset denda
             document.getElementById('btnProsesContainer').classList.remove('hidden');
             
             document.getElementById('cicilanGrid').innerHTML = `
                 <label><input type="radio" name="cicilan" value="${c.cicilanKe}" class="peer sr-only" checked onchange="document.getElementById('nominal').value='${formatRp(c.cicilanPerBulan)}'; renderPreview()"><div class="px-5 py-3 rounded-xl bg-white border-2 border-slate-200 peer-checked:bg-slate-900 peer-checked:text-white peer-checked:border-slate-900 text-slate-600 font-black text-xs flex flex-col items-center transition-all"><span>Bulan Ke-${c.cicilanKe}</span><span class="text-[8px] font-bold opacity-70 mt-0.5">Bulanan</span></div></label>
-                <label><input type="radio" name="cicilan" value="Pelunasan" class="peer sr-only" onchange="document.getElementById('nominal').value='${formatRp(totalLunas)}'; renderPreview()"><div class="px-5 py-3 rounded-xl bg-white border-2 border-slate-200 peer-checked:bg-slate-900 peer-checked:text-white peer-checked:border-slate-900 text-slate-600 font-black text-xs flex flex-col items-center transition-all"><span>Lunas Full</span><span class="text-[8px] font-bold text-amber-400 mt-0.5 uppercase tracking-widest">Diskon 10%</span></div></label>`;
+                <label><input type="radio" name="cicilan" value="Pelunasan" class="peer sr-only" onchange="document.getElementById('nominal').value='${formatRp(totalLunas)}'; document.getElementById('denda').value=''; renderPreview()"><div class="px-5 py-3 rounded-xl bg-white border-2 border-slate-200 peer-checked:bg-slate-900 peer-checked:text-white peer-checked:border-slate-900 text-slate-600 font-black text-xs flex flex-col items-center transition-all"><span>Lunas Full</span><span class="text-[8px] font-bold text-amber-400 mt-0.5 uppercase tracking-widest">Diskon 10%</span></div></label>`;
             renderPreview();
         }
 
         const renderPreview = () => {
-            const custRadio = document.querySelector('input[name="pelanggan"]:checked'), cicilanEl = document.querySelector('input[name="cicilan"]:checked'), nominalVal = parseRp(document.getElementById('nominal').value);
+            const custRadio = document.querySelector('input[name="pelanggan"]:checked'), cicilanEl = document.querySelector('input[name="cicilan"]:checked');
+            const nominalVal = parseRp(document.getElementById('nominal').value);
+            const dendaVal = parseRp(document.getElementById('denda').value);
+            
             if (!custRadio || !cicilanEl || nominalVal === 0) return null;
             
             document.getElementById('previewContainer').classList.remove('hidden');
@@ -184,6 +214,11 @@
             
             const data = dbCustomers.find(c => c.idKontrak === custRadio.value);
             let isLunas = cicilanEl.value === 'Pelunasan';
+
+            if (!window.tempIdTransaksi || window.isLunasTemp !== isLunas) {
+                window.tempIdTransaksi = buatIdTransaksi(isLunas ? 3 : 2);
+                window.isLunasTemp = isLunas;
+            }
             
             let sisaHutangAsli = data.hutang - data.terbayar;
             let sisaBaru = isLunas ? 0 : sisaHutangAsli - nominalVal; 
@@ -191,25 +226,37 @@
 
             let strukDiskonHtml = isLunas ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-emerald-600">Diskon Ibra':</span><span class="text-[10px] font-black text-right uppercase text-emerald-600">- Rp ${formatRp(window.currentDiskon)}</span></div>` : '';
             
+            // Tambahan HTML untuk Denda di struk jika denda diisi
+            let strukDendaHtml = dendaVal > 0 ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-red-600">Denda / Dana Kebajikan:</span><span class="text-[10px] font-black text-right uppercase text-red-600">+ Rp ${formatRp(dendaVal)}</span></div>` : '';
+            
+            const totalBayarPlusDenda = nominalVal + dendaVal;
+
             document.getElementById('isiStruk').innerHTML = `
                 <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold">Tgl/Waktu:</span><span class="text-[10px] font-bold text-right">${new Date().toLocaleString('id-ID')}</span></div>
-                <div class="flex-between mb-4"><span class="text-[10px] uppercase font-bold">No. Kontrak:</span><span class="text-[10px] font-black text-right">${data.idKontrak}</span></div>
+                <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-slate-400">No. Transaksi:</span><span class="text-[10px] font-black text-right brand-color">${window.tempIdTransaksi}</span></div>
+                <div class="flex-between mb-4"><span class="text-[10px] uppercase font-bold text-slate-400">No. Kontrak:</span><span class="text-[10px] font-black text-right">${data.idKontrak}</span></div>
                 
                 <div class="flex-between mb-1"><span class="text-xs font-black uppercase">Pelanggan:</span><span class="text-xs font-black text-right uppercase brand-color">${data.nama}</span></div>
                 <div class="flex-between mb-4"><span class="text-xs font-black uppercase">Unit/Barang:</span><span class="text-xs font-black text-right uppercase">${data.barang || '-'}</span></div>
                 
                 <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold">Keterangan:</span><span class="text-[10px] font-black text-right uppercase">${isLunas ? 'Pelunasan Muroqoshoh' : 'Angsuran Ke-' + cicilanEl.value}</span></div>
-                <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold">Metode:</span><span class="text-[10px] font-black text-right uppercase">Transfer/Cash</span></div>
-                ${strukDiskonHtml}
+                
                 <div class="solid-line"></div>
-                <div class="flex-between my-2 items-center"><span class="text-base font-black brand-color uppercase">Bayar:</span><span class="text-[26px] font-black brand-color tracking-tighter">Rp ${formatRp(nominalVal)}</span></div>
+                <div class="flex-between mb-1 items-center"><span class="text-[11px] font-black uppercase">Angsuran Pokok:</span><span class="text-sm font-black">Rp ${formatRp(nominalVal)}</span></div>
+                ${strukDiskonHtml}
+                ${strukDendaHtml}
+                <div class="dashed-line"></div>
+                
+                <div class="flex-between my-2 items-center"><span class="text-base font-black brand-color uppercase">Total Kas:</span><span class="text-[26px] font-black brand-color tracking-tighter">Rp ${formatRp(totalBayarPlusDenda)}</span></div>
                 <div class="solid-line"></div>
                 
-                <div class="flex-between mt-3"><span class="text-[10px] uppercase font-bold">Sisa Hutang:</span><span class="text-sm font-black text-right uppercase">Rp ${formatRp(sisaBaru)}</span></div>`;
-            return { data, cicilan: cicilanEl.value, nominalVal, sisaBaru, isLunas };
+                <div class="flex-between mt-3"><span class="text-[10px] uppercase font-bold">Sisa Hutang Pokok:</span><span class="text-sm font-black text-right uppercase">Rp ${formatRp(sisaBaru)}</span></div>`;
+            
+            return { data, cicilan: cicilanEl.value, nominalVal, dendaVal, totalBayarPlusDenda, sisaBaru, isLunas, idTransaksi: window.tempIdTransaksi };
         };
 
         document.getElementById('nominal').addEventListener('input', (e) => { if(isSaved) return; e.target.value = formatRp(parseRp(e.target.value)); renderPreview(); });
+        document.getElementById('denda').addEventListener('input', (e) => { if(isSaved) return; e.target.value = formatRp(parseRp(e.target.value)); renderPreview(); });
 
         document.getElementById('btnProses').addEventListener('click', async () => {
             const p = renderPreview(); if (!p) return showToast("Lengkapi data nominal!", "error");
@@ -218,6 +265,7 @@
             try {
                 let payload = { 
                     tipe: p.isLunas ? "PELUNASAN_AWAL" : "KAS_MASUK_CICILAN", 
+                    idTransaksi: p.idTransaksi,
                     idKontrak: p.data.idKontrak, 
                     waktu: new Date().toLocaleString('id-ID'), 
                     bulanIni: new Date().getMonth() + 1, 
@@ -225,29 +273,27 @@
                     whatsapp: p.data.wa, 
                     cicilanKe: p.cicilan, 
                     nominalMasuk: p.nominalVal, 
-                    catatan: p.isLunas ? "Pelunasan Muroqoshoh Selesai" : "Sisa: Rp " + formatRp(p.sisaBaru) 
+                    dendaMasuk: p.dendaVal, // <-- Data Denda Dikirim ke Backend
+                    catatan: p.isLunas ? "Pelunasan Muroqoshoh Selesai" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru) 
                 };
                 
                 await fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                 
                 isSaved = true; currentSavedData = p;
                 document.getElementById('nominal').disabled = true;
+                document.getElementById('denda').disabled = true;
                 document.getElementById('formSection').style.opacity = '0.3';
                 document.getElementById('btnProsesContainer').classList.add('hidden');
                 document.getElementById('actionButtons').classList.replace('hidden', 'flex');
                 
-                if (p.isLunas) {
-                    showToast("LUNAS! Riwayat telah dicatat.", "success");
-                } else {
-                    showToast("Berhasil Disimpan!", "success");
-                }
+                if (p.isLunas) { showToast("LUNAS! Riwayat telah dicatat.", "success"); } 
+                else { showToast("Berhasil Disimpan!", "success"); }
             } catch(e) { 
                 btn.disabled = false; btn.innerHTML = "Gagal. Coba lagi."; 
                 showToast("Terjadi kendala jaringan.", "error");
             }
         });
 
-        // PESAN SHARE STRUK WA (Formal tapi santai)
         async function captureAndShare(mode) {
             if(!currentSavedData) return;
             const wrapper = document.getElementById('strukWrapper');
@@ -265,7 +311,7 @@
                             await navigator.share({ 
                                 files: [file], 
                                 title: 'Kuitansi Zenith Cell', 
-                                text: `Assalamu'alaikum Kak ${currentSavedData.data.nama}.\n\nBerikut dilampirkan kuitansi bukti pembayaran angsurannya. Dana telah kami terima dan dicatat di sistem.\n\nTerima kasih atas kepercayaannya kepada Zenith Cell. Semoga senantiasa diberikan kelancaran rezeki.` 
+                                text: `Assalamu'alaikum Kak ${currentSavedData.data.nama}.\n\nBerikut dilampirkan kuitansi bukti pembayaran angsurannya. Dana telah kami terima dan dicatat di sistem.\n\nTerima kasih atas kepercayaannya kepada Zenith Cell.` 
                             });
                         } else {
                             const a = document.createElement('a'); a.download = fileName; a.href = URL.createObjectURL(blob); a.click();
@@ -285,17 +331,21 @@
             let struk = "        ZENITH CELL         \n";
             struk += " Gadget Syariah Kota Malang \n";
             struk += "--------------------------------\n";
-            struk += "Tgl   : " + tgl + "\n";
-            struk += "Kasir : Admin Pusat\n";
+            struk += "Tgl     : " + tgl + "\n";
+            struk += "No.Trans: " + p.idTransaksi + "\n";
+            struk += "Kasir   : Admin Pusat\n";
             struk += "--------------------------------\n";
-            struk += "No. Kntrk: " + p.data.idKontrak + "\n";
-            struk += "Pelanggan: " + p.data.nama.toUpperCase() + "\n";
-            struk += "Unit     : " + barang.toUpperCase() + "\n";
-            struk += "Ket      : " + ketCicilan + "\n";
-            if(p.isLunas) struk += "Diskon   : Rp " + formatRp(window.currentDiskon) + "\n";
+            struk += "No.Kntrk: " + p.data.idKontrak + "\n";
+            struk += "Customer: " + p.data.nama.toUpperCase() + "\n";
+            struk += "Unit    : " + barang.toUpperCase() + "\n";
+            struk += "Ket     : " + ketCicilan + "\n";
             struk += "--------------------------------\n";
-            struk += "BAYAR    : Rp " + formatRp(p.nominalVal) + "\n";
-            struk += "Sisa     : Rp " + formatRp(p.sisaBaru) + "\n";
+            struk += "Angsuran: Rp " + formatRp(p.nominalVal) + "\n";
+            if(p.dendaVal > 0) struk += "Denda   : Rp " + formatRp(p.dendaVal) + "\n";
+            if(p.isLunas) struk += "Diskon  : Rp " + formatRp(window.currentDiskon) + "\n";
+            struk += "--------------------------------\n";
+            struk += "TOTAL   : Rp " + formatRp(p.totalBayarPlusDenda) + "\n";
+            struk += "Sisa Utg: Rp " + formatRp(p.sisaBaru) + "\n";
             struk += "--------------------------------\n";
             struk += "     Alhamdulillah Sah!     \n";
             struk += " Terima kasih, moga berkah! \n";
@@ -312,5 +362,3 @@
     </script>
 </body>
 </html>
-
-
