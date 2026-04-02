@@ -21,7 +21,6 @@
         @keyframes scrollText { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
         .scrolling-text { display: inline-block; white-space: nowrap; animation: scrollText 33s linear infinite; will-change: transform; }
         
-        /* ANIMASI GETAR UNTUK PIN SALAH */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             20%, 60% { transform: translateX(-5px); }
@@ -107,13 +106,18 @@
 
                 <div class="faq-item clean-card p-4 rounded-2xl cursor-pointer" onclick="toggleFaq(this)">
                     <div class="flex justify-between items-center"><h3 class="font-bold text-[11px] text-slate-700">Terlambat bayar kena denda?</h3><i data-lucide="chevron-down" class="chevron w-4 h-4 text-slate-300 transition-transform"></i></div>
-                    <div class="faq-content text-[10px] text-slate-500 leading-relaxed border-t border-slate-100 mt-2">Sistem kami murni syariah <b>Tanpa Denda</b> uang. Terlambat tidak akan menambah hutang Anda. Namun, sebagai sesama muslim, kami memohon agar Anda menjaga amanah jadwal pembayaran agar transaksi senantiasa berkah.</div>
+                    <div class="faq-content text-[10px] text-slate-500 leading-relaxed border-t border-slate-100 mt-2">Sistem kami murni syariah <b>Tanpa Denda</b> yang bersifat memakan untung. Terlambat tidak akan menambah nilai pokok hutang Anda (Bebas Riba). Namun, demi kedisiplinan, sanksi keterlambatan akan disalurkan ke lembaga amal.</div>
                 </div>
             </div>
         </section>
 
         <footer class="text-center mt-auto pb-4 pt-6 border-t border-slate-100">
-            <button onclick="bukaModalHukum()" class="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 mb-4 inline-flex items-center justify-center gap-1"><i data-lucide="shield-check" class="w-3 h-3"></i> Kebijakan Privasi & Keamanan Data</button>
+            <div class="flex flex-wrap items-center justify-center gap-3 mb-4">
+                <button onclick="bukaModalHukum('privasi')" class="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1 active:scale-95"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Privasi Data</button>
+                <span class="text-slate-300 text-[10px]">|</span>
+                <button onclick="bukaModalHukum('snk')" class="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1 active:scale-95"><i data-lucide="scale" class="w-3.5 h-3.5"></i> S&K Akad Syariah</button>
+            </div>
+            
             <div class="text-[9px] font-medium text-slate-400 leading-relaxed mb-4">
                 &copy; 2026 Zenith Cell Ecosystem.<br>
                 <span class="text-slate-300 flex items-center justify-center gap-1 mt-1">Developed with <i data-lucide="heart" class="w-2.5 h-2.5 text-red-400 fill-current"></i> by <span class="font-bold text-slate-500">Ardita Rizki Fauzi</span></span>
@@ -133,8 +137,6 @@
     </nav>
 
     <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[90] opacity-0 pointer-events-none transition-opacity duration-300" onclick="tutupSidebar()"></div>
-    
-    <!-- SIDEBAR DENGAN FITUR FINTECH SYARIAH -->
     <aside id="sidebarMenu" class="fixed top-0 right-0 h-full w-72 bg-slate-50 shadow-2xl z-[100] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-slate-200">
         <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white shrink-0">
             <h3 class="font-black text-slate-800 flex items-center gap-2"><i data-lucide="compass" class="w-5 h-5 text-emerald-500"></i> Eksplorasi</h3>
@@ -142,7 +144,6 @@
         </div>
         
         <div class="p-4 flex-grow space-y-4 overflow-y-auto no-scrollbar pb-10">
-            <!-- 1. Layanan Islami Harian -->
             <div>
                 <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Layanan Islami Harian</p>
                 <div class="space-y-2">
@@ -162,18 +163,9 @@
                         </div>
                         <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-300"></i>
                     </a>
-                    <a href="https://baznas.go.id/bayarzakat" target="_blank" class="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-emerald-200 rounded-2xl active:scale-95 transition-all shadow-sm group">
-                        <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-emerald-500 transition-colors"><i data-lucide="calculator" class="w-5 h-5 text-emerald-600 group-hover:text-white"></i></div>
-                        <div class="text-left flex-grow">
-                            <h4 class="font-bold text-xs text-slate-800">Kalkulator Zakat</h4>
-                            <p class="text-[9px] text-slate-500">Hitung & Salurkan (Baznas)</p>
-                        </div>
-                        <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-300"></i>
-                    </a>
                 </div>
             </div>
 
-            <!-- 2. Fitur Fintech & Edukasi -->
             <div class="pt-2 border-t border-slate-200">
                 <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1 mt-2">Edukasi & Fitur Syariah</p>
                 <div class="space-y-2">
@@ -196,7 +188,6 @@
                 </div>
             </div>
 
-            <!-- 3. Otoritas Admin -->
             <div class="pt-2 border-t border-slate-200">
                 <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1 mt-2">Otoritas (Admin)</p>
                 <div class="space-y-2">
@@ -217,46 +208,34 @@
                 </div>
             </div>
         </div>
-        
-        <div class="p-4 border-t border-slate-200 text-center bg-white shrink-0">
-            <p class="text-[9px] font-bold text-slate-400">Zenith Cell Ecosystem v1.6</p>
-        </div>
+        <div class="p-4 border-t border-slate-200 text-center bg-white shrink-0"><p class="text-[9px] font-bold text-slate-400">Zenith Cell Ecosystem v1.6</p></div>
     </aside>
 
-    <!-- MODAL KEBIJAKAN PRIVASI (Fokus ke Data) -->
     <div id="hukumModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col items-center justify-end px-2 pb-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl transform translate-y-full transition-transform max-h-[85vh] overflow-y-auto no-scrollbar" id="hukumCard">
             <div class="flex justify-between items-center mb-4 pb-2 border-b">
-                <h3 class="text-base font-black text-slate-900">Kebijakan Privasi Data</h3>
-                <button onclick="tutupModalHukum()" class="p-1.5 bg-slate-100 rounded-full text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+                <h3 class="text-base font-black text-slate-900 flex items-center gap-2" id="hukumTitle"><i data-lucide="scale" class="w-5 h-5 text-emerald-500"></i> Syarat & Ketentuan</h3>
+                <button onclick="tutupModalHukum()" class="p-1.5 bg-slate-100 rounded-full text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            <div class="space-y-3 text-[11px] text-slate-600 leading-relaxed font-medium">
-                <p class="font-bold text-emerald-700">1. Keamanan Identitas Diri</p>
-                <p>Kami sangat menghargai privasi Anda. Data pribadi yang dikirimkan melalui form pengajuan (seperti NIK KTP, Nomor HP, dan Alamat) akan dijaga kerahasiaannya dengan standar keamanan internal dan hanya digunakan untuk keperluan verifikasi Zenith Cell.</p>
-                <p class="font-bold text-emerald-700">2. Anti Penyalahgunaan Data</p>
-                <p>Kami menjamin bahwa data nasabah tidak akan pernah diperjualbelikan, disewakan, atau dibagikan kepada pihak ketiga (termasuk aplikasi pinjaman online atau pihak marketing eksternal).</p>
-                <p class="font-bold text-emerald-700">3. Riwayat Credit Score</p>
-                <p>Setelah seluruh tagihan selesai dilunasi, riwayat transaksi Anda akan kami simpan dengan aman sebagai riwayat Credit Score positif. Hal ini akan mempermudah dan mempercepat proses apabila Anda ingin mengajukan pembiayaan kembali di masa mendatang.</p>
-            </div>
-            <button onclick="tutupModalHukum()" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl mt-6 active:scale-95">Saya Mengerti</button>
+            
+            <div id="hukumContent" class="space-y-4 text-[11px] text-slate-600 leading-relaxed font-medium pb-2">
+                </div>
+            
+            <button onclick="tutupModalHukum()" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl mt-4 active:scale-95 shadow-lg">Saya Mengerti & Sepakat</button>
         </div>
     </div>
 
-    <!-- MODAL EDUKASI / INFO FINTECH SYARIAH -->
     <div id="infoModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col items-center justify-end px-2 pb-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl transform translate-y-full transition-transform max-h-[85vh] overflow-y-auto no-scrollbar" id="infoCard">
             <div class="flex justify-between items-center mb-4 pb-2 border-b">
                 <h3 class="text-base font-black text-slate-900" id="infoTitle">Informasi</h3>
                 <button onclick="tutupModalInfo()" class="p-1.5 bg-slate-100 rounded-full text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            <div id="infoContent" class="space-y-3 text-[11px] text-slate-600 leading-relaxed font-medium">
-                <!-- Konten disuntikkan via JS -->
-            </div>
+            <div id="infoContent" class="space-y-3 text-[11px] text-slate-600 leading-relaxed font-medium"></div>
             <button onclick="tutupModalInfo()" class="w-full bg-emerald-500 text-white font-bold py-3.5 rounded-xl mt-6 active:scale-95">Tutup</button>
         </div>
     </div>
 
-    <!-- MODAL PIN ADMIN DENGAN ANIMASI GETAR -->
     <div id="pinModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden items-center justify-center p-4 opacity-0 transition-opacity">
         <div class="bg-white rounded-[2rem] p-6 max-w-[300px] w-full text-center shadow-2xl transform scale-95 transition-transform" id="pinCard">
             <button onclick="closePin()" class="absolute top-4 right-4 p-1.5 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -285,7 +264,49 @@
         function toggleFaq(el) { const isActive = el.classList.contains('active'); document.querySelectorAll('.faq-item').forEach(item => item.classList.remove('active')); if (!isActive) el.classList.add('active'); }
 
         const modalHukum = document.getElementById('hukumModal'), cardHukum = document.getElementById('hukumCard');
-        function bukaModalHukum() { modalHukum.classList.replace('hidden', 'flex'); setTimeout(() => { modalHukum.classList.remove('opacity-0'); cardHukum.classList.remove('translate-y-full'); }, 10); }
+        
+        // FUNGSI DINAMIS UNTUK MODAL PRIVASI & S&K
+        function bukaModalHukum(tipe) { 
+            const titleEl = document.getElementById('hukumTitle');
+            const contentEl = document.getElementById('hukumContent');
+
+            if (tipe === 'privasi') {
+                titleEl.innerHTML = `<i data-lucide="shield-check" class="w-5 h-5 text-emerald-500"></i> Kebijakan Privasi Data`;
+                contentEl.innerHTML = `
+                    <div><p class="font-bold text-emerald-700 text-xs mb-1">1. Keamanan Identitas Diri</p>
+                    <p>Kami menghargai privasi Anda. Data pribadi yang dikirimkan (NIK KTP, Nomor HP, Alamat) dijamin kerahasiaannya dengan standar keamanan internal Zenith Cell.</p></div>
+                    <div><p class="font-bold text-emerald-700 text-xs mb-1">2. Anti Penyalahgunaan Data</p>
+                    <p>Kami menjamin bahwa data nasabah tidak akan pernah diperjualbelikan atau dibagikan kepada pihak ketiga (termasuk aplikasi pinjaman online atau marketing eksternal).</p></div>
+                    <div><p class="font-bold text-emerald-700 text-xs mb-1">3. Riwayat Credit Score</p>
+                    <p>Riwayat transaksi Anda yang telah lunas akan kami simpan sebagai Credit Score positif untuk mempermudah pengajuan pembiayaan Anda di masa mendatang.</p></div>
+                `;
+            } else if (tipe === 'snk') {
+                titleEl.innerHTML = `<i data-lucide="scale" class="w-5 h-5 text-emerald-500"></i> S&K Akad Syariah`;
+                contentEl.innerHTML = `
+                    <div class="p-3 bg-emerald-50 rounded-xl mb-2 border border-emerald-100">
+                        <p class="text-emerald-800 italic">"Hai orang-orang yang beriman, penuhilah akad-akad itu..." (QS. Al-Ma'idah: 1)</p>
+                    </div>
+                    <div><p class="font-bold text-emerald-700 text-xs mb-1">1. Status Kepemilikan & Akad</p>
+                    <p>Transaksi ini murni menggunakan akad <b>Murabahah (Jual Beli)</b>. Zenith Cell berposisi sebagai Penjual barang, dan Anda sebagai Pembeli. Ini <u>bukan</u> akad pinjam-meminjam uang (kredit tunai).</p></div>
+                    
+                    <div><p class="font-bold text-emerald-700 text-xs mb-1">2. Bebas Gharar (Kepastian Harga)</p>
+                    <p>Harga jual yang telah disepakati di awal bersifat final (Fix Price). Nominal cicilan per bulan <b>tidak akan pernah berubah</b> (naik/turun) hingga lunas, terhindar dari ketidakpastian (Gharar).</p></div>
+                    
+                    <div><p class="font-bold text-emerald-700 text-xs mb-1">3. Keterlambatan & Sanksi (Ta'zir)</p>
+                    <p>Sistem kami tidak menerapkan bunga denda/riba. Namun, untuk menjaga kedisiplinan, nasabah yang <b>mampu namun sengaja menunda</b> pembayaran dapat dikenakan sanksi denda (Ta'zir). <b>Uang sanksi ini 100% disalurkan sebagai Dana Sosial/Amal</b>, bukan untuk keuntungan Zenith Cell.</p></div>
+                    
+                    <div><p class="font-bold text-emerald-700 text-xs mb-1">4. Penyelesaian Sengketa (Tabayyun)</p>
+                    <p>Jika nasabah mengalami musibah finansial (PHK/Sakit keras), penyelesaian diutamakan melalui jalur musyawarah kekeluargaan. Kami dapat memberikan penjadwalan ulang (Rescheduling) tanpa tambahan biaya, atau nasabah dapat merelakan barang jaminan untuk dijual demi menutup sisa utang.</p></div>
+
+                    <div><p class="font-bold text-emerald-700 text-xs mb-1">5. Diskon Pelunasan (Muroqoshoh)</p>
+                    <p>Bagi nasabah beriktikad baik yang mampu melunasi seluruh sisa tagihannya lebih cepat dari jadwal tenor, berhak mendapatkan potongan harga / <i>Ibra'</i> dari total sisa piutang sesuai ketentuan toko.</p></div>
+                `;
+            }
+
+            lucide.createIcons();
+            modalHukum.classList.replace('hidden', 'flex'); 
+            setTimeout(() => { modalHukum.classList.remove('opacity-0'); cardHukum.classList.remove('translate-y-full'); }, 10); 
+        }
         function tutupModalHukum() { modalHukum.classList.add('opacity-0'); cardHukum.classList.add('translate-y-full'); setTimeout(() => { modalHukum.classList.replace('flex', 'hidden'); }, 300); }
         
         const modalInfo = document.getElementById('infoModal'), cardInfo = document.getElementById('infoCard');
@@ -335,7 +356,6 @@
             setTimeout(() => { pinModal.classList.replace('flex', 'hidden'); }, 300); 
         }
         
-        // LOGIKA ANIMASI GETAR SAAT SANDI SALAH (100% BEBAS ALERT & TOAST)
         document.getElementById('pinForm').addEventListener('submit', (e) => { 
             e.preventDefault(); 
             if (pinInput.value === CONFIG.PIN_ADMIN) { 
@@ -352,7 +372,6 @@
             } 
         });
 
-        // Reset warna saat ngetik ulang
         pinInput.addEventListener('input', () => {
             pinInput.classList.remove('border-red-500', 'bg-red-50', 'text-red-600', 'placeholder-red-400');
             pinInput.classList.add('border-slate-200');
@@ -362,5 +381,3 @@
     </script>
 </body>
 </html>
-
-
