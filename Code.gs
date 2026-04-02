@@ -22,7 +22,6 @@ function doPost(e) {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var payload = JSON.parse(e.postData.contents);
     
-    // 1. PENGAJUAN BARU
     if (payload.tipe === "PENGAJUAN_BARU") {
       var s = getOrCreateSheet(ss, "Pengajuan");
       if (s.getLastRow() === 0) {
@@ -33,7 +32,6 @@ function doPost(e) {
       return createJsonResponse({status: "success"});
     }
 
-    // 2. ACC PENGAJUAN
     if (payload.tipe === "ACC_PENGAJUAN") {
       var sP = ss.getSheetByName("Pengajuan");
       var sL = getOrCreateSheet(ss, "Pelanggan");
@@ -53,7 +51,6 @@ function doPost(e) {
       return createJsonResponse({status: "success"});
     }
 
-    // 3. TOLAK PENGAJUAN
     if (payload.tipe === "TOLAK_PENGAJUAN") {
       var sP = ss.getSheetByName("Pengajuan");
       if (sP) {
@@ -67,7 +64,6 @@ function doPost(e) {
       return createJsonResponse({status: "success"});
     }
 
-    // 4. KASIR POS - BAYAR CICILAN
     if (payload.tipe === "KAS_MASUK_CICILAN") {
       var sT = getOrCreateSheet(ss, "Transaksi");
       if (sT.getLastRow() === 0) { 
@@ -91,7 +87,6 @@ function doPost(e) {
       return createJsonResponse({status: "success"});
     }
 
-    // 5. KASIR POS - PELUNASAN AWAL
     if (payload.tipe === "PELUNASAN_AWAL") {
       var sT = getOrCreateSheet(ss, "Transaksi");
       var sL = ss.getSheetByName("Pelanggan");
