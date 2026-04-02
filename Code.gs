@@ -1,5 +1,5 @@
 // ==========================================
-// MASTER API ZENITH CELL (STABIL & BERSIH)
+// MASTER API ZENITH CELL (V18 - SUPER STABIL)
 // ==========================================
 
 function getOrCreateSheet(ss, sheetName) {
@@ -10,6 +10,11 @@ function getOrCreateSheet(ss, sheetName) {
 
 function createJsonResponse(data) {
   return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// Pembersih ID Anti-Error
+function cleanId(id) {
+  return String(id).replace(/['" ]/g, '').trim().toUpperCase();
 }
 
 function doPost(e) {
@@ -24,9 +29,7 @@ function doPost(e) {
         s.appendRow(["ID Kontrak", "Tanggal", "Nama Lengkap", "NIK", "No WA", "Alamat", "Pekerjaan", "Gaji", "Darurat Nama", "Darurat WA", "Barang", "Harga", "DP", "Tenor", "Jaminan", "Jatuh Tempo", "Margin", "Status"]);
         s.getRange("A1:R1").setFontWeight("bold").setBackground("#fef3c7");
       }
-      s.appendRow([
-        payload.idKontrak, payload.timestamp || new Date().toLocaleString('id-ID'), payload.nama, "'" + payload.nik, "'" + payload.wa, payload.alamat, payload.pekerjaan, payload.gaji, payload.daruratNama, "'" + payload.daruratWa, payload.barang, payload.harga, payload.dp, payload.tenor, payload.jaminan, payload.jatuhTempo, payload.margin || 25, "PENDING"
-      ]);
+      s.appendRow(["'" + cleanId(payload.idKontrak), payload.timestamp || new Date().toLocaleString('id-ID'), payload.nama, "'" + payload.nik, "'" + payload.wa, payload.alamat, payload.pekerjaan, payload.gaji, payload.daruratNama, "'" + payload.daruratWa, payload.barang, payload.harga, payload.dp, payload.tenor, payload.jaminan, payload.jatuhTempo, payload.margin || 25, "PENDING"]);
       return createJsonResponse({status: "success"});
     }
 
@@ -37,7 +40,7 @@ function doPost(e) {
       if (sP) {
         var dP = sP.getDataRange().getValues();
         for (var i = 1; i < dP.length; i++) {
-          if (String(dP[i][0]) === String(payload.idKontrak)) { 
+          if (cleanId(dP[i][0]) === cleanId(payload.idKontrak)) { 
             sP.getRange(i + 1, 18).setValue("ACC"); break;
           }
         }
@@ -46,7 +49,7 @@ function doPost(e) {
         sL.appendRow(["ID Kontrak", "Nama Pelanggan", "No WA", "Barang", "Total Hutang", "Sudah Terbayar", "Cicilan Per Bulan", "Tgl Jatuh Tempo", "Cicilan Ke", "Bulan Terakhir Bayar"]);
         sL.getRange("A1:J1").setFontWeight("bold").setBackground("#e0e7ff");
       }
-      sL.appendRow([payload.idKontrak, payload.nama, "'" + payload.wa, payload.barang, payload.totalHutang, 0, payload.cicilanBulan, payload.jatuhTempo, 1, 0]);
+      sL.appendRow(["'" + cleanId(payload.idKontrak), payload.nama, "'" + payload.wa, payload.barang, payload.totalHutang, 0, payload.cicilanBulan, payload.jatuhTempo, 1, 0]);
       return createJsonResponse({status: "success"});
     }
 
@@ -56,7 +59,7 @@ function doPost(e) {
       if (sP) {
         var dP = sP.getDataRange().getValues();
         for (var i = 1; i < dP.length; i++) {
-          if (String(dP[i][0]) === String(payload.idKontrak)) { 
+          if (cleanId(dP[i][0]) === cleanId(payload.idKontrak)) { 
             sP.getRange(i + 1, 18).setValue("DITOLAK"); break;
           }
         }
@@ -71,13 +74,13 @@ function doPost(e) {
         sT.appendRow(["ID Transaksi", "Waktu", "ID Kontrak", "Nama", "WA", "Pembayaran Ke", "Angsuran Pokok", "Dana Kebajikan (Denda)", "Catatan"]);
         sT.getRange("A1:I1").setFontWeight("bold").setBackground("#f3e8ff");
       }
-      sT.appendRow([payload.idTransaksi, payload.waktu, payload.idKontrak, payload.nama, "'"+payload.whatsapp, payload.cicilanKe, payload.nominalMasuk, payload.dendaMasuk || 0, payload.catatan]);
+      sT.appendRow(["'" + cleanId(payload.idTransaksi), payload.waktu, "'" + cleanId(payload.idKontrak), payload.nama, "'"+payload.whatsapp, payload.cicilanKe, payload.nominalMasuk, payload.dendaMasuk || 0, payload.catatan]);
       
       var sL = ss.getSheetByName("Pelanggan");
       if (sL) {
         var dL = sL.getDataRange().getValues();
         for (var i = 1; i < dL.length; i++) {
-          if (String(dL[i][0]) === String(payload.idKontrak)) {
+          if (cleanId(dL[i][0]) === cleanId(payload.idKontrak)) {
             sL.getRange(i+1, 6).setValue((parseInt(dL[i][5])||0) + parseInt(payload.nominalMasuk));
             sL.getRange(i+1, 9).setValue((parseInt(dL[i][8])||0) + 1);
             sL.getRange(i+1, 10).setValue(payload.bulanIni); 
@@ -97,7 +100,7 @@ function doPost(e) {
         sT.appendRow(["ID Transaksi", "Waktu", "ID Kontrak", "Nama", "WA", "Pembayaran Ke", "Angsuran Pokok", "Dana Kebajikan (Denda)", "Catatan"]);
         sT.getRange("A1:I1").setFontWeight("bold").setBackground("#f3e8ff");
       }
-      sT.appendRow([payload.idTransaksi, payload.waktu, payload.idKontrak, payload.nama, "'"+payload.whatsapp, "LUNAS FULL", payload.nominalMasuk, payload.dendaMasuk || 0, payload.catatan]);
+      sT.appendRow(["'" + cleanId(payload.idTransaksi), payload.waktu, "'" + cleanId(payload.idKontrak), payload.nama, "'"+payload.whatsapp, "LUNAS FULL", payload.nominalMasuk, payload.dendaMasuk || 0, payload.catatan]);
       
       if (sR.getLastRow() === 0) {
         sR.appendRow(["ID Kontrak", "Nama Pelanggan", "No WA", "Barang", "Total Hutang Awal", "Status Kredit"]);
@@ -106,8 +109,8 @@ function doPost(e) {
       if (sL) {
         var dL = sL.getDataRange().getValues();
         for (var i = 1; i < dL.length; i++) {
-          if (String(dL[i][0]) === String(payload.idKontrak)) {
-            sR.appendRow([dL[i][0], dL[i][1], "'" + dL[i][2], dL[i][3], dL[i][4], "LUNAS EXCELLENT (Muroqoshoh)"]);
+          if (cleanId(dL[i][0]) === cleanId(payload.idKontrak)) {
+            sR.appendRow(["'" + cleanId(dL[i][0]), dL[i][1], "'" + dL[i][2], dL[i][3], dL[i][4], "LUNAS EXCELLENT (Muroqoshoh)"]);
             sL.deleteRow(i + 1); break;
           }
         }
@@ -133,7 +136,7 @@ function doGet(e) {
         var statusPengajuan = (d[i][17] || "").toString().toUpperCase();
         if (statusPengajuan === "ACC" || statusPengajuan === "DITOLAK") continue;
         res.push({ 
-          idKontrak: d[i][0] || "", nama: d[i][2] || "", wa: (d[i][4] || "").toString().replace(/[^0-9]/g, ''), 
+          idKontrak: cleanId(d[i][0]), nama: d[i][2] || "", wa: (d[i][4] || "").toString().replace(/[^0-9]/g, ''), 
           barang: d[i][10] || "", harga: d[i][11] || 0, dp: d[i][12] || 0, tenor: d[i][13] || 1, 
           jaminan: d[i][14] || "", jatuhTempo: d[i][15] || 1, margin: d[i][16] || 25
         });
@@ -156,7 +159,7 @@ function doGet(e) {
            statusSkor = "TELAT " + (tglSekarang - jatuhTempoDB) + " HARI";
         }
         res.push({ 
-          idKontrak: d[i][0] || "", nama: d[i][1] || "", wa: (d[i][2] || "").toString().replace(/[^0-9]/g, ''), 
+          idKontrak: cleanId(d[i][0]), nama: d[i][1] || "", wa: (d[i][2] || "").toString().replace(/[^0-9]/g, ''), 
           barang: d[i][3] || "", hutang: parseInt(d[i][4]) || 0, terbayar: parseInt(d[i][5]) || 0, 
           cicilanPerBulan: parseInt(d[i][6]) || 0, jatuhTempo: jatuhTempoDB, 
           cicilanKe: parseInt(d[i][8]) || 1, bulanTerakhirBayar: bulanTerakhirDB, statusPembayaran: statusSkor
