@@ -29,7 +29,6 @@
         .solid-line { border-top: 3px solid #000000; margin: 15px 0; }
         .flex-between { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
 
-        /* CSS KHUSUS UNTUK PRINT DI PC */
         @media print {
             body { background: white; }
             body * { visibility: hidden; }
@@ -132,15 +131,17 @@
         lucide.createIcons();
         let dbCustomers = [], isSaved = false, currentSavedData = null; window.currentDiskon = 0;
         
-        // FORMAT ID TRANSAKSI BARU: TRX + YYMMDD + 3 HURUF ACAK
+        // FORMAT ID TRANSAKSI: INV + YYMMDD + HHMM
+        // CONTOH: INV2604021653
         function buatIdTransaksi() {
             const d = new Date(); 
             const yy = String(d.getFullYear()).slice(-2);
             const mm = String(d.getMonth() + 1).padStart(2, '0'); 
             const dd = String(d.getDate()).padStart(2, '0');
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            let r = ''; for (let i = 0; i < 3; i++) r += chars.charAt(Math.floor(Math.random() * chars.length));
-            return `TRX${yy}${mm}${dd}${r}`;
+            const hh = String(d.getHours()).padStart(2, '0');
+            const mins = String(d.getMinutes()).padStart(2, '0');
+            
+            return `INV${yy}${mm}${dd}${hh}${mins}`;
         }
         
         const formatRp = (n) => new Intl.NumberFormat('id-ID').format(n);
@@ -193,7 +194,6 @@
             document.getElementById('nominal').value = formatRp(c.cicilanPerBulan);
             document.getElementById('denda').value = "";
             
-            // Tampilkan Tombol Tunggal (Hilangkan display none paksa dari klik sebelumnya jika ada)
             document.getElementById('btnProsesContainer').style.removeProperty('display');
             document.getElementById('btnProsesContainer').classList.remove('hidden');
             
@@ -246,7 +246,7 @@
 
         ['nominal', 'denda'].forEach(id => document.getElementById(id).addEventListener('input', (e) => { if(isSaved) return; e.target.value = formatRp(parseRp(e.target.value)); renderPreview(); }));
 
-        // EKSEKUSI SUPER AMAN DAN SAT-SET (CUMA 1 TOMBOL SAJA)
+        // SAT-SET SIMPAN
         const eksekusiSimpan = (e) => {
             if(e) e.preventDefault();
             
@@ -268,19 +268,15 @@
                     catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru) 
                 };
                 
-                // Tembak Google Sheets
                 fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(e=>{});
                 
-                // Langsung proses UI tanpa nunggu balasan server
                 setTimeout(() => {
                     isSaved = true; currentSavedData = p;
                     document.getElementById('nominal').disabled = true; document.getElementById('denda').disabled = true;
                     document.getElementById('formSection').style.opacity = '0.3';
                     
-                    // SEMBUNYIKAN TOMBOL SECARA PAKSA CSS INLINE
                     document.getElementById('btnProsesContainer').style.setProperty('display', 'none', 'important');
 
-                    // TAMPILKAN TOMBOL WA / PRINT
                     const actionBtns = document.getElementById('actionButtons');
                     actionBtns.classList.remove('hidden'); actionBtns.classList.add('flex');
                     
@@ -289,7 +285,6 @@
                 }, 300); 
 
             } catch (err) {
-                // Mencegah macet jika ada error tak terduga
                 document.getElementById('txtBtnProses').innerText = "Simpan & Buat Struk";
                 document.getElementById('btnProses').disabled = false;
                 showToast("Terjadi kesalahan internal.", "error");
@@ -321,7 +316,7 @@
             }, 200);
         }
 
-        // FITUR PRINT PINTAR: HP = RAWBT | PC = JENDELA PRINT WINDOWS
+        // PRINT RAWBT (HP) & WINDOWS PRINT (PC)
         function cetakStrukTajam() {
             if (!currentSavedData) return showToast("Data transaksi belum ada!", "error");
             const p = currentSavedData;
@@ -342,7 +337,6 @@
 
                 window.location.href = "intent:" + encodeURIComponent(struk) + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
             } else {
-                // Di PC, siapkan layout struk jadi versi hitam putih agar dicetak pas
                 document.getElementById('strukWrapper').className = "is-printer mx-auto";
                 setTimeout(() => { window.print(); }, 200);
             }
