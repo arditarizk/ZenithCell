@@ -10,7 +10,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="config.js"></script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; overflow-x: hidden; transition: background-color 0.3s; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; overflow-x: hidden; transition: background-color 0.3s, color 0.3s; }
         .clean-card { background: #ffffff; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px -5px rgba(0,0,0,0.03); transition: all 0.3s; }
         .faq-content { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.4s ease, opacity 0.4s ease; }
         .faq-item.active .faq-content { max-height: 400px; opacity: 1; }
@@ -23,24 +23,37 @@
         @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
         .shake-anim { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
 
-        /* DARK MODE AMAN */
+        /* DARK MODE - PERFECTED */
         body.dark-mode { background-color: #0f172a; color: #f8fafc; }
         body.dark-mode .clean-card, body.dark-mode main, body.dark-mode header, body.dark-mode nav { background-color: #1e293b !important; border-color: #334155 !important; }
-        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode p { color: #f8fafc !important; }
-        body.dark-mode .text-slate-500, body.dark-mode .text-slate-800 { color: #cbd5e1 !important; }
         body.dark-mode .bg-white { background-color: #1e293b !important; }
-        body.dark-mode .bg-slate-50 { background-color: #334155 !important; }
+        body.dark-mode .bg-slate-50 { background-color: #334155 !important; border-color: #475569 !important; }
+        body.dark-mode .text-slate-900, body.dark-mode .text-slate-800, body.dark-mode .text-slate-700 { color: #f8fafc !important; }
+        body.dark-mode .text-slate-600, body.dark-mode .text-slate-500 { color: #cbd5e1 !important; }
+        
+        /* Fix khusus warna Badge "Gadget Syariah" di Dark Mode */
+        body.dark-mode .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.15) !important; border-color: rgba(16, 185, 129, 0.3) !important; }
+        body.dark-mode .text-emerald-600 { color: #34d399 !important; }
+        
+        /* Fix Modal Background di Dark Mode */
+        body.dark-mode #hukumCard, body.dark-mode #infoCard, body.dark-mode #pinCard { background-color: #1e293b !important; border: 1px solid #334155; }
+        body.dark-mode .border-b, body.dark-mode .border-t { border-color: #334155 !important; }
+        body.dark-mode #sidebarMenu { background-color: #0f172a !important; border-color: #334155 !important; }
     </style>
 </head>
 <body class="text-slate-800 selection:bg-emerald-200 min-h-screen flex flex-col">
 
     <div id="toastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 pointer-events-none w-full max-w-sm px-4"></div>
 
-    <main class="w-full max-w-md lg:max-w-5xl px-5 pt-8 pb-32 lg:pb-10 relative z-10 flex flex-col lg:bg-white lg:rounded-[3rem] lg:shadow-2xl lg:p-10 lg:my-8 mx-auto transition-colors flex-grow">
+    <main class="w-full max-w-md lg:max-w-5xl px-5 pt-8 pb-32 lg:pb-10 relative z-10 flex flex-col lg:bg-white lg:rounded-[3rem] lg:shadow-2xl lg:p-10 lg:my-8 mx-auto flex-grow">
         
         <header class="mb-8 text-center flex flex-col items-center relative w-full max-w-4xl mx-auto">
-            <button onclick="toggleDarkMode()" class="absolute top-0 left-0 lg:left-4 p-2.5 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-emerald-500 active:scale-95 transition-all" id="btnDarkMode"><i data-lucide="moon" class="w-5 h-5"></i></button>
-            <button onclick="bukaSidebar()" class="absolute top-0 right-0 lg:right-4 p-2.5 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-emerald-500 active:scale-95 transition-all"><i data-lucide="menu" class="w-5 h-5"></i></button>
+            <button onclick="toggleDarkMode()" class="absolute top-0 left-0 lg:left-4 p-2.5 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-emerald-500 active:scale-95 transition-all" id="btnDarkMode">
+                <i data-lucide="moon" class="w-5 h-5"></i>
+            </button>
+            <button onclick="bukaSidebar()" class="absolute top-0 right-0 lg:right-4 p-2.5 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-emerald-500 active:scale-95 transition-all">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
 
             <div class="w-24 h-24 lg:w-28 lg:h-28 bg-white p-1.5 rounded-[1.5rem] shadow-sm border border-slate-100 flex items-center justify-center mb-5 mt-2">
                 <img src="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/5daa1530-3351-436c-abc0-38c81c73669f.png" class="w-full h-full object-contain rounded-[1.25rem]">
@@ -62,7 +75,7 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 w-full max-w-4xl mx-auto">
-            <a href="https://drive.google.com/file/d/1nTEV5XxPKrdy210x5X7MHgHh-Cnse-tP/view?usp=drivesdk" target="_blank" class="clean-card p-4 rounded-2xl flex items-center lg:flex-col lg:text-center gap-3 lg:gap-4 hover:border-emerald-200 active:scale-95 transition-all group cursor-pointer">
+            <a href="https://drive.google.com/drive/my-drive?q=after:2026-04-02%20parent:0ALFeKWWWvfq2Uk9PVA" target="_blank" class="clean-card p-4 rounded-2xl flex items-center lg:flex-col lg:text-center gap-3 lg:gap-4 hover:border-emerald-200 active:scale-95 transition-all group cursor-pointer">
                 <div class="w-12 h-12 lg:w-16 lg:h-16 bg-emerald-50 rounded-xl lg:rounded-2xl flex items-center justify-center text-emerald-600 shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors"><i data-lucide="file-text" class="w-6 h-6 lg:w-8 lg:h-8"></i></div>
                 <div class="flex-grow lg:flex-none text-left lg:text-center">
                     <h3 class="font-bold text-xs lg:text-base text-slate-800">Perjanjian Akad</h3>
@@ -110,9 +123,7 @@
                 <div class="flex flex-col sm:flex-row gap-3 w-full mt-1 relative z-10">
                     <div class="relative flex-grow flex items-center bg-slate-50 border border-slate-200 rounded-xl shadow-sm focus-within:border-emerald-500 transition-all">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i data-lucide="link" class="w-4 h-4 text-emerald-500"></i></div>
-                        
                         <input type="url" id="linkJastip" placeholder="Contoh: https://shopee.co.id/..." class="w-full pl-11 pr-20 py-3.5 bg-transparent text-xs lg:text-sm font-bold outline-none rounded-xl">
-                        
                         <div class="absolute inset-y-0 right-0 pr-2 flex items-center gap-0.5">
                             <button type="button" onclick="pasteJastip()" class="p-2 text-slate-400 hover:text-emerald-500 transition-colors" title="Tempel / Paste"><i data-lucide="clipboard" class="w-4 h-4"></i></button>
                             <button type="button" onclick="clearJastip()" class="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Hapus"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -173,18 +184,12 @@
                 <div class="space-y-2">
                     <a href="https://jadwalsholat.nu.or.id/" target="_blank" class="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-emerald-200 rounded-2xl active:scale-95 transition-all shadow-sm group">
                         <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-emerald-500 transition-colors"><i data-lucide="clock-4" class="w-5 h-5 text-emerald-600 group-hover:text-white"></i></div>
-                        <div class="text-left flex-grow">
-                            <h4 class="font-bold text-xs text-slate-800">Jadwal Sholat</h4>
-                            <p class="text-[9px] text-slate-500">Akurat se-Indonesia (NU)</p>
-                        </div>
+                        <div class="text-left flex-grow"><h4 class="font-bold text-xs text-slate-800">Jadwal Sholat</h4><p class="text-[9px] text-slate-500">Akurat se-Indonesia (NU)</p></div>
                         <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-300"></i>
                     </a>
                     <a href="https://quran.nu.or.id/" target="_blank" class="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-emerald-200 rounded-2xl active:scale-95 transition-all shadow-sm group">
                         <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-emerald-500 transition-colors"><i data-lucide="book-open" class="w-5 h-5 text-emerald-600 group-hover:text-white"></i></div>
-                        <div class="text-left flex-grow">
-                            <h4 class="font-bold text-xs text-slate-800">Al-Qur'an Digital</h4>
-                            <p class="text-[9px] text-slate-500">Lengkap dengan Tafsir</p>
-                        </div>
+                        <div class="text-left flex-grow"><h4 class="font-bold text-xs text-slate-800">Al-Qur'an Digital</h4><p class="text-[9px] text-slate-500">Lengkap dengan Tafsir</p></div>
                         <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-300"></i>
                     </a>
                 </div>
@@ -195,18 +200,12 @@
                 <div class="space-y-2">
                     <button onclick="tutupSidebar(); setTimeout(() => bukaModalInfo('muroqoshoh'), 300)" class="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-amber-200 rounded-2xl active:scale-95 transition-all shadow-sm group">
                         <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-amber-500 transition-colors"><i data-lucide="zap" class="w-5 h-5 text-amber-600 group-hover:text-white"></i></div>
-                        <div class="text-left flex-grow">
-                            <h4 class="font-bold text-xs text-slate-800">Diskon Pelunasan</h4>
-                            <p class="text-[9px] text-slate-500">Program Muroqoshoh</p>
-                        </div>
+                        <div class="text-left flex-grow"><h4 class="font-bold text-xs text-slate-800">Diskon Pelunasan</h4><p class="text-[9px] text-slate-500">Program Muroqoshoh</p></div>
                         <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>
                     </button>
                     <button onclick="tutupSidebar(); setTimeout(() => bukaModalInfo('kamus'), 300)" class="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-indigo-200 rounded-2xl active:scale-95 transition-all shadow-sm group">
                         <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-indigo-500 transition-colors"><i data-lucide="library" class="w-5 h-5 text-indigo-600 group-hover:text-white"></i></div>
-                        <div class="text-left flex-grow">
-                            <h4 class="font-bold text-xs text-slate-800">Kamus Akad</h4>
-                            <p class="text-[9px] text-slate-500">Istilah Fintech Syariah</p>
-                        </div>
+                        <div class="text-left flex-grow"><h4 class="font-bold text-xs text-slate-800">Kamus Akad</h4><p class="text-[9px] text-slate-500">Istilah Fintech Syariah</p></div>
                         <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>
                     </button>
                 </div>
@@ -223,10 +222,41 @@
         <div class="p-4 border-t border-slate-200 text-center bg-white shrink-0"><p class="text-[9px] font-bold text-slate-400">Zenith Cell Ecosystem v1.6</p></div>
     </aside>
 
-    <div id="hukumModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col items-center justify-end px-2 pb-4 opacity-0 transition-opacity duration-300"><div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl transform translate-y-full transition-transform max-h-[85vh] overflow-y-auto no-scrollbar" id="hukumCard"><div class="flex justify-between items-center mb-4 pb-2 border-b"><h3 class="text-base font-black text-slate-900 flex items-center gap-2" id="hukumTitle">S&K</h3><button onclick="tutupModalHukum()" class="p-1.5 bg-slate-100 rounded-full text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button></div><div id="hukumContent" class="space-y-4 text-xs lg:text-sm text-slate-600 leading-relaxed font-medium pb-2"></div><button onclick="tutupModalHukum()" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl mt-4 active:scale-95 shadow-lg">Saya Mengerti & Sepakat</button></div></div>
-    <div id="infoModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col items-center justify-end px-2 pb-4 opacity-0 transition-opacity duration-300"><div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl transform translate-y-full transition-transform max-h-[85vh] overflow-y-auto no-scrollbar" id="infoCard"><div class="flex justify-between items-center mb-4 pb-2 border-b"><h3 class="text-base font-black text-slate-900" id="infoTitle">Informasi</h3><button onclick="tutupModalInfo()" class="p-1.5 bg-slate-100 rounded-full text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button></div><div id="infoContent" class="space-y-3 text-xs lg:text-sm text-slate-600 leading-relaxed font-medium"></div><button onclick="tutupModalInfo()" class="w-full bg-emerald-500 text-white font-bold py-3.5 rounded-xl mt-6 active:scale-95">Tutup</button></div></div>
+    <div id="hukumModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col items-center justify-end px-2 pb-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl transform translate-y-full transition-transform max-h-[85vh] overflow-y-auto no-scrollbar" id="hukumCard">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                <h3 class="text-base font-black text-slate-900 flex items-center gap-2" id="hukumTitle">S&K</h3>
+                <button onclick="tutupModalHukum()" class="p-1.5 bg-slate-100 rounded-full text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div id="hukumContent" class="space-y-4 text-xs lg:text-sm text-slate-600 leading-relaxed font-medium pb-2"></div>
+            <button onclick="tutupModalHukum()" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl mt-4 active:scale-95 shadow-lg">Saya Mengerti & Sepakat</button>
+        </div>
+    </div>
+
+    <div id="infoModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col items-center justify-end px-2 pb-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl transform translate-y-full transition-transform max-h-[85vh] overflow-y-auto no-scrollbar" id="infoCard">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                <h3 class="text-base font-black text-slate-900" id="infoTitle">Informasi</h3>
+                <button onclick="tutupModalInfo()" class="p-1.5 bg-slate-100 rounded-full text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div id="infoContent" class="space-y-3 text-xs lg:text-sm text-slate-600 leading-relaxed font-medium"></div>
+            <button onclick="tutupModalInfo()" class="w-full bg-emerald-500 text-white font-bold py-3.5 rounded-xl mt-6 active:scale-95">Tutup</button>
+        </div>
+    </div>
     
-    <div id="pinModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden items-center justify-center p-4 opacity-0 transition-opacity"><div class="bg-white rounded-[2rem] p-6 max-w-[300px] w-full text-center shadow-2xl transform scale-95 transition-transform" id="pinCard"><button onclick="closePin()" class="absolute top-4 right-4 p-1.5 bg-slate-100 rounded-full text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button><div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mx-auto mb-3"><i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i></div><h3 class="text-lg font-extrabold mb-1">Akses Admin</h3><p id="pinMsg" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest transition-colors">Masuk untuk melanjutkan</p><form id="pinForm"><input type="text" id="usernameInput" placeholder="ID Pengguna" required class="w-full text-center py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm outline-none mt-5 focus:border-emerald-500 transition-all uppercase"><input type="password" id="pinInput" placeholder="Sandi Admin" required class="w-full text-center py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-base outline-none mt-3 focus:border-emerald-500 tracking-widest transition-all"><button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl mt-4 active:scale-95 transition-all shadow-sm">Masuk Sistem</button></form></div></div>
+    <div id="pinModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden items-center justify-center p-4 opacity-0 transition-opacity">
+        <div class="bg-white rounded-[2rem] p-6 max-w-[300px] w-full text-center shadow-2xl transform scale-95 transition-transform" id="pinCard">
+            <button onclick="closePin()" class="absolute top-4 right-4 p-1.5 bg-slate-100 rounded-full text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mx-auto mb-3"><i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i></div>
+            <h3 class="text-lg font-extrabold text-slate-900 mb-1">Akses Admin</h3>
+            <p id="pinMsg" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest transition-colors">Masuk untuk melanjutkan</p>
+            <form id="pinForm">
+                <input type="text" id="usernameInput" placeholder="ID Pengguna" required class="w-full text-center py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm outline-none mt-5 focus:border-emerald-500 transition-all uppercase">
+                <input type="password" id="pinInput" placeholder="Sandi Admin" required class="w-full text-center py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-base outline-none mt-3 focus:border-emerald-500 tracking-widest transition-all">
+                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl mt-4 active:scale-95 transition-all shadow-sm">Masuk Sistem</button>
+            </form>
+        </div>
+    </div>
 
     <script>
         lucide.createIcons();
@@ -243,6 +273,7 @@
             document.getElementById('teksPengumuman').innerText = CONFIG.TEKS_PENGUMUMAN;
         }
 
+        // LOGIKA DARK MODE
         let isDarkMode = localStorage.getItem('zenithDarkMode') === 'true';
         if(isDarkMode) document.body.classList.add('dark-mode');
         function toggleDarkMode() {
@@ -250,7 +281,7 @@
             isDarkMode ? document.body.classList.add('dark-mode') : document.body.classList.remove('dark-mode');
         }
 
-        // LOGIKA JASTIP DENGAN PASTE & CLEAR
+        // LOGIKA JASTIP
         async function pasteJastip() {
             try {
                 const text = await navigator.clipboard.readText();
@@ -259,28 +290,98 @@
                 showToast("Silakan tahan dan pilih 'Tempel' di kolom input", "error");
             }
         }
-        
         function clearJastip() {
             document.getElementById('linkJastip').value = '';
             document.getElementById('linkJastip').focus();
         }
-
         function prosesJastip() {
             const link = document.getElementById('linkJastip').value;
             if(!link) return showToast("Mohon masukkan link Shopee/Tokopedia!", "error");
-            
             const pesan = `Assalamu'alaikum Admin Zenith Cell,%0A%0ASaya ingin menggunakan layanan *Jastip Gadget Impian*.%0A%0A*Link Barang:* ${encodeURIComponent(link)}%0A%0AMohon bantu hitungkan skema pembiayaan Syariahnya ya Kak. Terima kasih!`;
             window.open(`https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${pesan}`, '_blank');
         }
 
+        // LOGIKA SIDEBAR & FAQ
         function bukaSidebar() { document.getElementById('sidebarOverlay').classList.remove('opacity-0', 'pointer-events-none'); document.getElementById('sidebarMenu').classList.remove('translate-x-full'); }
         function tutupSidebar() { document.getElementById('sidebarOverlay').classList.add('opacity-0', 'pointer-events-none'); document.getElementById('sidebarMenu').classList.add('translate-x-full'); }
         function toggleFaq(el) { const isActive = el.classList.contains('active'); document.querySelectorAll('.faq-item').forEach(item => item.classList.remove('active')); if (!isActive) el.classList.add('active'); }
 
+        // FUNGSI MODAL HUKUM (Privasi & S&K) YANG SEBELUMNYA TERHAPUS SUDAH KEMBALI
         const modalHukum = document.getElementById('hukumModal'), cardHukum = document.getElementById('hukumCard');
-        function bukaModalHukum(tipe) { /* sama seperti sebelumnya */ }
+        function bukaModalHukum(tipe) { 
+            const titleEl = document.getElementById('hukumTitle');
+            const contentEl = document.getElementById('hukumContent');
+
+            if (tipe === 'privasi') {
+                titleEl.innerHTML = `<i data-lucide="shield-check" class="w-5 h-5 text-emerald-500"></i> Kebijakan Privasi Data`;
+                contentEl.innerHTML = `
+                    <div><p class="font-bold text-emerald-700 text-sm mb-1">1. Keamanan Identitas Diri</p>
+                    <p>Kami menghargai privasi Anda. Data pribadi yang dikirimkan (NIK KTP, Nomor HP, Alamat) dijamin kerahasiaannya dengan standar keamanan internal Zenith Cell.</p></div>
+                    <div><p class="font-bold text-emerald-700 text-sm mb-1">2. Anti Penyalahgunaan Data</p>
+                    <p>Kami menjamin bahwa data nasabah tidak akan pernah diperjualbelikan atau dibagikan kepada pihak ketiga (termasuk aplikasi pinjaman online atau marketing eksternal).</p></div>
+                    <div><p class="font-bold text-emerald-700 text-sm mb-1">3. Riwayat Credit Score</p>
+                    <p>Riwayat transaksi Anda yang telah lunas akan kami simpan sebagai Credit Score positif untuk mempermudah pengajuan pembiayaan Anda di masa mendatang.</p></div>
+                `;
+            } else if (tipe === 'snk') {
+                titleEl.innerHTML = `<i data-lucide="scale" class="w-5 h-5 text-emerald-500"></i> S&K Akad Syariah`;
+                contentEl.innerHTML = `
+                    <div class="p-3 bg-emerald-50 rounded-xl mb-2 border border-emerald-100">
+                        <p class="text-emerald-800 italic text-xs">"Hai orang-orang yang beriman, penuhilah akad-akad itu..." (QS. Al-Ma'idah: 1)</p>
+                    </div>
+                    <div><p class="font-bold text-emerald-700 text-sm mb-1">1. Status Kepemilikan & Akad</p>
+                    <p>Transaksi ini murni menggunakan akad <b>Murabahah (Jual Beli)</b>. Zenith Cell berposisi sebagai Penjual barang, dan Anda sebagai Pembeli. Ini <u>bukan</u> akad pinjam-meminjam uang (kredit tunai).</p></div>
+                    
+                    <div><p class="font-bold text-emerald-700 text-sm mb-1">2. Bebas Gharar (Kepastian Harga)</p>
+                    <p>Harga jual yang telah disepakati di awal bersifat final (Fix Price). Nominal cicilan per bulan <b>tidak akan pernah berubah</b> (naik/turun) hingga lunas, terhindar dari ketidakpastian (Gharar).</p></div>
+                    
+                    <div><p class="font-bold text-emerald-700 text-sm mb-1">3. Keterlambatan & Sanksi (Ta'zir)</p>
+                    <p>Sistem kami tidak menerapkan bunga denda/riba. Namun, untuk menjaga kedisiplinan, nasabah yang <b>mampu namun sengaja menunda</b> pembayaran dapat dikenakan sanksi denda (Ta'zir). <b>Uang sanksi ini 100% disalurkan sebagai Dana Sosial/Amal</b>, bukan untuk keuntungan Zenith Cell.</p></div>
+                    
+                    <div><p class="font-bold text-emerald-700 text-sm mb-1">4. Penyelesaian Sengketa (Tabayyun)</p>
+                    <p>Jika nasabah mengalami musibah finansial (PHK/Sakit keras), penyelesaian diutamakan melalui jalur musyawarah kekeluargaan. Kami dapat memberikan penjadwalan ulang (Rescheduling) tanpa tambahan biaya, atau nasabah dapat merelakan barang jaminan untuk dijual demi menutup sisa utang.</p></div>
+                `;
+            }
+            lucide.createIcons();
+            modalHukum.classList.replace('hidden', 'flex'); 
+            setTimeout(() => { modalHukum.classList.remove('opacity-0'); cardHukum.classList.remove('translate-y-full'); }, 10); 
+        }
         function tutupModalHukum() { modalHukum.classList.add('opacity-0'); cardHukum.classList.add('translate-y-full'); setTimeout(() => { modalHukum.classList.replace('flex', 'hidden'); }, 300); }
         
+        // FUNGSI MODAL INFO (Kamus & Muroqoshoh) YANG SEBELUMNYA TERHAPUS SUDAH KEMBALI
+        const modalInfo = document.getElementById('infoModal'), cardInfo = document.getElementById('infoCard');
+        function bukaModalInfo(tipe) { 
+            const titleEl = document.getElementById('infoTitle');
+            const contentEl = document.getElementById('infoContent');
+            
+            if (tipe === 'muroqoshoh') {
+                titleEl.innerText = "Pelunasan Muroqoshoh";
+                contentEl.innerHTML = `
+                    <div class="p-3 bg-amber-50 rounded-xl mb-3 border border-amber-100 flex items-center justify-center">
+                        <i data-lucide="zap" class="w-8 h-8 text-amber-500"></i>
+                    </div>
+                    <p class="font-bold text-slate-800">Apa itu Diskon Pelunasan Cepat?</p>
+                    <p>Dalam akad syariah, Zenith Cell memfasilitasi program <b>Muroqoshoh</b> (pemberian Ibra' atau potongan harga) bagi nasabah yang memiliki iktikad baik untuk melunasi seluruh sisa tagihannya lebih cepat dari jadwal tenor.</p>
+                    <p class="font-bold text-slate-800 mt-2">Berapa besar potongannya?</p>
+                    <p>Sistem kami secara otomatis akan memberikan <b>potongan/diskon sebesar 10% dari total sisa tagihan akhir</b> Anda saat Anda melakukan proses "Lunas Full" di Kasir Zenith Cell.</p>
+                `;
+            } else if (tipe === 'kamus') {
+                titleEl.innerText = "Kamus Fintech Syariah";
+                contentEl.innerHTML = `
+                    <p class="font-bold text-indigo-700 text-sm">1. Akad Murabahah</p>
+                    <p class="mb-2">Akad jual beli di mana pihak Zenith Cell menyatakan harga beli asli dari supplier, dan menjualnya kepada nasabah dengan tambahan margin (keuntungan) yang disepakati secara transparan sejak awal.</p>
+                    <p class="font-bold text-indigo-700 text-sm">2. Ibra' (Diskon)</p>
+                    <p class="mb-2">Potongan atas sisa piutang/tagihan yang diberikan oleh toko kepada nasabah yang melakukan pelunasan dipercepat (Muroqoshoh).</p>
+                    <p class="font-bold text-indigo-700 text-sm">3. Bebas Gharar</p>
+                    <p>Gharar berarti ketidakpastian. Di Zenith Cell, tidak ada biaya tersembunyi, penambahan denda tak terduga, atau fluktuasi cicilan. Angsuran Anda bersifat <i>Fix Price</i> dari awal hingga akhir.</p>
+                `;
+            }
+            lucide.createIcons();
+            modalInfo.classList.replace('hidden', 'flex'); 
+            setTimeout(() => { modalInfo.classList.remove('opacity-0'); cardInfo.classList.remove('translate-y-full'); }, 10); 
+        }
+        function tutupModalInfo() { modalInfo.classList.add('opacity-0'); cardInfo.classList.add('translate-y-full'); setTimeout(() => { modalInfo.classList.replace('flex', 'hidden'); }, 300); }
+
+        // LOGIKA PIN ADMIN
         let pendingUrl = "";
         function requestPin(url) { pendingUrl = url; document.getElementById('pinInput').value = ""; document.getElementById('usernameInput').value = ""; document.getElementById('pinModal').classList.replace('hidden', 'flex'); setTimeout(() => { document.getElementById('pinModal').classList.remove('opacity-0'); document.getElementById('pinCard').classList.remove('scale-95'); document.getElementById('usernameInput').focus(); }, 10); }
         function closePin() { document.getElementById('pinModal').classList.add('opacity-0'); document.getElementById('pinCard').classList.add('scale-95'); setTimeout(() => { document.getElementById('pinModal').classList.replace('flex', 'hidden'); }, 300); }
