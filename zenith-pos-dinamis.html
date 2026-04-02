@@ -29,7 +29,6 @@
         .solid-line { border-top: 3px solid #000000; margin: 15px 0; }
         .flex-between { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
 
-        /* KODE RAHASIA UNTUK PRINTER THERMAL 58mm DI PC */
         @media print {
             @page { size: 58mm auto; margin: 0; }
             body { background: white; margin: 0; padding: 0; min-height: 0; }
@@ -56,7 +55,7 @@
                 <a href="index.html" class="p-2 bg-white rounded-full text-slate-500 mr-2 active:scale-95 transition-all shadow-sm"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
                 <div class="flex items-center gap-3 flex-grow">
                     <div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shrink-0"><i data-lucide="smartphone-charging" class="w-6 h-6 text-emerald-400"></i></div>
-                    <div><h1 class="font-black text-xl leading-none">Kasir POS</h1><p class="text-[10px] font-bold text-emerald-600 uppercase">Input & Pelunasan</p></div>
+                    <div><h1 class="font-black text-xl leading-none">Kasir POS</h1><p class="text-[10px] font-bold text-emerald-600 uppercase" id="labelNamaKasir">Input & Pelunasan</p></div>
                 </div>
                 <button onclick="fetchCustomersFromCloud()" class="p-2.5 bg-emerald-100 rounded-xl text-emerald-700 active:rotate-180 transition-all shadow-sm"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
             </header>
@@ -92,6 +91,7 @@
                             <span class="absolute left-3 text-red-500 font-bold text-sm">Rp</span>
                             <input type="text" id="denda" inputmode="numeric" placeholder="0" class="w-full pl-9 pr-3 py-3 bg-white border border-red-200 rounded-xl text-red-700 font-bold text-sm outline-none focus:border-red-500 transition-all">
                         </div>
+                        <p class="text-[8px] font-bold text-red-500/80 leading-tight">*Catatan: Uang denda ini disalurkan untuk kepentingan sosial.</p>
                     </div>
                 </div>
 
@@ -101,7 +101,6 @@
                     </button>
                 </div>
             </form>
-            
             <div class="h-24 lg:hidden block shrink-0"></div>
         </section>
 
@@ -113,7 +112,7 @@
                             <h2 class="text-[32px] font-black tracking-tighter leading-none mb-1 brand-color">ZENITH CELL</h2>
                             <p class="text-[10px] font-bold uppercase">Jl. Sanan 5a, Purwantoro</p>
                             <p class="text-[10px] font-bold uppercase mb-2">Kota Malang - Jawa Timur</p>
-                            <p class="text-[9px] font-bold opacity-70">Admin: 0895-4105-71547</p>
+                            <p class="text-[9px] font-bold opacity-70" id="previewNamaKasir">Admin: Pusat</p>
                         </div>
                         <div class="dashed-line"></div><div id="isiStruk"></div><div class="dashed-line"></div>
                         <div class="text-center mt-2">
@@ -138,15 +137,21 @@
 
     <script>
         lucide.createIcons();
+        
+        // PENGAMBILAN NAMA KASIR DARI LOGIN INDEX
+        const NAMA_KASIR_AKTIF = localStorage.getItem('kasirZenithAktif') || 'Admin Pusat';
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('labelNamaKasir').innerText = `KASIR: ${NAMA_KASIR_AKTIF.toUpperCase()}`;
+            document.getElementById('previewNamaKasir').innerText = `Kasir: ${NAMA_KASIR_AKTIF}`;
+        });
+
         let dbCustomers = [], isSaved = false, currentSavedData = null; window.currentDiskon = 0;
         
         function buatIdTransaksi() {
-            const d = new Date(); 
-            const yy = String(d.getFullYear()).slice(-2);
-            const mm = String(d.getMonth() + 1).padStart(2, '0'); 
-            const dd = String(d.getDate()).padStart(2, '0');
-            const hh = String(d.getHours()).padStart(2, '0');
-            const mins = String(d.getMinutes()).padStart(2, '0');
+            const d = new Date(); const yy = String(d.getFullYear()).slice(-2);
+            const mm = String(d.getMonth() + 1).padStart(2, '0'); const dd = String(d.getDate()).padStart(2, '0');
+            const hh = String(d.getHours()).padStart(2, '0'); const mins = String(d.getMinutes()).padStart(2, '0');
             return `INV${yy}${mm}${dd}${hh}${mins}`;
         }
         
@@ -225,7 +230,7 @@
             const tBayar = nominalVal + dendaVal;
 
             let strukDiskonHtml = isLunas ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-emerald-600">Diskon Ibra':</span><span class="text-[10px] font-black text-right uppercase text-emerald-600">- Rp ${formatRp(window.currentDiskon)}</span></div>` : '';
-            let strukDendaHtml = dendaVal > 0 ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-red-600">Denda / Dana Kebajikan:</span><span class="text-[10px] font-black text-right uppercase text-red-600">+ Rp ${formatRp(dendaVal)}</span></div>` : '';
+            let strukDendaHtml = dendaVal > 0 ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-red-600">Denda Syariah:</span><span class="text-[10px] font-black text-right uppercase text-red-600">+ Rp ${formatRp(dendaVal)}</span></div>` : '';
 
             document.getElementById('isiStruk').innerHTML = `
                 <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold">Tgl/Waktu:</span><span class="text-[10px] font-bold text-right">${new Date().toLocaleString('id-ID')}</span></div>
@@ -252,7 +257,6 @@
 
         ['nominal', 'denda'].forEach(id => document.getElementById(id).addEventListener('input', (e) => { if(isSaved) return; e.target.value = formatRp(parseRp(e.target.value)); renderPreview(); }));
 
-        // SAT-SET SIMPAN
         const eksekusiSimpan = (e) => {
             if(e) e.preventDefault();
             
@@ -281,10 +285,8 @@
                     document.getElementById('nominal').disabled = true; document.getElementById('denda').disabled = true;
                     document.getElementById('posForm').style.opacity = '0.3';
                     
-                    // SEMBUNYIKAN TOMBOL SECARA PAKSA CSS INLINE
                     document.getElementById('btnProsesContainer').style.setProperty('display', 'none', 'important');
 
-                    // TAMPILKAN TOMBOL WA / PRINT
                     const actionBtns = document.getElementById('actionButtons');
                     actionBtns.classList.remove('hidden'); actionBtns.classList.add('flex');
                     
@@ -324,7 +326,7 @@
             }, 200);
         }
 
-        // PRINT SMART: RAWBT(ANDROID) & WINDOWS PRINT(PC)
+        // TULISAN NAMA KASIR DI CETAKAN RAWBT
         function cetakStrukTajam() {
             if (!currentSavedData) return showToast("Data transaksi belum ada!", "error");
             const p = currentSavedData;
@@ -336,7 +338,7 @@
                 const barang = p.data.barang ? p.data.barang : '-';
 
                 let struk = "        ZENITH CELL         \n Gadget Syariah Kota Malang \n--------------------------------\n";
-                struk += "Tgl     : " + tgl + "\nNo.Trans: " + p.idTransaksi + "\nKasir   : Admin Pusat\n--------------------------------\n";
+                struk += "Tgl     : " + tgl + "\nNo.Trans: " + p.idTransaksi + "\nKasir   : " + NAMA_KASIR_AKTIF + "\n--------------------------------\n";
                 struk += "No.Kntrk: " + p.data.idKontrak + "\nCustomer: " + p.data.nama.toUpperCase() + "\nUnit    : " + barang.toUpperCase() + "\nKet     : " + ketCicilan + "\n--------------------------------\n";
                 struk += "Angsuran: Rp " + formatRp(p.nominalVal) + "\n";
                 if(p.dendaVal > 0) struk += "Denda   : Rp " + formatRp(p.dendaVal) + "\n";
@@ -345,7 +347,6 @@
 
                 window.location.href = "intent:" + encodeURIComponent(struk) + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
             } else {
-                // Di PC, siapkan layout struk jadi versi hitam putih agar dicetak pas
                 document.getElementById('strukWrapper').className = "is-printer mx-auto";
                 setTimeout(() => { window.print(); }, 200);
             }
