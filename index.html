@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Zenith Cell - Gadget Syariah Kota Malang</title>
     <link rel="icon" type="image/png" href="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/6f184ccb-599f-4527-b31f-f416b7dc6b8d.png">
-    <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -17,20 +16,20 @@
         .faq-item.active .faq-content { max-height: 300px; opacity: 1; padding-top: 12px; }
         .faq-item.active i.chevron { transform: rotate(180deg); color: #10b981; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        @keyframes scrollText { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
-        .scrolling-text { display: inline-block; white-space: nowrap; animation: scrollText 33s linear infinite; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
-        .shake-anim { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        
+        /* Animasi Pengumuman Langsung Jalan */
+        @keyframes scrollText { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        .scrolling-text { display: inline-block; white-space: nowrap; padding-left: 100%; animation: scrollText 15s linear infinite; will-change: transform; }
     </style>
 </head>
-<body class="text-slate-800 flex justify-center selection:bg-emerald-200 lg:p-8">
+<body class="text-slate-800 flex justify-center selection:bg-emerald-200">
 
-    <main class="w-full max-w-md lg:max-w-5xl px-5 pt-8 relative z-10 flex flex-col min-h-screen lg:min-h-0 lg:bg-white lg:rounded-[3rem] lg:shadow-2xl lg:p-10 mx-auto">
-        <header class="mb-8 text-center flex flex-col items-center relative">
+    <main class="w-full max-w-md lg:max-w-5xl px-5 pt-8 relative z-10 flex flex-col min-h-screen lg:min-h-0 lg:bg-white lg:rounded-[3rem] lg:shadow-2xl lg:p-10 lg:my-8 mx-auto">
+        <header class="mb-8 text-center flex flex-col items-center relative w-full max-w-4xl mx-auto">
             <button onclick="bukaSidebar()" class="absolute top-0 right-0 lg:right-4 p-2.5 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-emerald-500 active:scale-95 transition-all"><i data-lucide="menu" class="w-5 h-5"></i></button>
 
             <div class="w-24 h-24 lg:w-28 lg:h-28 bg-white p-1.5 rounded-[1.5rem] shadow-sm border border-slate-100 flex items-center justify-center mb-5 mt-2">
-                <img src="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/5daa1530-3351-436c-abc0-38c81c73669f.png" alt="Logo Zenith" class="w-full h-full object-contain rounded-[1.25rem]">
+                <img src="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/5daa1530-3351-436c-abc0-38c81c73669f.png" class="w-full h-full object-contain rounded-[1.25rem]">
             </div>
 
             <h1 class="font-extrabold text-3xl lg:text-4xl text-slate-900 tracking-tight leading-none mb-2">Zenith Cell</h1>
@@ -41,12 +40,14 @@
             </a>
         </header>
 
-        <div id="pengumumanContainer" class="hidden relative overflow-hidden bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-[1rem] shadow-md shadow-emerald-500/20 mb-5 flex items-center px-4 py-4 min-h-[64px] max-w-3xl mx-auto w-full">
+        <div id="pengumumanContainer" class="hidden relative overflow-hidden bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-[1rem] shadow-md shadow-emerald-500/20 mb-6 flex items-center px-4 py-4 min-h-[64px] max-w-4xl mx-auto w-full">
             <div class="bg-white/20 p-2.5 rounded-xl shrink-0 relative z-10 mr-3 backdrop-blur-sm"><i data-lucide="megaphone" class="w-5 h-5 text-white"></i></div>
-            <div class="overflow-hidden w-full relative mask-image-fade"><p id="teksPengumuman" class="scrolling-text text-xs font-bold tracking-wide uppercase leading-relaxed"></p></div>
+            <div class="overflow-hidden w-full relative flex">
+                <p id="teksPengumuman" class="scrolling-text text-xs font-bold tracking-wide uppercase leading-relaxed shrink-0"></p>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 w-full max-w-4xl mx-auto">
             <section class="clean-card p-4 rounded-2xl flex items-center lg:flex-col lg:text-center gap-3 lg:gap-4 hover:border-emerald-200 active:scale-95 transition-all group">
                 <div class="w-12 h-12 lg:w-16 lg:h-16 bg-emerald-50 rounded-xl lg:rounded-2xl flex items-center justify-center text-emerald-600 shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors"><i data-lucide="file-text" class="w-6 h-6 lg:w-8 lg:h-8"></i></div>
                 <div class="flex-grow lg:flex-none">
@@ -84,7 +85,7 @@
             </a>
         </div>
 
-        <section class="mb-8 w-full max-w-3xl mx-auto">
+        <section class="mb-8 w-full max-w-4xl mx-auto">
             <h2 class="text-[10px] lg:text-xs font-black text-slate-400 uppercase tracking-widest mb-3 ml-1 flex items-center justify-center lg:justify-start gap-1.5"><i data-lucide="message-circle-question" class="w-3.5 h-3.5 lg:w-4 lg:h-4"></i> FAQ & Edukasi Syariah</h2>
             <div class="space-y-2.5">
                 <div class="faq-item clean-card p-4 rounded-2xl cursor-pointer" onclick="toggleFaq(this)">
@@ -102,7 +103,7 @@
             </div>
         </section>
 
-        <footer class="text-center mt-auto pb-4 pt-6 border-t border-slate-100 w-full max-w-3xl mx-auto">
+        <footer class="text-center mt-auto pb-4 pt-6 border-t border-slate-100 w-full max-w-4xl mx-auto">
             <div class="flex flex-wrap items-center justify-center gap-3 mb-4">
                 <button onclick="bukaModalHukum('privasi')" class="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1 active:scale-95"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Privasi Data</button>
                 <span class="text-slate-300 text-[10px]">|</span>
@@ -145,7 +146,7 @@
                 </div>
             </div>
             <div class="pt-2 border-t border-slate-200">
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1 mt-2">Otoritas (Admin)</p>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1 mt-2">Otoritas Admin</p>
                 <div class="space-y-2">
                     <button onclick="tutupSidebar(); setTimeout(() => requestPin('zenith-pos-dinamis.html'), 300)" class="w-full flex items-center gap-3 p-3 bg-emerald-500 text-white rounded-2xl shadow-md"><div class="w-10 h-10 bg-emerald-600/50 rounded-xl flex items-center justify-center"><i data-lucide="smartphone-charging" class="w-5 h-5"></i></div><div class="text-left"><h4 class="font-bold text-xs">Kasir POS</h4><p class="text-[9px] text-emerald-100">Input Pembayaran</p></div></button>
                     <button onclick="tutupSidebar(); setTimeout(() => requestPin('reminder-tagihan-dinamis.html'), 300)" class="w-full flex items-center gap-3 p-3 bg-slate-900 text-white rounded-2xl shadow-md"><div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center"><i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i></div><div class="text-left"><h4 class="font-bold text-xs">Server Admin</h4><p class="text-[9px] text-slate-400">Panel Manajemen</p></div></button>
