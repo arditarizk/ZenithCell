@@ -118,7 +118,7 @@
                     <p class="text-xs font-bold text-slate-500 italic" id="motivationalText">"Alhamdulillah, sikit lagi lunas Kak! Tetap istiqomah ya! 🚀"</p>
                 </div>
 
-                <a href="#" id="btnKalender" class="w-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-extrabold py-4 rounded-[1.25rem] active:scale-95 transition-all flex justify-center items-center gap-2 shadow-sm">
+                <a id="btnKalender" href="#" class="w-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-extrabold py-4 rounded-[1.25rem] active:scale-95 transition-all flex justify-center items-center gap-2 shadow-sm">
                     <i data-lucide="calendar-plus" class="w-5 h-5"></i> Ingatkan Saya via Kalender HP
                 </a>
             </div>
@@ -247,23 +247,32 @@
                     else motTeks.innerText = "✨ Alhamdulillah, sikit lagi lunas Kak! Tetap istiqomah ya! 🚀";
                 }
 
-                // MENANAMKAN LINK INTENT LANGSUNG KE DALAM TOMBOL (ANTI DIBLOKIR CHROME)
-                const judulEvent = encodeURIComponent(`Bayar Angsuran HP (${data.barang})`);
-                const descEvent = encodeURIComponent(`Halo ${data.nama}, ini pengingat untuk membayar angsuran Zenith Cell senilai Rp ${formatRp(cicilanPerBln)}.`);
+                // FIX: Menanamkan LINK INTENT LANGSUNG KE DALAM TOMBOL
+                const judulEvent = `Angsuran HP (${data.barang})`;
+                const descEvent = `Halo ${data.nama}, waktunya bayar angsuran Zenith Cell bulan ini senilai Rp ${formatRp(cicilanPerBln)} agar rapor VVIP Kakak aman. Semangat!`;
+                
+                // Menghitung tanggal kalender
                 const eventDate = new Date(thnSkrg, targetBln - 1, angkaTgl, 8, 0, 0);
-                const startTime = eventDate.getTime();
-                const endTime = startTime + (60 * 60 * 1000); 
 
                 const isAndroid = /Android/i.test(navigator.userAgent);
+                
                 if (isAndroid) {
-                    btnKal.href = `intent:#Intent;action=android.intent.action.INSERT;type=vnd.android.cursor.dir/event;S.title=${judulEvent};S.description=${descEvent};l.beginTime=${startTime};l.endTime=${endTime};end`;
-                    btnKal.removeAttribute("target");
+                    const startTime = eventDate.getTime();
+                    const endTime = startTime + (60 * 60 * 1000); // Durasi 1 Jam
+                    
+                    // Deep Link asli Android
+                    btnKal.href = `intent://events#Intent;scheme=content;action=android.intent.action.INSERT;type=vnd.android.cursor.dir/event;S.title=${encodeURIComponent(judulEvent)};S.description=${encodeURIComponent(descEvent)};l.beginTime=${startTime};l.endTime=${endTime};end;`;
+                    btnKal.removeAttribute("target"); // Jangan buka tab baru
                 } else {
+                    // Fallback PC/iPhone
                     const yyyy = eventDate.getFullYear();
                     const mm = String(eventDate.getMonth() + 1).padStart(2, '0');
                     const dd = String(eventDate.getDate()).padStart(2, '0');
-                    btnKal.href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${judulEvent}&dates=${yyyy}${mm}${dd}T080000/${yyyy}${mm}${dd}T090000&details=${descEvent}`;
-                    btnKal.setAttribute("target", "_blank");
+                    const tglMulai = `${yyyy}${mm}${dd}T080000`; 
+                    const tglSelesai = `${yyyy}${mm}${dd}T090000`;
+                    
+                    btnKal.href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(judulEvent)}&dates=${tglMulai}/${tglSelesai}&details=${encodeURIComponent(descEvent)}`;
+                    btnKal.setAttribute("target", "_blank"); // PC/iPhone harus tab baru
                 }
             }
 
