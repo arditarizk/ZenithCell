@@ -112,7 +112,7 @@
             </div>
             
             <div id="btnProsesContainerMobile" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] z-50 lg:hidden hidden">
-                <button type="button" id="btnProsesMobile" class="w-full bg-slate-900 text-white font-extrabold py-4 rounded-[1.5rem] active:scale-95 flex justify-center items-center gap-2 shadow-2xl border border-slate-700 transition-all">
+                <button type="button" id="btnProsesMobile" class="w-full bg-slate-900 text-white font-extrabold py-4 rounded-[1.5rem] active:scale-95 flex justify-center items-center gap-2 shadow-2xl border-t border-slate-700 transition-all">
                     <i data-lucide="save" class="w-5 h-5 text-emerald-400"></i><span>Simpan & Buat Struk</span>
                 </button>
             </div>
@@ -219,7 +219,7 @@
 
         ['nominal', 'denda'].forEach(id => document.getElementById(id).addEventListener('input', (e) => { if(isSaved) return; e.target.value = formatRp(parseRp(e.target.value)); renderPreview(); }));
 
-        // PERBAIKAN: OPTIMISTIC UI AGAR TIDAK BLOKIR KARENA REDIRECT GOOGLE
+        // PERBAIKAN: OPTIMISTIC UI BEBAS LOADING LAMA & ERROR JARINGAN
         const eksekusiSimpan = (e) => {
             if(e) e.preventDefault();
             const p = renderPreview(); 
@@ -246,10 +246,11 @@
                 catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru) 
             };
             
-            // Bypass CORS redirect block menggunakan Fire and Forget
+            // Bypass CORS block: Tembak dan Lupakan (Fire and Forget)
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
             .catch(err => console.log("Fetch info:", err));
             
+            // Memunculkan struk super cepat hanya dalam 0.4 detik
             setTimeout(() => {
                 isSaved = true; 
                 currentSavedData = p;
@@ -264,7 +265,7 @@
                 showToast(p.isLunas ? "LUNAS! Riwayat telah dicatat." : "Berhasil Disimpan!", "success");
                 
                 if(window.innerWidth < 1024) document.getElementById('previewPanel').scrollIntoView({behavior: 'smooth'});
-            }, 1000);
+            }, 400); 
         };
 
         document.getElementById('btnProses').addEventListener('click', eksekusiSimpan);
@@ -295,6 +296,7 @@
             }, 200);
         }
 
+        // FORMAT RAWBT DIKEMBALIKAN 100% PERSIS DENGAN ORIGINALNYA
         function cetakStrukTajam() {
             if (!currentSavedData) return showToast("Data transaksi belum ada!", "error");
             const p = currentSavedData;
@@ -305,21 +307,17 @@
             let struk = "        ZENITH CELL         \n";
             struk += " Gadget Syariah Kota Malang \n";
             struk += "--------------------------------\n";
-            struk += "Tgl     : " + tgl + "\n";
-            struk += "No.Trans: " + p.idTransaksi + "\n";
-            struk += "Kasir   : Admin Pusat\n";
+            struk += "Tgl   : " + tgl + "\n";
+            struk += "Kasir : Admin Pusat\n";
             struk += "--------------------------------\n";
-            struk += "No.Kntrk: " + p.data.idKontrak + "\n";
-            struk += "Customer: " + p.data.nama.toUpperCase() + "\n";
-            struk += "Unit    : " + barang.toUpperCase() + "\n";
-            struk += "Ket     : " + ketCicilan + "\n";
+            struk += "No. Kntrk: " + p.data.idKontrak + "\n";
+            struk += "Pelanggan: " + p.data.nama.toUpperCase() + "\n";
+            struk += "Unit     : " + barang.toUpperCase() + "\n";
+            struk += "Ket      : " + ketCicilan + "\n";
+            if(p.isLunas) struk += "Diskon   : Rp " + formatRp(window.currentDiskon) + "\n";
             struk += "--------------------------------\n";
-            struk += "Angsuran: Rp " + formatRp(p.nominalVal) + "\n";
-            if(p.dendaVal > 0) struk += "Denda   : Rp " + formatRp(p.dendaVal) + "\n";
-            if(p.isLunas) struk += "Diskon  : Rp " + formatRp(window.currentDiskon) + "\n";
-            struk += "--------------------------------\n";
-            struk += "TOTAL   : Rp " + formatRp(p.totalBayarPlusDenda) + "\n";
-            struk += "Sisa Utg: Rp " + formatRp(p.sisaBaru) + "\n";
+            struk += "BAYAR    : Rp " + formatRp(p.nominalVal) + "\n";
+            struk += "Sisa     : Rp " + formatRp(p.sisaBaru) + "\n";
             struk += "--------------------------------\n";
             struk += "     Alhamdulillah Sah!     \n";
             struk += " Terima kasih, moga berkah! \n";
