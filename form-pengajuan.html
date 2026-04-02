@@ -145,6 +145,18 @@
         lucide.createIcons();
         let promoMarginAktif = null;
 
+        // FUNGSI BUAT ID TRANSAKSI BARU (KODE 1 = PENGAJUAN)
+        function buatIdTransaksi(kodeTipe) {
+            const now = new Date();
+            const yy = String(now.getFullYear()).slice(-2);
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const random = Math.floor(Math.random() * 90 + 10);
+            return `${kodeTipe}${yy}${mm}${dd}${hh}${mins}${random}`;
+        }
+
         function showToast(message, type = 'error') {
             const toast = document.createElement('div');
             const bgColor = type === 'success' ? 'bg-emerald-500' : (type === 'info' ? 'bg-blue-500' : 'bg-red-500');
@@ -247,7 +259,9 @@
 
             btn.disabled = true; btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Menyimpan...`;
             lucide.createIcons();
-            const id = "ZN-" + Math.floor(100000 + Math.random() * 900000);
+            
+            // PAKAI ID TRANSAKSI 13 DIGIT (KODE 1)
+            const id = buatIdTransaksi(1);
 
             try {
                 fetch(CONFIG.API_URL, { 
@@ -256,7 +270,6 @@
                     body: JSON.stringify({ tipe: "PENGAJUAN_BARU", idKontrak: id, timestamp: new Date().toLocaleString('id-ID'), ...data }) 
                 });
                 
-                // --- PESAN WA: MAHASISWA KE DOSEN (Formal & Sopan) ---
                 const waMsg = `Assalamu'alaikum Admin Zenith Cell.\n\nPermisi, saya bermaksud mengajukan pembiayaan dengan rincian sebagai berikut:\n\nID Pengajuan: ${id}\nNama: ${data.nama}\nBarang: ${data.barang}\nHarga Pokok: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor} Bulan\nJatuh Tempo: Tgl ${data.jatuhTempo}\nSkema: ${data.margin}% (${data.jaminan})\n\nBerikut saya lampirkan foto KTP dan jaminan fisik (jika ada).\nMohon arahannya untuk proses verifikasi lebih lanjut. Terima kasih.`;
                 
                 window.open(`https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(waMsg)}`, '_blank');
@@ -271,5 +284,3 @@
     </script>
 </body>
 </html>
-
-
