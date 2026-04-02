@@ -188,7 +188,7 @@
             resCicilan.innerText = formatRupiah(Math.round(total / tenor));
         }
         
-        // PENGIRIMAN DATA INTEGRASI KE FORM PENGAJUAN
+        // INTEGRASI BAWA DATA KE FORM
         function lanjutKeForm() {
             const harga = parseRupiah(priceInput.value);
             if(harga === 0) {
@@ -198,10 +198,16 @@
             }
             const dp = parseRupiah(dpInput.value);
             const tenor = document.querySelector('input[name="tenor"]:checked').value;
-            const jalur = document.getElementById('jenisJalur').value; // isinya "25" atau "15"
+            const jalur = document.getElementById('jenisJalur').value; 
+            const voucher = document.getElementById('kodePromo').value.trim();
             
-            // Kirim parameter melalui URL
-            window.location.href = `form-pengajuan.html?harga=${harga}&dp=${dp}&tenor=${tenor}&jalur=${jalur}`;
+            // Tambahkan data voucher di URL jika promo sukses diaktifkan
+            let url = `form-pengajuan.html?harga=${harga}&dp=${dp}&tenor=${tenor}&jalur=${jalur}`;
+            if(voucher && promoMargin !== null) { 
+                url += `&voucher=${encodeURIComponent(voucher)}`;
+            }
+            
+            window.location.href = url;
         }
     </script>
 </body>
