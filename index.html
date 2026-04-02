@@ -213,6 +213,7 @@
             </div>
             
             <div id="hukumContent" class="space-y-4 text-[11px] text-slate-600 leading-relaxed font-medium pb-2"></div>
+            
             <button onclick="tutupModalHukum()" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl mt-4 active:scale-95 shadow-lg">Saya Mengerti & Sepakat</button>
         </div>
     </div>
@@ -247,6 +248,7 @@
         lucide.createIcons();
         if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg failed', err)); }
 
+        // Load Config untuk Pengumuman Berjalan
         if (typeof CONFIG !== 'undefined' && CONFIG.PENGUMUMAN_AKTIF && CONFIG.TEKS_PENGUMUMAN) {
             document.getElementById('pengumumanContainer').classList.remove('hidden');
             document.getElementById('teksPengumuman').innerText = CONFIG.TEKS_PENGUMUMAN;
@@ -258,7 +260,6 @@
         function toggleFaq(el) { const isActive = el.classList.contains('active'); document.querySelectorAll('.faq-item').forEach(item => item.classList.remove('active')); if (!isActive) el.classList.add('active'); }
 
         const modalHukum = document.getElementById('hukumModal'), cardHukum = document.getElementById('hukumCard');
-        
         function bukaModalHukum(tipe) { 
             const titleEl = document.getElementById('hukumTitle');
             const contentEl = document.getElementById('hukumContent');
@@ -295,7 +296,6 @@
                     <p>Bagi nasabah beriktikad baik yang mampu melunasi seluruh sisa tagihannya lebih cepat dari jadwal tenor, berhak mendapatkan potongan harga / <i>Ibra'</i> dari total sisa piutang sesuai ketentuan toko.</p></div>
                 `;
             }
-
             lucide.createIcons();
             modalHukum.classList.replace('hidden', 'flex'); 
             setTimeout(() => { modalHukum.classList.remove('opacity-0'); cardHukum.classList.remove('translate-y-full'); }, 10); 
@@ -329,7 +329,6 @@
                     <p>Gharar berarti ketidakpastian. Di Zenith Cell, tidak ada biaya tersembunyi, penambahan denda tak terduga, atau fluktuasi cicilan. Angsuran Anda bersifat <i>Fix Price</i> dari awal hingga akhir.</p>
                 `;
             }
-            
             lucide.createIcons();
             modalInfo.classList.replace('hidden', 'flex'); 
             setTimeout(() => { modalInfo.classList.remove('opacity-0'); cardInfo.classList.remove('translate-y-full'); }, 10); 
@@ -338,28 +337,33 @@
 
         let pendingUrl = "";
         const pinModal = document.getElementById('pinModal'), pinCard = document.getElementById('pinCard'), pinInput = document.getElementById('pinInput'), pinMsg = document.getElementById('pinMsg'), usernameInput = document.getElementById('usernameInput');
-        function requestPin(url) { pendingUrl = url; pinInput.value = ""; usernameInput.value = ""; pinModal.classList.replace('hidden', 'flex'); setTimeout(() => { pinModal.classList.remove('opacity-0'); pinCard.classList.remove('scale-95'); usernameInput.focus(); }, 10); }
+        
+        function requestPin(url) { 
+            pendingUrl = url; 
+            pinInput.value = ""; 
+            usernameInput.value = ""; 
+            pinModal.classList.replace('hidden', 'flex'); 
+            setTimeout(() => { pinModal.classList.remove('opacity-0'); pinCard.classList.remove('scale-95'); usernameInput.focus(); }, 10); 
+        }
         
         function closePin() { 
             pinModal.classList.add('opacity-0'); pinCard.classList.add('scale-95'); 
             resetLoginStyle();
             setTimeout(() => { pinModal.classList.replace('flex', 'hidden'); }, 300); 
         }
-        
-        // DAFTAR ADMIN ZENITH CELL
-        const DAFTAR_ADMIN = {
-            "ARDITA": { sandi: "123456", namaLengkap: "Ardita Rizki F." },
-            "VIVI": { sandi: "654321", namaLengkap: "Vivi Nur D." }
-        };
 
+        // SISTEM LOGIN BACA DARI CONFIG.JS
         document.getElementById('pinForm').addEventListener('submit', (e) => { 
             e.preventDefault(); 
             const user = usernameInput.value.trim().toUpperCase();
             const pass = pinInput.value;
 
-            // Jika username dan sandi valid ATAU menggunakan sandi master config (fallback)
-            if ((DAFTAR_ADMIN[user] && DAFTAR_ADMIN[user].sandi === pass) || pass === CONFIG.PIN_ADMIN) { 
-                const namaAdmin = DAFTAR_ADMIN[user] ? DAFTAR_ADMIN[user].namaLengkap : "Admin Pusat";
+            // Membaca data kasir dari config.js
+            const adminData = typeof CONFIG !== 'undefined' && CONFIG.DAFTAR_ADMIN ? CONFIG.DAFTAR_ADMIN : {};
+
+            // Jika cocok ATAU menggunakan password darurat
+            if ((adminData[user] && adminData[user].sandi === pass) || pass === CONFIG.PIN_ADMIN) { 
+                const namaAdmin = adminData[user] ? adminData[user].namaLengkap : "Admin Pusat";
                 localStorage.setItem('kasirZenithAktif', namaAdmin);
                 window.location.href = pendingUrl; 
             } else { 
