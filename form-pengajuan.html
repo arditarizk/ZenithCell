@@ -11,6 +11,7 @@
     <script src="config.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; padding-bottom: 20px; -webkit-tap-highlight-color: transparent; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         .glass-panel { background: rgba(255, 255, 255, 0.98); border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); }
         input:focus-within, select:focus-within, textarea:focus-within { outline: 2px solid #10b981; outline-offset: 2px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -20,17 +21,18 @@
 
     <div id="toastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 pointer-events-none w-full max-w-sm px-4"></div>
 
-    <main class="m-auto w-full max-w-5xl bg-white/50 lg:bg-white lg:glass-panel lg:rounded-[2.5rem] lg:p-8 lg:shadow-xl relative z-10 flex flex-col">
-        <header class="mb-6 flex items-center gap-4 bg-white p-4 rounded-[2rem] lg:rounded-2xl shadow-sm border relative mx-4 lg:mx-0 mt-4 lg:mt-0">
-            <a href="index.html" class="p-2.5 bg-slate-50 border border-slate-100 rounded-full text-slate-500 active:scale-95 transition-all"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
+    <main class="m-auto w-full max-w-md lg:max-w-5xl bg-white/50 lg:bg-white lg:glass-panel lg:rounded-[2.5rem] lg:p-8 lg:shadow-xl relative z-10 flex flex-col pb-24 lg:pb-0 pt-6 lg:pt-0">
+        <header class="mb-6 flex items-center gap-4 bg-white p-4 rounded-[2rem] lg:rounded-2xl shadow-sm border relative mx-4 lg:mx-0">
+            <a href="index.html" class="p-2.5 bg-slate-50 border border-slate-100 rounded-full text-slate-500 active:scale-95 transition-all hover:bg-slate-200"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
             <div>
                 <h1 class="font-black text-xl leading-none text-slate-900">Form Pengajuan</h1>
                 <p class="text-[10px] font-bold text-emerald-600 uppercase mt-1 tracking-widest">Sesuai Prinsip Murabahah</p>
             </div>
         </header>
 
-        <form id="pengajuanForm" class="px-4 lg:px-0">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <form id="pengajuanForm" class="px-4 lg:px-0 flex-grow">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-8">
+                
                 <div class="space-y-5">
                     <section class="glass-panel p-5 rounded-3xl">
                         <h2 class="text-sm font-extrabold mb-4 flex items-center gap-2 text-slate-800"><i data-lucide="user" class="w-4 h-4 text-emerald-500"></i> Identitas Diri</h2>
@@ -48,7 +50,10 @@
                             <select id="pekerjaan" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm focus:border-emerald-500"><option value="" disabled selected>-- Pilih Profesi --</option><option value="Karyawan Swasta">Karyawan Swasta</option><option value="Wirausaha">Wirausaha</option><option value="Lainnya">Lainnya</option></select>
                             <select id="gaji" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm focus:border-emerald-500"><option value="" disabled selected>-- Estimasi Penghasilan --</option><option value="< Rp 3 Juta">< Rp 3 Juta</option><option value="Rp 3 - 5 Juta">Rp 3 - 5 Juta</option><option value="> Rp 5 Juta">> Rp 5 Juta</option></select>
                             <div class="p-3 bg-slate-50 border rounded-xl">
-                                <label class="text-[10px] font-extrabold text-slate-400 uppercase mb-2 block">Kontak Darurat</label>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-[10px] font-extrabold text-slate-400 uppercase">Kontak Darurat</label>
+                                    <button type="button" onclick="pickContact()" class="text-[9px] font-bold bg-indigo-100 text-indigo-600 px-2 py-1 rounded hover:bg-indigo-200 transition-colors">Pilih Kontak</button>
+                                </div>
                                 <input type="text" id="daruratNama" placeholder="Nama Kerabat" required class="w-full p-2.5 bg-white border rounded-lg text-sm font-bold outline-none mb-2 focus:border-emerald-500">
                                 <input type="tel" id="daruratWa" placeholder="No. HP Kerabat" required class="w-full p-2.5 bg-white border rounded-lg text-sm font-bold outline-none focus:border-emerald-500">
                             </div>
@@ -63,17 +68,23 @@
                             <input type="text" id="barang" placeholder="Gadget Yang Diinginkan" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm focus:border-emerald-500">
                             <div class="grid grid-cols-2 gap-2">
                                 <div class="relative flex items-center"><span class="absolute left-3 text-slate-400 font-bold text-xs">Rp</span><input type="text" id="hargaBarang" inputmode="numeric" placeholder="Harga Pokok" required class="w-full pl-9 pr-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm focus:border-emerald-500"></div>
-                                <div class="relative flex items-center"><span class="absolute left-3 text-slate-400 font-bold text-xs">Rp</span><input type="text" id="dpBarang" inputmode="numeric" placeholder="DP (Uang Muka)" class="w-full pl-9 pr-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm focus:border-emerald-500"></div>
+                                <div class="relative flex items-center"><span class="absolute left-3 text-slate-400 font-bold text-xs">Rp</span><input type="text" id="dpBarang" inputmode="numeric" placeholder="DP (Opsional)" class="w-full pl-9 pr-3 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm focus:border-emerald-500"></div>
                             </div>
                             
-                            <select id="pilihJalur" required onchange="toggleJalur()" class="w-full px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl font-bold outline-none text-sm"><option value="REGULER" selected>REGULER (Margin 25%)</option><option value="VIP">VIP (Margin 15%) - Jaminan</option></select>
+                            <div class="pt-2 border-t border-slate-100">
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Jalur Transaksi</label>
+                                <select id="pilihJalur" required onchange="toggleJalur()" class="w-full px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl font-bold outline-none text-sm focus:border-emerald-500">
+                                    <option value="REGULER" selected>REGULER (Margin 25%) - Tanpa Jaminan</option>
+                                    <option value="VIP">🌟 VIP (Margin 15%) - Titip Jaminan</option>
+                                </select>
+                            </div>
                             
                             <div class="flex gap-2">
-                                <input type="text" id="inputVoucher" placeholder="Kode Promo..." class="flex-grow px-3 py-3 bg-white border border-amber-200 rounded-xl font-black uppercase outline-none text-xs focus:border-amber-500">
+                                <input type="text" id="inputVoucher" placeholder="Ketik promo..." class="flex-grow px-3 py-3 bg-white border border-amber-200 rounded-xl font-black uppercase outline-none text-xs focus:border-amber-500">
                                 <button type="button" id="btnCekVoucher" onclick="verifikasiVoucher()" class="bg-amber-500 text-white px-4 rounded-xl font-bold text-[10px] active:scale-95">Gunakan</button>
                             </div><p id="msgVoucher" class="text-[9px] font-bold hidden"></p>
 
-                            <div id="boxJaminan" class="hidden"><select id="jenisJaminan" class="w-full px-4 py-3 bg-white border rounded-xl font-bold outline-none text-sm"><option value="" disabled selected>-- Pilih Jaminan --</option><option value="BPKB Motor">BPKB Motor</option><option value="Ijazah Asli">Ijazah Asli</option></select></div>
+                            <div id="boxJaminan" class="hidden"><select id="jenisJaminan" class="w-full px-4 py-3 bg-white border rounded-xl font-bold outline-none text-sm focus:border-emerald-500"><option value="" disabled selected>-- Pilih Jenis Jaminan --</option><option value="BPKB Motor">BPKB Motor</option><option value="Ijazah Asli">Ijazah Asli</option></select></div>
 
                             <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
                                 <div><label class="block text-[10px] font-bold text-slate-500 mb-1">Jatuh Tempo</label><input type="number" id="jatuhTempo" min="1" max="31" placeholder="Tgl 25" required class="w-full px-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-sm focus:border-emerald-500"></div>
@@ -82,26 +93,50 @@
                         </div>
                     </section>
                     
-                    <div class="fixed lg:static bottom-4 left-1/2 lg:left-0 -translate-x-1/2 lg:translate-x-0 w-[92%] lg:w-full z-50 lg:z-auto lg:mt-4">
-                        <button type="submit" id="btnSubmitForm" class="w-full bg-slate-900 text-white font-extrabold py-4 px-6 rounded-2xl active:scale-95 transition-all flex justify-center items-center gap-2 shadow-2xl border border-slate-700 lg:shadow-none lg:border-none">
+                    <div class="fixed lg:static bottom-4 left-1/2 lg:left-auto -translate-x-1/2 lg:translate-x-0 w-[92%] lg:w-full z-50 lg:z-auto lg:mt-6">
+                        <button type="submit" id="btnSubmitForm" class="w-full bg-slate-900 text-white font-extrabold py-4 px-6 rounded-2xl active:scale-95 transition-all flex justify-center items-center gap-2 shadow-2xl lg:shadow-md border border-slate-700">
                             <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i><span id="txtBtnSubmit">Ajukan Pembiayaan</span>
                         </button>
                     </div>
                 </div>
             </div>
-            <div class="w-full h-24 lg:hidden shrink-0"></div>
         </form>
     </main>
 
     <div id="instruksiModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity">
-        <div class="bg-white rounded-[2rem] p-6 max-w-[320px] w-full text-center shadow-2xl transform scale-95 transition-transform"><div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="check-circle" class="w-8 h-8 text-emerald-500"></i></div><h3 class="text-lg font-extrabold text-slate-900 mb-1">Berhasil Disimpan</h3><p class="text-slate-500 text-xs mb-6">Pengajuan direkam sistem. Lanjut ke WA Admin.</p><button onclick="location.reload()" class="w-full bg-slate-100 font-bold py-3 rounded-xl text-sm">Selesai</button></div>
+        <div class="bg-white rounded-[2rem] p-6 max-w-[320px] w-full text-center shadow-2xl transform scale-95 transition-transform"><div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="check-circle" class="w-8 h-8 text-emerald-500"></i></div><h3 class="text-lg font-extrabold text-slate-900 mb-1">Berhasil Disimpan</h3><p class="text-slate-500 text-xs mb-6">Pengajuan direkam sistem. Lanjut ke WA Admin.</p><button onclick="location.reload()" class="w-full bg-slate-100 font-bold py-3 rounded-xl text-sm active:scale-95 transition-all">Selesai</button></div>
     </div>
 
     <script>
         lucide.createIcons(); let promoMarginAktif = null;
-        function buatIdTransaksi(kode) { const d=new Date(); return `${kode}${String(d.getFullYear()).slice(-2)}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}${Math.floor(Math.random()*90+10)}`; }
+        
+        // FITUR BARU: ID ALFANUMERIK (ZC) AGAR GOOGLE SHEETS TIDAK BINGUNG
+        function buatIdTransaksi(kodeTipe) {
+            const now = new Date();
+            const yy = String(now.getFullYear()).slice(-2);
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const random = Math.floor(Math.random() * 90 + 10);
+            return `ZC${kodeTipe}-${yy}${mm}${dd}-${hh}${mins}-${random}`;
+        }
+
         function showToast(m, t='error') { const d=document.createElement('div'); d.className=`${t==='success'?'bg-emerald-500':(t==='info'?'bg-blue-500':'bg-red-500')} text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 fixed top-5 left-1/2 -translate-x-1/2 z-[1000] min-w-[250px] font-bold text-sm`; d.innerHTML=`<i data-lucide="info" class="w-5 h-5 shrink-0"></i><span>${m}</span>`; document.getElementById('toastContainer').appendChild(d); lucide.createIcons(); setTimeout(()=>d.remove(), 3000); }
         
+        async function pickContact() {
+            if (!('contacts' in navigator && 'ContactsManager' in window)) return showToast("Fitur pilih kontak tidak didukung pada HP Anda.", "info");
+            try {
+                const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
+                if (contacts.length > 0) {
+                    document.getElementById('daruratNama').value = contacts[0].name[0] || '';
+                    let phone = contacts[0].tel[0].replace(/[^0-9]/g, '');
+                    if (phone.startsWith('62')) phone = '0' + phone.substring(2);
+                    document.getElementById('daruratWa').value = phone;
+                }
+            } catch (ex) { console.log(ex); }
+        }
+
         function verifikasiVoucher() {
             const i = document.getElementById('inputVoucher'), m = document.getElementById('msgVoucher'), j = document.getElementById('pilihJalur').value;
             const k = i.value.trim().toLowerCase(), targetM = j === "VIP" ? 15 : 25;
@@ -111,7 +146,7 @@
                 promoMarginAktif = CONFIG.VOUCHERS[k].margin; m.innerText = "Aktif (Margin "+promoMarginAktif+"%)"; m.className = "text-[9px] mt-1.5 font-bold text-emerald-600 block"; i.disabled=true; showToast("Voucher Aktif", "success");
             } else { m.innerText = "Tidak valid."; m.className = "text-[9px] mt-1.5 font-bold text-red-500 block"; }
         }
-        function toggleJalur() { document.getElementById('boxJaminan').classList.toggle('hidden', document.getElementById('pilihJalur').value === 'REGULER'); promoMarginAktif=null; document.getElementById('inputVoucher').disabled=false; document.getElementById('msgVoucher').classList.add('hidden'); }
+        function toggleJalur() { document.getElementById('boxJaminan').classList.toggle('hidden', document.getElementById('pilihJalur').value === 'REGULER'); promoMarginAktif=null; document.getElementById('inputVoucher').disabled=false; document.getElementById('inputVoucher').value=''; document.getElementById('msgVoucher').classList.add('hidden'); }
         
         const fr = (n) => (n===0||isNaN(n))?"":new Intl.NumberFormat('id-ID').format(n), pr = (s) => parseInt(s.toString().replace(/[^0-9]/g, ''))||0;
         ['hargaBarang', 'dpBarang'].forEach(id => document.getElementById(id).addEventListener('input', e => e.target.value = fr(pr(e.target.value))));
@@ -120,13 +155,13 @@
 
         document.getElementById('pengajuanForm').addEventListener('submit', (e) => {
             e.preventDefault(); const n = document.getElementById('nik').value; if(n.length!==16) return showToast("NIK harus 16 digit.");
-            const btn = document.getElementById('btnSubmitForm'); btn.disabled=true; btn.innerHTML="Memproses...";
+            const btn = document.getElementById('btnSubmitForm'); btn.disabled=true; btn.innerHTML=`<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Menyimpan...`; lucide.createIcons();
             const data = { nama:document.getElementById('nama').value, nik:n, wa:document.getElementById('wa').value, alamat:document.getElementById('alamat').value, pekerjaan:document.getElementById('pekerjaan').value, gaji:document.getElementById('gaji').value, daruratNama:document.getElementById('daruratNama').value, daruratWa:document.getElementById('daruratWa').value, barang:document.getElementById('barang').value, harga:document.getElementById('hargaBarang').value, dp:document.getElementById('dpBarang').value||"0", tenor:document.getElementById('tenorSelect').value, jaminan:document.getElementById('pilihJalur').value==="VIP"?document.getElementById('jenisJaminan').value:"Tanpa Jaminan", jatuhTempo:document.getElementById('jatuhTempo').value, margin: promoMarginAktif || (document.getElementById('pilihJalur').value==="VIP"?15:25) };
             const id = buatIdTransaksi(1);
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "PENGAJUAN_BARU", idKontrak: id, timestamp: new Date().toLocaleString('id-ID'), ...data }) }).then(()=>{
-                window.open(`https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(`Assalamu'alaikum Admin.\n\nID: ${id}\nNama: ${data.nama}\nBarang: ${data.barang}\nHarga: Rp ${data.harga}\nDP: Rp ${data.dp}\nSkema: ${data.margin}%`)}`, '_blank');
+                window.open(`https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(`Assalamu'alaikum Admin.\n\nPermisi, saya bermaksud mengajukan pembiayaan dengan rincian sebagai berikut:\n\nID Pengajuan: ${id}\nNama: ${data.nama}\nBarang: ${data.barang}\nHarga Pokok: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor} Bulan\nJatuh Tempo: Tgl ${data.jatuhTempo}\nSkema: ${data.margin}% (${data.jaminan})\n\nBerikut saya lampirkan foto KTP dan jaminan fisik (jika ada).\nMohon arahannya untuk proses verifikasi lebih lanjut. Terima kasih.`)}`, '_blank');
                 document.getElementById('instruksiModal').classList.replace('hidden', 'flex'); setTimeout(()=>document.getElementById('instruksiModal').classList.remove('opacity-0'),10);
-            }).catch(()=>showToast("Gagal Jaringan"));
+            }).catch(()=>{ showToast("Gagal Jaringan"); btn.disabled=false; btn.innerHTML="Coba Lagi"; });
         });
     </script>
 </body>
