@@ -61,7 +61,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4 w-full max-w-4xl mx-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 w-full max-w-4xl mx-auto">
             <a href="https://drive.google.com/file/d/1nTEV5XxPKrdy210x5X7MHgHh-Cnse-tP/view?usp=drivesdk" target="_blank" class="clean-card p-4 rounded-2xl flex items-center lg:flex-col lg:text-center gap-3 lg:gap-4 hover:border-emerald-200 active:scale-95 transition-all group cursor-pointer">
                 <div class="w-12 h-12 lg:w-16 lg:h-16 bg-emerald-50 rounded-xl lg:rounded-2xl flex items-center justify-center text-emerald-600 shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors"><i data-lucide="file-text" class="w-6 h-6 lg:w-8 lg:h-8"></i></div>
                 <div class="flex-grow lg:flex-none text-left lg:text-center">
@@ -95,18 +95,30 @@
             </a>
         </div>
 
-        <div class="w-full max-w-4xl mx-auto mb-8">
-            <div class="clean-card p-5 lg:p-6 rounded-3xl bg-gradient-to-r from-slate-900 to-slate-800 border-slate-700 transition-all flex flex-col gap-4 shadow-xl">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="shopping-bag" class="w-6 h-6 text-emerald-400"></i></div>
-                    <div class="text-white">
-                        <h3 class="font-black text-sm lg:text-base text-emerald-400">Request Gadget Impian (Jastip)</h3>
-                        <p class="text-[10px] lg:text-xs text-slate-400 mt-0.5">Paste link Shopee/Tokopedia di sini, kami carikan barangnya!</p>
+        <div class="w-full max-w-4xl mx-auto mb-10 px-1 lg:px-0">
+            <div class="clean-card p-5 lg:p-6 rounded-3xl bg-white border border-emerald-100 shadow-md flex flex-col gap-4 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+                
+                <div class="flex items-center gap-4 relative z-10">
+                    <div class="w-12 h-12 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="shopping-bag" class="w-6 h-6 text-emerald-500"></i></div>
+                    <div>
+                        <h3 class="font-black text-sm lg:text-base text-slate-800">Request Gadget Impian (Jastip)</h3>
+                        <p class="text-[10px] lg:text-xs text-slate-500 mt-0.5">Paste link Shopee/Tokopedia di sini, kami hitungkan cicilannya!</p>
                     </div>
                 </div>
-                <div class="flex gap-2 w-full mt-1">
-                    <input type="url" id="linkJastip" placeholder="https://shopee.co.id/..." class="flex-grow px-4 py-3.5 rounded-xl bg-slate-800 border border-slate-600 text-white text-xs outline-none focus:border-emerald-400 transition-colors">
-                    <button onclick="prosesJastip()" class="bg-emerald-500 text-slate-900 px-5 py-3.5 rounded-xl font-extrabold text-xs active:scale-95 transition-all shadow-lg flex items-center gap-1.5 whitespace-nowrap"><i data-lucide="send" class="w-4 h-4"></i> Hitung</button>
+                
+                <div class="flex flex-col sm:flex-row gap-3 w-full mt-1 relative z-10">
+                    <div class="relative flex-grow flex items-center bg-slate-50 border border-slate-200 rounded-xl shadow-sm focus-within:border-emerald-500 transition-all">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i data-lucide="link" class="w-4 h-4 text-emerald-500"></i></div>
+                        
+                        <input type="url" id="linkJastip" placeholder="Contoh: https://shopee.co.id/..." class="w-full pl-11 pr-20 py-3.5 bg-transparent text-xs lg:text-sm font-bold outline-none rounded-xl">
+                        
+                        <div class="absolute inset-y-0 right-0 pr-2 flex items-center gap-0.5">
+                            <button type="button" onclick="pasteJastip()" class="p-2 text-slate-400 hover:text-emerald-500 transition-colors" title="Tempel / Paste"><i data-lucide="clipboard" class="w-4 h-4"></i></button>
+                            <button type="button" onclick="clearJastip()" class="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Hapus"><i data-lucide="x" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                    <button onclick="prosesJastip()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3.5 rounded-xl font-extrabold text-xs active:scale-95 transition-all shadow-md flex justify-center items-center gap-1.5 shrink-0 w-full sm:w-auto"><i data-lucide="send" class="w-4 h-4"></i> Hitung Cicilan</button>
                 </div>
             </div>
         </div>
@@ -121,6 +133,10 @@
                 <div class="faq-item clean-card p-5 lg:p-6 rounded-2xl cursor-pointer hover:shadow-md transition-shadow" onclick="toggleFaq(this)">
                     <div class="flex justify-between items-center"><h3 class="font-bold text-sm lg:text-base text-slate-800">Bebas Riba & Gharar?</h3><i data-lucide="chevron-down" class="chevron w-5 h-5 text-slate-400 transition-transform"></i></div>
                     <div class="faq-content text-xs lg:text-sm text-slate-500 leading-relaxed border-t border-slate-100 mt-0 pt-0"><div class="pt-3">Pastinya! Kami <b>Tanpa Riba</b> (tidak ada bunga berbunga) dan <b>Tanpa Gharar</b> (semua info harga & spesifikasi jelas di awal). Harga yang disepakati saat akad tidak akan berubah sampai lunas.</div></div>
+                </div>
+                <div class="faq-item clean-card p-5 lg:p-6 rounded-2xl cursor-pointer hover:shadow-md transition-shadow" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center"><h3 class="font-bold text-sm lg:text-base text-slate-800">Terlambat bayar kena denda?</h3><i data-lucide="chevron-down" class="chevron w-5 h-5 text-slate-400 transition-transform"></i></div>
+                    <div class="faq-content text-xs lg:text-sm text-slate-500 leading-relaxed border-t border-slate-100 mt-0 pt-0"><div class="pt-3">Sistem kami murni syariah <b>Tanpa Denda</b> yang bersifat memakan untung. Terlambat tidak akan menambah nilai pokok hutang Anda (Bebas Riba). Namun, demi kedisiplinan, sanksi keterlambatan akan disalurkan ke lembaga amal/sosial.</div></div>
                 </div>
             </div>
         </section>
@@ -152,8 +168,59 @@
     <aside id="sidebarMenu" class="fixed top-0 right-0 h-full w-72 bg-slate-50 shadow-2xl z-[100] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-slate-200">
         <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white shrink-0"><h3 class="font-black text-slate-800 flex items-center gap-2"><i data-lucide="compass" class="w-5 h-5 text-emerald-500"></i> Eksplorasi</h3><button onclick="tutupSidebar()" class="p-1.5 bg-slate-50 rounded-full text-slate-400 hover:text-red-500 active:scale-95 transition-all"><i data-lucide="x" class="w-4 h-4"></i></button></div>
         <div class="p-4 flex-grow space-y-4 overflow-y-auto no-scrollbar pb-10">
-            <button onclick="tutupSidebar(); setTimeout(() => requestPin('zenith-pos-dinamis.html'), 300)" class="w-full flex items-center gap-3 p-3 bg-emerald-500 text-white rounded-2xl active:scale-95 transition-transform shadow-md"><div class="w-10 h-10 bg-emerald-600/50 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="smartphone-charging" class="w-5 h-5 text-white"></i></div><div class="text-left"><h4 class="font-bold text-xs">Kasir POS</h4><p class="text-[9px] text-emerald-100">Input Pembayaran</p></div></button>
+            <div>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Layanan Islami Harian</p>
+                <div class="space-y-2">
+                    <a href="https://jadwalsholat.nu.or.id/" target="_blank" class="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-emerald-200 rounded-2xl active:scale-95 transition-all shadow-sm group">
+                        <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-emerald-500 transition-colors"><i data-lucide="clock-4" class="w-5 h-5 text-emerald-600 group-hover:text-white"></i></div>
+                        <div class="text-left flex-grow">
+                            <h4 class="font-bold text-xs text-slate-800">Jadwal Sholat</h4>
+                            <p class="text-[9px] text-slate-500">Akurat se-Indonesia (NU)</p>
+                        </div>
+                        <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-300"></i>
+                    </a>
+                    <a href="https://quran.nu.or.id/" target="_blank" class="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-emerald-200 rounded-2xl active:scale-95 transition-all shadow-sm group">
+                        <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-emerald-500 transition-colors"><i data-lucide="book-open" class="w-5 h-5 text-emerald-600 group-hover:text-white"></i></div>
+                        <div class="text-left flex-grow">
+                            <h4 class="font-bold text-xs text-slate-800">Al-Qur'an Digital</h4>
+                            <p class="text-[9px] text-slate-500">Lengkap dengan Tafsir</p>
+                        </div>
+                        <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-300"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-200">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1 mt-2">Edukasi & Fitur Syariah</p>
+                <div class="space-y-2">
+                    <button onclick="tutupSidebar(); setTimeout(() => bukaModalInfo('muroqoshoh'), 300)" class="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-amber-200 rounded-2xl active:scale-95 transition-all shadow-sm group">
+                        <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-amber-500 transition-colors"><i data-lucide="zap" class="w-5 h-5 text-amber-600 group-hover:text-white"></i></div>
+                        <div class="text-left flex-grow">
+                            <h4 class="font-bold text-xs text-slate-800">Diskon Pelunasan</h4>
+                            <p class="text-[9px] text-slate-500">Program Muroqoshoh</p>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>
+                    </button>
+                    <button onclick="tutupSidebar(); setTimeout(() => bukaModalInfo('kamus'), 300)" class="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-indigo-200 rounded-2xl active:scale-95 transition-all shadow-sm group">
+                        <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-indigo-500 transition-colors"><i data-lucide="library" class="w-5 h-5 text-indigo-600 group-hover:text-white"></i></div>
+                        <div class="text-left flex-grow">
+                            <h4 class="font-bold text-xs text-slate-800">Kamus Akad</h4>
+                            <p class="text-[9px] text-slate-500">Istilah Fintech Syariah</p>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-200">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1 mt-2">Otoritas (Admin)</p>
+                <div class="space-y-2">
+                    <button onclick="tutupSidebar(); setTimeout(() => requestPin('zenith-pos-dinamis.html'), 300)" class="w-full flex items-center gap-3 p-3 bg-emerald-500 text-white rounded-2xl active:scale-95 transition-transform shadow-md"><div class="w-10 h-10 bg-emerald-600/50 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="smartphone-charging" class="w-5 h-5 text-white"></i></div><div class="text-left"><h4 class="font-bold text-xs">Kasir POS</h4><p class="text-[9px] text-emerald-100">Input Pembayaran</p></div></button>
+                    <button onclick="tutupSidebar(); setTimeout(() => requestPin('reminder-tagihan-dinamis.html'), 300)" class="w-full flex items-center gap-3 p-3 bg-slate-900 text-white rounded-2xl active:scale-95 transition-transform shadow-md"><div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i></div><div class="text-left"><h4 class="font-bold text-xs">Server Admin</h4><p class="text-[9px] text-slate-400">Panel Manajemen</p></div></button>
+                </div>
+            </div>
         </div>
+        <div class="p-4 border-t border-slate-200 text-center bg-white shrink-0"><p class="text-[9px] font-bold text-slate-400">Zenith Cell Ecosystem v1.6</p></div>
     </aside>
 
     <div id="hukumModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col items-center justify-end px-2 pb-4 opacity-0 transition-opacity duration-300"><div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl transform translate-y-full transition-transform max-h-[85vh] overflow-y-auto no-scrollbar" id="hukumCard"><div class="flex justify-between items-center mb-4 pb-2 border-b"><h3 class="text-base font-black text-slate-900 flex items-center gap-2" id="hukumTitle">S&K</h3><button onclick="tutupModalHukum()" class="p-1.5 bg-slate-100 rounded-full text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button></div><div id="hukumContent" class="space-y-4 text-xs lg:text-sm text-slate-600 leading-relaxed font-medium pb-2"></div><button onclick="tutupModalHukum()" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl mt-4 active:scale-95 shadow-lg">Saya Mengerti & Sepakat</button></div></div>
@@ -171,13 +238,11 @@
             setTimeout(() => toast.remove(), 3500);
         }
 
-        // PENGUMUMAN
         if (typeof CONFIG !== 'undefined' && CONFIG.PENGUMUMAN_AKTIF && CONFIG.TEKS_PENGUMUMAN) {
             document.getElementById('pengumumanContainer').classList.remove('hidden');
             document.getElementById('teksPengumuman').innerText = CONFIG.TEKS_PENGUMUMAN;
         }
 
-        // LOGIKA DARK MODE
         let isDarkMode = localStorage.getItem('zenithDarkMode') === 'true';
         if(isDarkMode) document.body.classList.add('dark-mode');
         function toggleDarkMode() {
@@ -185,10 +250,24 @@
             isDarkMode ? document.body.classList.add('dark-mode') : document.body.classList.remove('dark-mode');
         }
 
-        // 🚀 PROSES JASTIP LINK
+        // LOGIKA JASTIP DENGAN PASTE & CLEAR
+        async function pasteJastip() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('linkJastip').value = text;
+            } catch (err) {
+                showToast("Silakan tahan dan pilih 'Tempel' di kolom input", "error");
+            }
+        }
+        
+        function clearJastip() {
+            document.getElementById('linkJastip').value = '';
+            document.getElementById('linkJastip').focus();
+        }
+
         function prosesJastip() {
             const link = document.getElementById('linkJastip').value;
-            if(!link) return showToast("Mohon paste link Tokopedia/Shopee terlebih dahulu!", "error");
+            if(!link) return showToast("Mohon masukkan link Shopee/Tokopedia!", "error");
             
             const pesan = `Assalamu'alaikum Admin Zenith Cell,%0A%0ASaya ingin menggunakan layanan *Jastip Gadget Impian*.%0A%0A*Link Barang:* ${encodeURIComponent(link)}%0A%0AMohon bantu hitungkan skema pembiayaan Syariahnya ya Kak. Terima kasih!`;
             window.open(`https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${pesan}`, '_blank');
@@ -198,7 +277,6 @@
         function tutupSidebar() { document.getElementById('sidebarOverlay').classList.add('opacity-0', 'pointer-events-none'); document.getElementById('sidebarMenu').classList.add('translate-x-full'); }
         function toggleFaq(el) { const isActive = el.classList.contains('active'); document.querySelectorAll('.faq-item').forEach(item => item.classList.remove('active')); if (!isActive) el.classList.add('active'); }
 
-        // Fungsi Buka Modal & Login... (Sisanya aman sesuai versi lama)
         const modalHukum = document.getElementById('hukumModal'), cardHukum = document.getElementById('hukumCard');
         function bukaModalHukum(tipe) { /* sama seperti sebelumnya */ }
         function tutupModalHukum() { modalHukum.classList.add('opacity-0'); cardHukum.classList.add('translate-y-full'); setTimeout(() => { modalHukum.classList.replace('flex', 'hidden'); }, 300); }
