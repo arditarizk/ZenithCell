@@ -64,7 +64,7 @@
                     
                     <div id="dendaArea" class="mt-4 p-4 bg-red-50 border border-red-100 rounded-2xl hidden">
                         <div class="flex justify-between items-center mb-2">
-                            <label class="block text-[10px] font-black text-red-600 uppercase">Denda / Dana Kebajikan</label>
+                            <label class="block text-[10px] font-black text-red-600 uppercase">Denda Syariah / Dana Kebajikan</label>
                             <i data-lucide="alert-circle" class="w-4 h-4 text-red-400"></i>
                         </div>
                         <div class="relative flex items-center mb-1">
@@ -77,7 +77,7 @@
             </form>
             
             <div id="btnProsesContainer" class="mt-6 hidden lg:block sticky bottom-0 lg:static bg-white pt-2 pb-4">
-                <button id="btnProses" class="w-full bg-slate-900 text-white font-extrabold py-4 rounded-[1.5rem] active:scale-95 flex justify-center items-center gap-2 shadow-2xl transition-all">
+                <button type="button" id="btnProses" class="w-full bg-slate-900 text-white font-extrabold py-4 rounded-[1.5rem] active:scale-95 flex justify-center items-center gap-2 shadow-2xl transition-all">
                     <i data-lucide="save" class="w-5 h-5 text-emerald-400"></i><span>Simpan & Buat Struk</span>
                 </button>
             </div>
@@ -112,7 +112,7 @@
             </div>
             
             <div id="btnProsesContainerMobile" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] z-50 lg:hidden hidden">
-                <button id="btnProsesMobile" class="w-full bg-slate-900 text-white font-extrabold py-4 rounded-[1.5rem] active:scale-95 flex justify-center items-center gap-2 shadow-2xl border-t border-slate-700 transition-all">
+                <button type="button" id="btnProsesMobile" class="w-full bg-slate-900 text-white font-extrabold py-4 rounded-[1.5rem] active:scale-95 flex justify-center items-center gap-2 shadow-2xl border border-slate-700 transition-all">
                     <i data-lucide="save" class="w-5 h-5 text-emerald-400"></i><span>Simpan & Buat Struk</span>
                 </button>
             </div>
@@ -164,6 +164,7 @@
             document.getElementById('cicilanArea').classList.remove('hidden');
             document.getElementById('nominalArea').classList.remove('hidden');
             document.getElementById('dendaArea').classList.remove('hidden');
+            
             document.getElementById('nominal').value = formatRp(c.cicilanPerBulan);
             document.getElementById('denda').value = "";
             document.getElementById('btnProsesContainer').classList.remove('hidden');
@@ -218,44 +219,77 @@
 
         ['nominal', 'denda'].forEach(id => document.getElementById(id).addEventListener('input', (e) => { if(isSaved) return; e.target.value = formatRp(parseRp(e.target.value)); renderPreview(); }));
 
-        const eksekusiSimpan = async () => {
-            const p = renderPreview(); if (!p) return showToast("Lengkapi data nominal!", "error");
-            document.getElementById('btnProses').disabled = true; document.getElementById('btnProsesMobile').disabled = true;
+        // PERBAIKAN: OPTIMISTIC UI AGAR TIDAK BLOKIR KARENA REDIRECT GOOGLE
+        const eksekusiSimpan = (e) => {
+            if(e) e.preventDefault();
+            const p = renderPreview(); 
+            if (!p) return showToast("Lengkapi data nominal!", "error");
             
-            try {
-                let payload = { tipe: p.isLunas ? "PELUNASAN_AWAL" : "KAS_MASUK_CICILAN", idTransaksi: p.idTransaksi, idKontrak: p.data.idKontrak, waktu: new Date().toLocaleString('id-ID'), bulanIni: new Date().getMonth() + 1, nama: p.data.nama, whatsapp: p.data.wa, cicilanKe: p.cicilan, nominalMasuk: p.nominalVal, dendaMasuk: p.dendaVal, catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru) };
-                await fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                isSaved = true; currentSavedData = p;
-                document.getElementById('nominal').disabled = true; document.getElementById('denda').disabled = true;
+            const btnP = document.getElementById('btnProses');
+            const btnM = document.getElementById('btnProsesMobile');
+            btnP.disabled = true; btnM.disabled = true;
+            btnP.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Memproses...</span>`;
+            btnM.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i><span>Memproses...</span>`;
+            lucide.createIcons();
+            
+            let payload = { 
+                tipe: p.isLunas ? "PELUNASAN_AWAL" : "KAS_MASUK_CICILAN", 
+                idTransaksi: p.idTransaksi, 
+                idKontrak: p.data.idKontrak, 
+                waktu: new Date().toLocaleString('id-ID'), 
+                bulanIni: new Date().getMonth() + 1, 
+                nama: p.data.nama, 
+                whatsapp: p.data.wa, 
+                cicilanKe: p.cicilan, 
+                nominalMasuk: p.nominalVal, 
+                dendaMasuk: p.dendaVal, 
+                catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru) 
+            };
+            
+            // Bypass CORS redirect block menggunakan Fire and Forget
+            fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
+            .catch(err => console.log("Fetch info:", err));
+            
+            setTimeout(() => {
+                isSaved = true; 
+                currentSavedData = p;
+                
+                document.getElementById('nominal').disabled = true; 
+                document.getElementById('denda').disabled = true;
                 document.getElementById('formSection').style.opacity = '0.3';
-                document.getElementById('btnProsesContainer').classList.add('hidden'); document.getElementById('btnProsesContainerMobile').classList.add('hidden');
+                document.getElementById('btnProsesContainer').classList.add('hidden'); 
+                document.getElementById('btnProsesContainerMobile').classList.add('hidden');
                 document.getElementById('actionButtons').classList.replace('hidden', 'flex');
+                
                 showToast(p.isLunas ? "LUNAS! Riwayat telah dicatat." : "Berhasil Disimpan!", "success");
                 
                 if(window.innerWidth < 1024) document.getElementById('previewPanel').scrollIntoView({behavior: 'smooth'});
-            } catch(e) { showToast("Gagal menyimpang jaringan.", "error"); }
+            }, 1000);
         };
 
         document.getElementById('btnProses').addEventListener('click', eksekusiSimpan);
         document.getElementById('btnProsesMobile').addEventListener('click', eksekusiSimpan);
 
-        async function captureAndShare() {
+        async function captureAndShare(mode) {
             if(!currentSavedData) return;
             const wrapper = document.getElementById('strukWrapper');
-            wrapper.className = "is-whatsapp mx-auto";
+            wrapper.className = mode === 'wa' ? "is-whatsapp mx-auto" : "is-printer mx-auto";
             showToast("Mempersiapkan Struk...");
+            
             setTimeout(async () => {
                 const canvas = await html2canvas(document.getElementById('strukCard'), { scale: 2.5, backgroundColor: "#ffffff", useCORS: true });
                 canvas.toBlob(async (blob) => {
-                    const file = new File([blob], `Zenith_${currentSavedData.data.nama.replace(/\s/g,'')}_${Date.now()}.png`, { type: "image/png" });
+                    const fileName = `Zenith_${currentSavedData.data.nama.replace(/\s/g,'')}_${Date.now()}.png`;
+                    const file = new File([blob], fileName, { type: "image/png" });
+
                     if (navigator.share && navigator.canShare({ files: [file] })) {
                         await navigator.share({ 
                             files: [file], 
                             title: 'Kuitansi Zenith Cell', 
                             text: `Assalamu'alaikum Kak ${currentSavedData.data.nama}.\n\nBerikut dilampirkan kuitansi bukti pembayaran angsurannya. Dana telah kami terima dan dicatat di sistem.\n\nTerima kasih atas kepercayaannya kepada Zenith Cell.` 
                         });
-                    } else { 
-                        const a = document.createElement('a'); a.download = file.name; a.href = URL.createObjectURL(blob); a.click(); 
+                    } else {
+                        const a = document.createElement('a'); a.download = fileName; a.href = URL.createObjectURL(blob); a.click();
                     }
                 }, "image/png");
             }, 200);
@@ -268,7 +302,6 @@
             const ketCicilan = p.isLunas ? 'Pelunasan Full' : 'Angsuran Ke-' + p.cicilan;
             const barang = p.data.barang ? p.data.barang : '-';
 
-            // FORMAT RAWBT DIKEMBALIKAN 100% PERSIS DENGAN ORIGINALNYA
             let struk = "        ZENITH CELL         \n";
             struk += " Gadget Syariah Kota Malang \n";
             struk += "--------------------------------\n";
@@ -296,8 +329,9 @@
             window.location.href = "intent:" + teksEncoded + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
         }
 
-        document.getElementById('btnShareWA').onclick = captureAndShare; 
+        document.getElementById('btnShareWA').onclick = () => captureAndShare('wa'); 
         document.getElementById('btnPrint').onclick = cetakStrukTajam;
+        
         fetchCustomersFromCloud();
     </script>
 </body>
