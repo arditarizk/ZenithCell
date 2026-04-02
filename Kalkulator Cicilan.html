@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id" class="antialiased">
 <head>
     <meta charset="UTF-8">
@@ -12,151 +12,173 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; -webkit-tap-highlight-color: transparent; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05); }
-        .glass-panel-dark { background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .radio-btn-label { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .radio-input:checked + .radio-btn-label { transform: scale(0.95); }
+        .glass-panel { background: rgba(255, 255, 255, 0.98); border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); }
+        input:focus-within, select:focus-within { outline: 2px solid #10b981; outline-offset: 2px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        input:focus { border-color: #10b981 !important; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1); }
     </style>
 </head>
-<body class="min-h-screen flex p-4 sm:p-6 lg:p-8 text-slate-800 selection:bg-emerald-200">
+<body class="text-slate-800 lg:p-8 min-h-screen flex selection:bg-emerald-200">
 
     <div id="toastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 pointer-events-none w-full max-w-sm px-4"></div>
 
-    <main class="m-auto w-full max-w-5xl glass-card rounded-[2.5rem] overflow-hidden flex flex-col lg:flex-row relative z-10">
-        <section class="w-full lg:w-7/12 p-6 sm:p-8 md:p-10 flex flex-col justify-center">
-            <header class="mb-8">
-                <a href="index.html" class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 mb-5 shadow-sm transition-colors active:scale-95"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
-                <div class="flex items-center gap-2 mb-3">
-                    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-100/80 text-emerald-700 text-xs font-bold uppercase tracking-widest"><i data-lucide="shield-check" class="w-4 h-4"></i> Transparan & Syariah</div>
-                </div>
-                <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">Simulasi Cicilan <br/><span class="text-emerald-600">Zenith Cell.</span></h1>
-            </header>
-
-            <form id="calcForm" class="space-y-8" onsubmit="event.preventDefault();">
-                <div class="space-y-5">
-                    <div class="group">
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Harga Gadget Pokok</label>
-                        <div class="relative flex items-center">
-                            <div class="absolute left-4 text-slate-400 font-bold">Rp</div>
-                            <input type="text" id="price" inputmode="numeric" placeholder="15.000.000" class="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent rounded-2xl font-black text-xl outline-none transition-all">
-                        </div>
-                    </div>
-
-                    <div class="group">
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Uang Muka (DP) <span class="text-slate-400 font-normal ml-1">Opsional</span></label>
-                        <div class="relative flex items-center">
-                            <div class="absolute left-4 text-slate-400 font-bold">Rp</div>
-                            <input type="text" id="dp" inputmode="numeric" placeholder="0" class="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-transparent rounded-2xl font-bold text-xl outline-none transition-all">
-                        </div>
-                    </div>
-                    
-                    <div class="group">
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Pilih Jalur & Jaminan</label>
-                        <select id="jenisJalur" onchange="calculate()" class="w-full px-4 py-4 bg-emerald-50 border-2 border-emerald-200 text-emerald-800 rounded-2xl font-bold outline-none text-sm appearance-none cursor-pointer hover:bg-emerald-100 transition-colors">
-                            <option value="25" selected>REGULER (Margin 25%) - Tanpa Jaminan</option>
-                            <option value="15">🌟 JALUR VIP (Margin 15%) - Syarat Titip Jaminan</option>
-                        </select>
-                        <p class="text-[10px] text-slate-500 font-medium mt-2 leading-relaxed">Jalur VIP mensyaratkan titipan jaminan fisik (BPKB/Ijazah Asli) selama masa cicilan.</p>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-3">Pilih Tenor (Durasi Cicilan)</label>
-                    <div class="grid grid-cols-4 gap-2 sm:gap-3">
-                        <label class="cursor-pointer relative"><input type="radio" name="tenor" value="3" class="radio-input peer sr-only" onchange="calculate()"><div class="radio-btn-label w-full py-3 rounded-xl bg-white border-2 border-slate-100 flex flex-col items-center justify-center peer-checked:bg-slate-800 peer-checked:text-white peer-checked:border-slate-800 shadow-sm transition-all"><span class="text-lg sm:text-xl font-black leading-none">3</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>
-                        <label class="cursor-pointer relative"><input type="radio" name="tenor" value="5" class="radio-input peer sr-only" checked onchange="calculate()"><div class="radio-btn-label w-full py-3 rounded-xl bg-white border-2 border-slate-100 flex flex-col items-center justify-center peer-checked:bg-slate-800 peer-checked:text-white peer-checked:border-slate-800 shadow-sm transition-all"><span class="text-lg sm:text-xl font-black leading-none">5</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>
-                        <label class="cursor-pointer relative"><input type="radio" name="tenor" value="8" class="radio-input peer sr-only" onchange="calculate()"><div class="radio-btn-label w-full py-3 rounded-xl bg-white border-2 border-slate-100 flex flex-col items-center justify-center peer-checked:bg-slate-800 peer-checked:text-white peer-checked:border-slate-800 shadow-sm transition-all"><span class="text-lg sm:text-xl font-black leading-none">8</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>
-                        <label class="cursor-pointer relative"><input type="radio" name="tenor" value="10" class="radio-input peer sr-only" onchange="calculate()"><div class="radio-btn-label w-full py-3 rounded-xl bg-white border-2 border-slate-100 flex flex-col items-center justify-center peer-checked:bg-slate-800 peer-checked:text-white peer-checked:border-slate-800 shadow-sm transition-all"><span class="text-lg sm:text-xl font-black leading-none">10</span><span class="text-[9px] font-bold uppercase mt-1 opacity-70">Bln</span></div></label>
-                    </div>
-                </div>
-            </form>
-        </section>
-
-        <section class="w-full lg:w-5/12 bg-slate-900 text-white p-6 sm:p-8 md:p-10 flex flex-col relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-[100px] rounded-full -mr-20 -mt-20"></div>
-            
-            <div class="relative z-10 flex-grow flex flex-col h-full">
-                <div class="mb-6 lg:mb-10 mt-2">
-                    <h2 class="text-slate-400 font-semibold tracking-widest text-xs uppercase mb-4 flex items-center gap-2"><i data-lucide="calculator" class="w-4 h-4"></i> Estimasi Cicilan</h2>
-                    <div class="flex items-start gap-1.5 mb-2"><span class="text-2xl sm:text-3xl font-bold mt-1.5 text-emerald-400">Rp</span><span class="text-5xl sm:text-6xl font-black" id="resCicilan">0</span></div>
-                    <p class="text-slate-400 text-[10px] font-medium italic">*Simulasi bersifat estimasi awal sesuai akad.</p>
-                </div>
-
-                <div class="glass-panel-dark rounded-[2rem] p-6 space-y-4 mb-6 mt-auto">
-                    <div class="flex justify-between items-center"><span class="text-slate-300 text-sm">Pokok Pembiayaan</span><span class="font-bold text-white" id="resPokok">Rp 0</span></div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-slate-300 text-sm flex items-center gap-2">Margin Keuntungan <span class="text-[9px] font-bold bg-blue-500/20 px-1.5 py-0.5 rounded text-blue-300 uppercase" id="resMarginText">25%</span></span>
-                        <span class="font-bold text-white" id="resMargin">Rp 0</span>
-                    </div>
-                    <div class="pt-4 border-t border-white/10 flex justify-between items-center"><span class="text-emerald-400 text-sm font-bold uppercase tracking-wider">Total Akad Jual Beli</span><span class="font-black text-xl text-white" id="resTotal">Rp 0</span></div>
-                </div>
-
-                <button onclick="lanjutKeForm()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-emerald-500/20">Lanjut Isi Form Pengajuan <i data-lucide="arrow-right" class="w-5 h-5"></i></button>
+    <main class="m-auto w-full max-w-md lg:max-w-5xl bg-white/50 lg:bg-white lg:glass-panel lg:rounded-[2.5rem] lg:p-8 lg:shadow-xl relative z-10 flex flex-col pb-24 lg:pb-0 pt-6 lg:pt-0">
+        <header class="mb-6 flex items-center gap-4 bg-white p-4 rounded-[2rem] lg:rounded-2xl shadow-sm border relative mx-4 lg:mx-0">
+            <a href="index.html" class="p-2.5 bg-slate-50 border border-slate-100 rounded-full text-slate-500 active:scale-95 transition-all"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
+            <div>
+                <h1 class="font-black text-xl leading-none text-slate-900">Simulasi Kredit</h1>
+                <p class="text-[10px] font-bold text-emerald-600 uppercase mt-1 tracking-widest">Kalkulator Murabahah</p>
             </div>
-        </section>
+        </header>
+
+        <div class="px-4 lg:px-0 flex-grow grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-8">
+            
+            <div class="space-y-4">
+                <section class="glass-panel p-5 rounded-3xl">
+                    <h2 class="text-sm font-extrabold mb-4 flex items-center gap-2 text-slate-800"><i data-lucide="calculator" class="w-4 h-4 text-emerald-500"></i> Nilai Barang</h2>
+                    <div class="space-y-3">
+                        <div class="relative flex items-center">
+                            <span class="absolute left-4 text-slate-400 font-bold text-sm">Rp</span>
+                            <input type="text" id="hargaBarang" inputmode="numeric" placeholder="Harga Pokok Barang" class="w-full pl-10 pr-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-base focus:border-emerald-500">
+                        </div>
+                        <div class="relative flex items-center">
+                            <span class="absolute left-4 text-slate-400 font-bold text-sm">Rp</span>
+                            <input type="text" id="dpBarang" inputmode="numeric" placeholder="Uang Muka (DP) - Opsional" class="w-full pl-10 pr-4 py-3 bg-slate-50 border rounded-xl font-bold outline-none text-base focus:border-emerald-500">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="glass-panel p-5 rounded-3xl">
+                    <h2 class="text-sm font-extrabold mb-4 flex items-center gap-2 text-slate-800"><i data-lucide="settings-2" class="w-4 h-4 text-emerald-500"></i> Pengaturan Akad</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-400 mb-2 uppercase tracking-widest">Pilih Jalur Transaksi</label>
+                            <select id="jenisJalur" onchange="hitungSimulasi()" class="w-full px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl font-bold outline-none text-sm focus:border-emerald-500">
+                                <option value="25" selected>REGULER (Margin 25%) - Tanpa Jaminan</option>
+                                <option value="15">🌟 VIP (Margin 15%) - Titip Jaminan</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-slate-400 mb-2 uppercase tracking-widest">Tenor (Lama Cicilan)</label>
+                            <div class="flex gap-2">
+                                <label class="flex-1"><input type="radio" name="tenor" value="3" class="peer sr-only" onchange="hitungSimulasi()"><div class="text-center py-2.5 rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-500 font-bold text-xs peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 transition-all cursor-pointer">3 Bln</div></label>
+                                <label class="flex-1"><input type="radio" name="tenor" value="5" class="peer sr-only" checked onchange="hitungSimulasi()"><div class="text-center py-2.5 rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-500 font-bold text-xs peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 transition-all cursor-pointer">5 Bln</div></label>
+                                <label class="flex-1"><input type="radio" name="tenor" value="8" class="peer sr-only" onchange="hitungSimulasi()"><div class="text-center py-2.5 rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-500 font-bold text-xs peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 transition-all cursor-pointer">8 Bln</div></label>
+                                <label class="flex-1"><input type="radio" name="tenor" value="10" class="peer sr-only" onchange="hitungSimulasi()"><div class="text-center py-2.5 rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-500 font-bold text-xs peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700 transition-all cursor-pointer">10 Bln</div></label>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                            <div class="flex items-center gap-2 mb-2"><i data-lucide="ticket-percent" class="w-3.5 h-3.5 text-amber-500"></i><span class="text-[10px] font-black text-amber-700 uppercase tracking-widest">Punya Promo?</span></div>
+                            <div class="flex gap-2">
+                                <input type="text" id="kodePromo" placeholder="Ketik kode..." class="flex-grow px-3 py-2 bg-white border border-amber-200 rounded-lg font-black uppercase outline-none text-xs focus:border-amber-500">
+                                <button onclick="cekPromo()" class="bg-amber-500 text-white px-3 rounded-lg font-bold text-[10px] active:scale-95 transition-all">Gunakan</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="flex flex-col justify-between">
+                <section class="glass-panel p-6 rounded-[2rem] bg-slate-900 text-white shadow-2xl relative overflow-hidden border border-slate-800 h-full flex flex-col justify-center">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl"></div>
+                    
+                    <h3 class="text-center text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Angsuran Per Bulan</h3>
+                    <div class="text-center mb-8 flex justify-center items-start gap-1">
+                        <span class="text-emerald-400 font-bold mt-1">Rp</span>
+                        <span class="text-4xl font-black tracking-tight" id="resCicilan">0</span>
+                    </div>
+
+                    <div class="space-y-4 relative z-10">
+                        <div class="flex justify-between items-center pb-3 border-b border-slate-700/50">
+                            <span class="text-xs text-slate-400 font-medium">Sisa Pokok (Setelah DP)</span>
+                            <span class="text-sm font-bold" id="resPokok">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-3 border-b border-slate-700/50">
+                            <span class="text-xs text-slate-400 font-medium flex items-center gap-1">Margin / Profit <span id="labelMarginAktif" class="bg-emerald-500/20 text-emerald-400 px-1.5 rounded text-[9px] font-black">25%</span></span>
+                            <span class="text-sm font-bold" id="resMargin">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2">
+                            <span class="text-xs text-slate-300 font-bold uppercase tracking-wider">Total Akad Jual Beli</span>
+                            <span class="text-lg font-black text-emerald-400" id="resTotal">Rp 0</span>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="fixed lg:static bottom-4 left-1/2 lg:left-auto -translate-x-1/2 lg:translate-x-0 w-[92%] lg:w-full z-50 lg:z-auto lg:mt-6">
+                    <button onclick="lanjutKeForm()" class="w-full bg-emerald-500 text-white font-extrabold py-4 px-6 rounded-2xl active:scale-95 transition-all flex justify-center items-center gap-2 shadow-lg shadow-emerald-500/30 border border-emerald-400">
+                        <span>Lanjut Ajukan Pembiayaan</span><i data-lucide="arrow-right" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script>
         lucide.createIcons();
+        let promoMargin = null;
 
-        function showToast(message, type = 'error') {
-            const toast = document.createElement('div');
-            const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
-            const icon = type === 'success' ? 'check-circle' : 'alert-circle';
-            toast.className = `${bgColor} text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 fixed top-5 left-1/2 -translate-x-1/2 z-[1000] min-w-[250px] font-bold text-sm text-left pointer-events-auto`;
-            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 shrink-0"></i><span>${message}</span>`;
-            document.getElementById('toastContainer').appendChild(toast);
-            lucide.createIcons();
-            
-            setTimeout(() => { toast.classList.remove('-translate-y-10', 'opacity-0'); }, 10);
-            setTimeout(() => { 
-                toast.classList.add('-translate-y-10', 'opacity-0'); 
-                setTimeout(() => toast.remove(), 300); 
-            }, 3500);
-        }
-
-        const priceInput = document.getElementById('price');
-        const dpInput = document.getElementById('dp');
+        const priceInput = document.getElementById('hargaBarang');
+        const dpInput = document.getElementById('dpBarang');
+        
+        const resCicilan = document.getElementById('resCicilan');
         const resPokok = document.getElementById('resPokok');
         const resMargin = document.getElementById('resMargin');
         const resTotal = document.getElementById('resTotal');
-        const resCicilan = document.getElementById('resCicilan');
-        const resMarginText = document.getElementById('resMarginText');
+        const labelMarginAktif = document.getElementById('labelMarginAktif');
 
-        const formatRupiah = (num) => (num === 0 || isNaN(num)) ? "0" : new Intl.NumberFormat('id-ID').format(num);
+        const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num);
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
 
-        priceInput.addEventListener('input', (e) => { 
-            let val = parseRupiah(e.target.value); 
-            e.target.value = val === 0 ? '' : formatRupiah(val); 
-            calculate(); 
+        function showToast(msg, type = 'error') {
+            const toast = document.createElement('div');
+            toast.className = `${type === 'success' ? 'bg-emerald-500' : 'bg-red-500'} text-white px-5 py-3.5 rounded-2xl shadow-xl fixed top-5 left-1/2 -translate-x-1/2 z-[1000] min-w-[250px] font-bold text-sm text-center`;
+            toast.innerText = msg; document.getElementById('toastContainer').appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        [priceInput, dpInput].forEach(el => {
+            el.addEventListener('input', function(e) {
+                this.value = formatRupiah(parseRupiah(this.value)) || '';
+                hitungSimulasi();
+            });
         });
 
-        dpInput.addEventListener('input', (e) => { 
-            let val = parseRupiah(e.target.value); 
-            e.target.value = val === 0 ? '' : formatRupiah(val); 
-            calculate(); 
-        });
+        function cekPromo() {
+            const kode = document.getElementById('kodePromo').value.trim().toLowerCase();
+            const jalurM = document.getElementById('jenisJalur').value;
+            if(!kode) return showToast("Masukkan kode promo.");
+            
+            if(CONFIG.VOUCHERS && CONFIG.VOUCHERS[kode]) {
+                if(CONFIG.VOUCHERS[kode].margin >= parseInt(jalurM)) {
+                    showToast(`Jalur pilihan Anda (${jalurM}%) sudah lebih murah dari promo ini.`, "info");
+                    return;
+                }
+                promoMargin = CONFIG.VOUCHERS[kode].margin;
+                showToast(`Promo Aktif! Margin turun menjadi ${promoMargin}%`, "success");
+                hitungSimulasi();
+            } else {
+                promoMargin = null;
+                showToast("Kode promo tidak valid.");
+                hitungSimulasi();
+            }
+        }
 
-        function calculate() {
-            const price = parseRupiah(priceInput.value); 
+        function hitungSimulasi() {
+            const price = parseRupiah(priceInput.value);
             const dp = parseRupiah(dpInput.value);
             const tenor = parseInt(document.querySelector('input[name="tenor"]:checked').value);
-            const finalMargin = parseInt(document.getElementById('jenisJalur').value);
-
-            resMarginText.innerText = `${finalMargin}%`;
+            const baseMargin = parseInt(document.getElementById('jenisJalur').value);
+            
+            const finalMargin = promoMargin !== null ? promoMargin : baseMargin;
+            labelMarginAktif.innerText = `${finalMargin}%`;
 
             if (price === 0) {
                 resPokok.innerText = "Rp 0"; resMargin.innerText = "Rp 0"; resTotal.innerText = "Rp 0"; resCicilan.innerText = "0";
                 return;
             }
 
-            let pokok = price - dp; 
-            if (pokok < 0) pokok = 0; 
-            
+            let pokok = price - dp; if (pokok < 0) pokok = 0; 
             const nominalMargin = pokok * (finalMargin / 100);
             const total = pokok + nominalMargin;
             
@@ -166,6 +188,7 @@
             resCicilan.innerText = formatRupiah(Math.round(total / tenor));
         }
         
+        // PENGIRIMAN DATA INTEGRASI KE FORM PENGAJUAN
         function lanjutKeForm() {
             const harga = parseRupiah(priceInput.value);
             if(harga === 0) {
@@ -173,17 +196,13 @@
                 priceInput.focus();
                 return;
             }
-            
             const dp = parseRupiah(dpInput.value);
             const tenor = document.querySelector('input[name="tenor"]:checked').value;
-            const jaminan = document.getElementById('jenisJalur').value === "15" ? "Jaminan" : "Tanpa";
+            const jalur = document.getElementById('jenisJalur').value; // isinya "25" atau "15"
             
-            window.location.href = `form-pengajuan.html?harga=${harga}&dp=${dp}&tenor=${tenor}&jalur=${jaminan}`;
+            // Kirim parameter melalui URL
+            window.location.href = `form-pengajuan.html?harga=${harga}&dp=${dp}&tenor=${tenor}&jalur=${jalur}`;
         }
-
-        calculate();
     </script>
 </body>
 </html>
-
-
