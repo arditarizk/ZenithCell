@@ -37,14 +37,9 @@
                         <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide text-center lg:text-left">Masukkan Nomor WhatsApp</label>
                         <div class="relative flex items-center">
                             <input type="tel" id="waInput" placeholder="Contoh: 081234567890" required class="w-full text-center lg:text-left pl-4 lg:pl-6 pr-[90px] py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-slate-900 font-bold text-lg outline-none focus:border-emerald-500 transition-all">
-                            
                             <div class="absolute right-2 flex items-center gap-1">
-                                <button type="button" id="btnClear" onclick="hapusInput()" class="p-2.5 text-slate-400 rounded-xl hover:bg-slate-200 hover:text-slate-600 transition-all duration-200 flex items-center justify-center opacity-0 pointer-events-none scale-90" title="Hapus Nomor">
-                                    <i data-lucide="x" class="w-5 h-5"></i>
-                                </button>
-                                <button type="button" onclick="pasteDariClipboard()" class="p-2.5 bg-slate-200/70 text-slate-600 rounded-xl hover:bg-emerald-100 hover:text-emerald-700 transition-colors active:scale-95 flex items-center justify-center" title="Tempel Nomor">
-                                    <i data-lucide="clipboard-paste" class="w-5 h-5"></i>
-                                </button>
+                                <button type="button" id="btnClear" onclick="hapusInput()" class="p-2.5 text-slate-400 rounded-xl hover:bg-slate-200 hover:text-slate-600 transition-all duration-200 flex items-center justify-center opacity-0 pointer-events-none scale-90" title="Hapus Nomor"><i data-lucide="x" class="w-5 h-5"></i></button>
+                                <button type="button" onclick="pasteDariClipboard()" class="p-2.5 bg-slate-200/70 text-slate-600 rounded-xl hover:bg-emerald-100 hover:text-emerald-700 transition-colors active:scale-95 flex items-center justify-center" title="Tempel Nomor"><i data-lucide="clipboard-paste" class="w-5 h-5"></i></button>
                             </div>
                         </div>
                     </div>
@@ -54,7 +49,6 @@
         </section>
 
         <section class="w-full lg:w-1/2 lg:bg-slate-50 lg:p-12 flex flex-col justify-center pb-16 lg:pb-12">
-            
             <div id="emptyState" class="text-center opacity-50 hidden lg:flex flex-col items-center justify-center h-full">
                 <i data-lucide="receipt" class="w-16 h-16 text-slate-300 mb-4"></i>
                 <p class="font-bold text-slate-400">Hasil tagihan akan muncul di sini</p>
@@ -141,7 +135,6 @@
             if (val.startsWith('62')) val = '0' + val.substring(2);
             this.value = val;
             
-            // Logika Pintar: Tampilkan tombol silang hanya setelah mengetik
             if(this.value.length > 0) {
                 btnClear.classList.remove('opacity-0', 'pointer-events-none', 'scale-90');
                 btnClear.classList.add('opacity-100', 'scale-100');
@@ -151,125 +144,64 @@
             }
         });
 
-        function hapusInput() {
-            waInput.value = '';
-            waInput.focus();
-            waInput.dispatchEvent(new Event('input')); 
-        }
+        function hapusInput() { waInput.value = ''; waInput.focus(); waInput.dispatchEvent(new Event('input')); }
 
         async function pasteDariClipboard() {
             try {
                 const text = await navigator.clipboard.readText();
-                if (text) {
-                    waInput.value = text;
-                    waInput.dispatchEvent(new Event('input'));
-                }
-            } catch (err) {
-                showToast("Gagal menempelkan teks. Pastikan izin clipboard aktif.");
-            }
+                if (text) { waInput.value = text; waInput.dispatchEvent(new Event('input')); }
+            } catch (err) { showToast("Gagal menempelkan teks. Pastikan izin clipboard aktif."); }
         }
 
         document.getElementById('searchForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            let inputStr = waInput.value;
-            if(inputStr === "") return;
-            
+            e.preventDefault(); let inputStr = waInput.value; if(inputStr === "") return;
             const btn = document.getElementById('btnSearch');
-            btn.disabled = true; 
-            document.getElementById('searchText').innerText = "Mencari..."; 
-            document.getElementById('searchIcon').outerHTML = `<div class="spinner" id="searchIcon"></div>`;
-            
-            // Sembunyikan state sebelumnya
-            document.getElementById('emptyState').classList.add('hidden');
-            document.getElementById('resultContainer').classList.add('hidden', 'opacity-0', 'translate-y-4'); 
-            document.getElementById('pendingContainer').classList.add('hidden', 'opacity-0', 'translate-y-4');
+            btn.disabled = true; document.getElementById('searchText').innerText = "Mencari..."; document.getElementById('searchIcon').outerHTML = `<div class="spinner" id="searchIcon"></div>`;
+            document.getElementById('emptyState').classList.add('hidden'); document.getElementById('resultContainer').classList.add('hidden', 'opacity-0', 'translate-y-4'); document.getElementById('pendingContainer').classList.add('hidden', 'opacity-0', 'translate-y-4');
 
             try {
                 const response = await fetch(`${CONFIG.API_URL}?wa=${inputStr}&nocache=${Date.now()}`);
                 const result = await response.json();
-
-                btn.disabled = false; 
-                document.getElementById('searchText').innerText = "Cari Data Saya"; 
-                document.getElementById('searchIcon').outerHTML = `<i data-lucide="search" id="searchIcon" class="w-5 h-5"></i>`; 
-                lucide.createIcons();
+                btn.disabled = false; document.getElementById('searchText').innerText = "Cari Data Saya"; document.getElementById('searchIcon').outerHTML = `<i data-lucide="search" id="searchIcon" class="w-5 h-5"></i>`; lucide.createIcons();
 
                 if (result.status === "success") {
                     tampilkanHasil(result.data);
                 } else if (result.status === "pending") {
-                    document.getElementById('pendNama').innerText = result.data.nama; 
-                    document.getElementById('pendBarang').innerText = result.data.barang;
-                    const c = document.getElementById('pendingContainer'); 
-                    c.classList.remove('hidden'); void c.offsetWidth;
-                    c.classList.remove('opacity-0', 'translate-y-4');
+                    document.getElementById('pendNama').innerText = result.data.nama; document.getElementById('pendBarang').innerText = result.data.barang;
+                    const c = document.getElementById('pendingContainer'); c.classList.remove('hidden'); void c.offsetWidth; c.classList.remove('opacity-0', 'translate-y-4');
                 } else {
-                    showToast(result.message || "Nomor Anda belum terdaftar di sistem kami.");
-                    document.getElementById('emptyState').classList.remove('hidden');
+                    showToast(result.message || "Nomor Anda belum terdaftar di sistem kami."); document.getElementById('emptyState').classList.remove('hidden');
                 }
             } catch (error) {
-                btn.disabled = false; 
-                document.getElementById('searchText').innerText = "Cari Data Saya"; 
-                document.getElementById('searchIcon').outerHTML = `<i data-lucide="search" id="searchIcon" class="w-5 h-5"></i>`; 
-                lucide.createIcons();
-                showToast("Koneksi gagal. Silakan periksa jaringan internet Anda.");
-                document.getElementById('emptyState').classList.remove('hidden');
+                btn.disabled = false; document.getElementById('searchText').innerText = "Cari Data Saya"; document.getElementById('searchIcon').outerHTML = `<i data-lucide="search" id="searchIcon" class="w-5 h-5"></i>`; lucide.createIcons();
+                showToast("Koneksi gagal. Silakan periksa jaringan internet Anda."); document.getElementById('emptyState').classList.remove('hidden');
             }
         });
 
         function tampilkanHasil(data) {
-            let hutangVal = parseInt(data.totalHutang) || 0; 
-            let bayarVal = parseInt(data.terbayar) || 0;
+            let hutangVal = parseInt(data.totalHutang) || 0; let bayarVal = parseInt(data.terbayar) || 0;
             let sisa = hutangVal - bayarVal; if (sisa < 0) sisa = 0;
             let persenLunas = hutangVal > 0 ? Math.round((bayarVal / hutangVal) * 100) : 0; 
-
             let angkaTgl = data.jatuhTempo ? (parseInt(data.jatuhTempo.toString().split('-')[0]) || 1) : 1;
             let bulanTerakhir = parseInt(data.bulanTerakhirBayar) || 0;
             
             let targetBulan = bulanTerakhir === 0 ? bulanSekarang : bulanTerakhir + 1;
-            if (bulanTerakhir === 0) {
-                let selisihHari = angkaTgl - tglSekarang;
-                if (selisihHari < 20) { targetBulan = bulanSekarang + 1; }
-            }
-            
-            let targetTahun = new Date().getFullYear();
-            if (targetBulan > 12) { targetBulan -= 12; targetTahun++; }
+            if (bulanTerakhir === 0) { let selisihHari = angkaTgl - tglSekarang; if (selisihHari < 20) { targetBulan = bulanSekarang + 1; } }
+            let targetTahun = new Date().getFullYear(); if (targetBulan > 12) { targetBulan -= 12; targetTahun++; }
             
             const namaBulan = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
             let teksTanggalLengkap = `${angkaTgl} ${namaBulan[targetBulan]} ${targetTahun}`;
 
-            document.getElementById('resNama').innerText = data.nama; 
-            document.getElementById('resSisa').innerText = formatRupiah(sisa); 
-            document.getElementById('resPersen').innerText = `${persenLunas}%`;
-            document.getElementById('resNextDue').innerText = `${teksTanggalLengkap} (Bulan Ke-${data.cicilanKe})`;
+            document.getElementById('resNama').innerText = data.nama; document.getElementById('resSisa').innerText = formatRupiah(sisa); document.getElementById('resPersen').innerText = `${persenLunas}%`; document.getElementById('resNextDue').innerText = `${teksTanggalLengkap} (Bulan Ke-${data.cicilanKe})`;
             
-            // FITUR FORMAT PESAN WA FORMAL (Dikembalikan 100%)
-            let pesanWaLengkap = `Assalamu'alaikum Admin Zenith Cell.\n\n` +
-                                 `Permisi, saya ${data.nama} bermaksud mengonfirmasi pembayaran angsuran dengan rincian berikut:\n\n` +
-                                 `Tagihan Bulan: ${namaBulan[targetBulan]} (Ke-${data.cicilanKe})\n` +
-                                 `Nominal Bayar: Rp ${formatRupiah(data.cicilanPerBulan)}\n` +
-                                 `Sisa Tagihan: Rp ${formatRupiah(sisa)}\n\n` +
-                                 `Berikut saya lampirkan bukti transfer pembayarannya. Terima kasih.`;
+            let pesanWaLengkap = `Assalamu'alaikum Admin Zenith Cell.\n\nPermisi, saya ${data.nama} bermaksud mengonfirmasi pembayaran angsuran dengan rincian berikut:\n\nTagihan Bulan: ${namaBulan[targetBulan]} (Ke-${data.cicilanKe})\nNominal Bayar: Rp ${formatRupiah(data.cicilanPerBulan)}\nSisa Tagihan: Rp ${formatRupiah(sisa)}\n\nBerikut saya lampirkan bukti transfer pembayarannya. Terima kasih.`;
             document.getElementById('btnWA').href = `https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(pesanWaLengkap)}`;
 
-            const container = document.getElementById('resultContainer');
-            container.classList.remove('hidden');
-            void container.offsetWidth;
-            container.classList.remove('opacity-0', 'translate-y-4');
-            document.getElementById('resBar').style.width = `${persenLunas}%`;
+            const container = document.getElementById('resultContainer'); container.classList.remove('hidden'); void container.offsetWidth; container.classList.remove('opacity-0', 'translate-y-4'); document.getElementById('resBar').style.width = `${persenLunas}%`;
         }
 
-        // FITUR KLIK UNTUK COPY NOMOR REKENING (Dikembalikan 100%)
         async function salinRekening(nomor, bank) {
-            try {
-                const tempInput = document.createElement('input');
-                tempInput.value = nomor;
-                document.body.appendChild(tempInput);
-                tempInput.select();
-                document.execCommand('copy');
-                document.body.removeChild(tempInput);
-                showToast(`Nomor Rekening ${bank} berhasil disalin.`, 'success');
-            } catch (err) {
-                showToast("Gagal menyalin nomor rekening.", 'error');
-            }
+            try { const tempInput = document.createElement('input'); tempInput.value = nomor; document.body.appendChild(tempInput); tempInput.select(); document.execCommand('copy'); document.body.removeChild(tempInput); showToast(`Nomor Rekening ${bank} berhasil disalin.`, 'success'); } catch (err) { showToast("Gagal menyalin nomor rekening.", 'error'); }
         }
     </script>
 </body>
