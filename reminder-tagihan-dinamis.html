@@ -97,7 +97,6 @@
         
         let currentTab = 'antrean', allTagihanData = [], currentActiveData = null, dataTolakSementara = null, targetWaLink = "";
 
-        // TOAST ORIGINAL DIKEMBALIKAN 100%
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
             const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
@@ -245,85 +244,53 @@
 
         window.closeModalAcc = function() { document.getElementById('accModal').classList.add('opacity-0'); document.getElementById('accModalContent').classList.add('scale-95'); setTimeout(() => document.getElementById('accModal').classList.replace('flex', 'hidden'), 300); };
 
-        // TEKS ACC DAN TOAST ORIGINAL DIKEMBALIKAN 100%
         document.getElementById('btnKonfirmasiAcc').addEventListener('click', () => {
             const payload = { tipe: "ACC_PENGAJUAN", idKontrak: currentActiveData.idKontrak, wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: document.getElementById('accJatuhTempo').value, totalHutang: parseRupiah(document.getElementById('accTotalHutang').value), cicilanBulan: parseRupiah(document.getElementById('accCicilan').value) };
-            
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            
             const msg = `Assalamu'alaikum Kak ${payload.nama}.\n\nAlhamdulillah, pengajuan pembiayaan ${payload.barang} Kakak di Zenith Cell telah disetujui (ACC).\n\nUntuk memantau sisa tagihan dan jadwal pembayaran bulanan, silakan cek secara berkala melalui tautan berikut:\nhttps://zenith-cell.netlify.app/cek-tagihan-live\n\nTerima kasih atas kepercayaannya.`;
             window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent(msg)}`, '_blank');
-            
-            closeModalAcc(); 
-            showToast("Berhasil di-ACC & Migrasi Otomatis!"); 
-            setTimeout(fetchAntrean, 1500);
+            closeModalAcc(); showToast("Berhasil di-ACC!"); setTimeout(fetchAntrean, 1500);
         });
 
         window.bukaModalTolak = function(id, nama, wa, barang) {
-            dataTolakSementara = { id, nama, wa, barang };
-            document.getElementById('tolakNamaUser').innerText = nama;
-            const modal = document.getElementById('tolakModal');
-            modal.classList.replace('hidden', 'flex');
+            dataTolakSementara = { id, nama, wa, barang }; document.getElementById('tolakNamaUser').innerText = nama;
+            const modal = document.getElementById('tolakModal'); modal.classList.replace('hidden', 'flex');
             setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('tolakCard').classList.remove('scale-95'); }, 10);
         }
 
         window.closeTolakModal = function() {
-            const modal = document.getElementById('tolakModal');
-            modal.classList.add('opacity-0');
-            document.getElementById('tolakCard').classList.add('scale-95');
+            const modal = document.getElementById('tolakModal'); modal.classList.add('opacity-0'); document.getElementById('tolakCard').classList.add('scale-95');
             setTimeout(() => modal.classList.replace('flex', 'hidden'), 300);
         }
 
-        // TEKS TOLAK DAN TOAST ORIGINAL DIKEMBALIKAN 100%
         document.getElementById('btnConfirmTolak').addEventListener('click', () => {
             if (!dataTolakSementara) return;
             const { id, nama, wa, barang } = dataTolakSementara;
-            const btn = document.getElementById('btnConfirmTolak');
-            btn.disabled = true; btn.innerText = "Memproses...";
-
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", idKontrak: id }) });
-            
             const msg = `Assalamu'alaikum Kak ${nama}.\n\nTerima kasih telah mempercayakan pengajuan ${barang} di Zenith Cell.\n\nMohon maaf, setelah melalui proses verifikasi, untuk saat ini pengajuan Kakak belum dapat kami proses lebih lanjut.\n\nTerima kasih atas pengertiannya, semoga sehat selalu.`;
             window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}&text=${encodeURIComponent(msg)}`, '_blank');
-            
-            closeTolakModal();
-            showToast("Pengajuan ditolak secara aman", "error");
-            
-            setTimeout(() => { 
-                btn.disabled = false; btn.innerText = "Ya, Tolak"; 
-                fetchAntrean(); 
-            }, 1000);
+            closeTolakModal(); showToast("Pengajuan ditolak", "error"); setTimeout(fetchAntrean, 1000);
         });
 
-        // TEKS WA PENGINGAT TAGIHAN ORIGINAL DIKEMBALIKAN 100%
         window.bukaPesanWA = function(nama, wa, ke, nominal, tglLengkap, bulanTagihan, isTelat) {
             const rek = `BCA - 8161292087 (a.n. Ardita Rizki Fauzi)\nBRI - 638501004971500 (a.n. Vivi Nur Damayanti)\nSeaBank - 901556541299 (a.n. Ardita Rizki Fauzi)`;
-            
             let m = "";
             if(isTelat) {
                 m = `Assalamu'alaikum Kak ${nama}.\n\nPermisi Kak, dari Zenith Cell izin menginformasikan bahwa tagihan angsuran (Bulan Ke-${ke}) senilai Rp ${formatRupiah(nominal)} untuk bulan ${bulanTagihan} *telah melewati jatuh tempo* (Tgl ${tglLengkap}).\n\nMohon kerjasamanya untuk segera melakukan pelunasan angsuran melalui salah satu rekening berikut:\n\n${rek}\n\nJika sudah melakukan pembayaran, mohon abaikan pesan ini. Terima kasih.`;
-                document.getElementById('waHeaderTitle').innerHTML = `<i data-lucide="alert-circle" class="w-4 h-4 text-red-500"></i> Surat Peringatan WA`;
+                document.getElementById('waHeaderTitle').innerHTML = `<i data-lucide="alert-circle" class="w-5 h-5 text-red-500"></i> Surat Peringatan WA`;
                 document.getElementById('pesanWA').className = "w-full p-3 bg-red-50/50 border border-red-100 rounded-xl text-xs font-medium outline-none resize-none text-red-900";
             } else {
                 m = `Assalamu'alaikum Kak ${nama}.\n\nPermisi Kak, dari Zenith Cell izin menginformasikan bahwa tagihan angsuran (Bulan Ke-${ke}) senilai Rp ${formatRupiah(nominal)} untuk bulan ${bulanTagihan} akan jatuh tempo pada tanggal ${tglLengkap}.\n\nPembayaran dapat dilakukan melalui salah satu rekening berikut:\n\n${rek}\n\nTerima kasih atas kerja samanya.`;
-                document.getElementById('waHeaderTitle').innerHTML = `<i data-lucide="send" class="w-4 h-4 text-emerald-500"></i> Pesan Tagihan`;
+                document.getElementById('waHeaderTitle').innerHTML = `<i data-lucide="send" class="w-5 h-5 text-emerald-500"></i> Pesan Tagihan`;
                 document.getElementById('pesanWA').className = "w-full p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl text-xs font-medium outline-none resize-none";
             }
-            
-            document.getElementById('pesanWA').value = m;
-            targetWaLink = `https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}`;
-            
-            document.getElementById('waModal').classList.replace('hidden', 'flex');
-            lucide.createIcons();
+            document.getElementById('pesanWA').value = m; targetWaLink = `https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}`;
+            document.getElementById('waModal').classList.replace('hidden', 'flex'); lucide.createIcons();
             setTimeout(() => { document.getElementById('waModal').classList.remove('opacity-0'); document.querySelector('#waModal > div').classList.remove('scale-95'); }, 10);
         }
         
         window.closeWaModal = function() { document.getElementById('waModal').classList.add('opacity-0'); document.querySelector('#waModal > div').classList.add('scale-95'); setTimeout(() => document.getElementById('waModal').classList.replace('flex', 'hidden'), 300); };
-
-        document.getElementById('btnKirimWA').addEventListener('click', () => {
-            window.open(`${targetWaLink}&text=${encodeURIComponent(document.getElementById('pesanWA').value)}`, '_blank');
-            closeWaModal();
-        });
+        document.getElementById('btnKirimWA').addEventListener('click', () => { window.open(`${targetWaLink}&text=${encodeURIComponent(document.getElementById('pesanWA').value)}`, '_blank'); closeWaModal(); });
 
         refreshData();
     </script>
