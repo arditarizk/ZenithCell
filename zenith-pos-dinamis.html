@@ -8,10 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="config.js"></script>
     <script>
-        // FITUR KEAMANAN PROFESIONAL: Blokir akses langsung via URL (Pintu Belakang)
         const KASIR_AKTIF = localStorage.getItem('kasirZenithAktif');
         if (!KASIR_AKTIF) { window.location.replace('index.html'); }
     </script>
@@ -22,6 +20,7 @@
         .spinner { border: 3px solid rgba(16, 185, 129, 0.3); border-top: 3px solid #10b981; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* TAMPILAN DI LAYAR HP/PC */
         .receipt-paper { background: #ffffff; color: #000000; font-family: 'Courier New', Courier, monospace; width: 100%; max-width: 340px; margin: 0 auto; padding: 30px 20px; position: relative; }
         .is-whatsapp .brand-color { color: #10b981 !important; }
         .is-whatsapp .brand-bg { background-color: #f0fdf4 !important; border: 1px solid #dcfce7 !important; border-radius: 8px; }
@@ -34,18 +33,55 @@
         .solid-line { border-top: 3px solid #000000; margin: 15px 0; }
         .flex-between { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
 
+        /* ======================================================== */
+        /* FIX CETAK STRUK KHUSUS UKURAN 48MM AGAR TIDAK TERPOTONG */
+        /* ======================================================== */
         @media print {
-            @page { size: 58mm auto; margin: 0; }
-            body { background: white; margin: 0; padding: 0; min-height: 0; }
-            body > * { display: none !important; }
-            main { display: block !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; border: none !important; background: transparent !important; }
-            #leftSection { display: none !important; }
-            #previewPanel { display: block !important; width: 58mm !important; padding: 0 !important; margin: 0 !important; background: white !important; }
-            #previewContainer { display: block !important; opacity: 1 !important; visibility: visible !important; transform: none !important; }
-            #strukWrapper { width: 58mm !important; margin: 0 !important; padding: 0 !important; }
-            .receipt-paper { width: 58mm !important; max-width: 58mm !important; padding: 2mm !important; margin: 0 !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; font-size: 11px !important; }
-            .receipt-paper * { color: black !important; }
-            #actionButtons, #btnProsesContainer { display: none !important; }
+            @page { size: 48mm auto; margin: 0; }
+            body { background: white; margin: 0; padding: 0; min-height: 0; width: 48mm; }
+            
+            /* Sembunyikan Elemen yang Tidak Perlu Dicetak */
+            header, #leftSection, #actionButtons, #btnProsesContainer, #toastContainer { display: none !important; }
+            
+            main { display: block !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; border: none !important; background: transparent !important; width: 48mm !important; }
+            #previewPanel { display: block !important; width: 48mm !important; padding: 0 !important; margin: 0 !important; background: white !important; }
+            #previewContainer { display: block !important; opacity: 1 !important; visibility: visible !important; transform: none !important; width: 100% !important; }
+            #strukWrapper { width: 48mm !important; max-width: 48mm !important; margin: 0 !important; padding: 0 !important; }
+            
+            .receipt-paper { 
+                width: 46mm !important; /* Disisakan 2mm agar margin printer aman */
+                max-width: 46mm !important; 
+                padding: 0 1mm !important; 
+                margin: 0 auto !important; 
+                border: none !important; 
+                box-shadow: none !important; 
+                border-radius: 0 !important; 
+                background: white !important;
+            }
+            
+            .receipt-paper * { color: black !important; line-height: 1.3 !important; font-family: 'Courier New', Courier, monospace !important; }
+            
+            /* SKALA UKURAN HURUF KHUSUS KERTAS 48MM */
+            .text-[32px] { font-size: 16px !important; letter-spacing: -0.5px !important; margin-bottom: 2px !important;} /* Judul Zenith Cell */
+            .text-[26px] { font-size: 12px !important; } /* Total Harga */
+            .text-sm { font-size: 8px !important; }
+            .text-xs { font-size: 7.5px !important; }
+            .text-[11px] { font-size: 7px !important; }
+            .text-[10px] { font-size: 7px !important; }
+            .text-[9px] { font-size: 6.5px !important; }
+            .text-[8px] { font-size: 6px !important; }
+            
+            /* Menyesuaikan Kolom Kiri-Kanan Agar Tidak Mendorong Keluar */
+            .flex-between { display: flex; justify-content: space-between; align-items: flex-start; gap: 2px !important; width: 100% !important; margin-bottom: 2px !important; }
+            .flex-between span:first-child { max-width: 45%; word-wrap: break-word; }
+            .flex-between span:last-child { max-width: 55%; text-align: right; word-wrap: break-word; }
+            
+            /* Menyesuaikan Garis Pembatas */
+            .dashed-line { border-top: 1px dashed #000 !important; margin: 4px 0 !important; }
+            .solid-line { border-top: 1px solid #000 !important; margin: 4px 0 !important; }
+            .brand-bg { background: transparent !important; border: 1px solid #000 !important; padding: 2px !important; margin: 4px 0 !important; }
+            .my-4 { margin-top: 4px !important; margin-bottom: 4px !important; }
+            .mb-4 { margin-bottom: 4px !important; }
         }
     </style>
 </head>
@@ -62,7 +98,7 @@
                     <div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shrink-0"><i data-lucide="smartphone-charging" class="w-6 h-6 text-emerald-400"></i></div>
                     <div><h1 class="font-black text-xl leading-none">Kasir POS</h1><p class="text-[10px] font-bold text-emerald-600 uppercase" id="labelNamaKasir">Input & Pelunasan</p></div>
                 </div>
-                <button onclick="logoutKasir()" class="p-2.5 bg-red-50 rounded-xl text-red-600 active:scale-95 transition-all shadow-sm flex items-center gap-1" title="Keluar dari sesi Kasir">
+                <button onclick="logoutKasir()" class="p-2.5 bg-red-50 rounded-xl text-red-600 active:scale-95 transition-all shadow-sm flex items-center gap-1" title="Keluar">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
                 </button>
             </header>
@@ -124,11 +160,13 @@
                             <p class="text-[10px] font-bold uppercase mb-2">Kota Malang - Jawa Timur</p>
                             <p class="text-[9px] font-bold opacity-70" id="previewNamaKasir">Admin: Pusat</p>
                         </div>
-                        <div class="dashed-line"></div><div id="isiStruk"></div><div class="dashed-line"></div>
+                        <div class="dashed-line"></div>
+                        <div id="isiStruk"></div>
+                        <div class="dashed-line"></div>
                         <div class="text-center mt-2">
                             <p class="text-sm font-black uppercase tracking-widest brand-color">Terima Kasih!</p>
                             <div class="my-4 brand-bg py-2 px-3"><p class="text-[10px] font-black uppercase brand-color italic">Layanan Gadget Syariah</p></div>
-                            <p class="text-[8px] font-bold leading-relaxed opacity-60 uppercase">Barang yang sudah dibeli tidak dapat ditukar/dikembalikan. Simpan struk ini sebagai bukti sah.</p>
+                            <p class="text-[8px] font-bold leading-relaxed opacity-60 uppercase">Barang yang dibeli tidak dapat ditukar/dikembalikan. Simpan struk ini sebagai bukti sah.</p>
                         </div>
                     </div>
                 </div>
@@ -148,7 +186,6 @@
     <script>
         lucide.createIcons();
         
-        // LOGOUT FUNCTION
         function logoutKasir() {
             localStorage.removeItem('kasirZenithAktif');
             window.location.replace('index.html');
@@ -243,20 +280,21 @@
             const tBayar = nominalVal + dendaVal;
 
             let strukDiskonHtml = isLunas ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-emerald-600">Diskon Ibra':</span><span class="text-[10px] font-black text-right uppercase text-emerald-600">- Rp ${formatRp(window.currentDiskon)}</span></div>` : '';
-            let strukDendaHtml = dendaVal > 0 ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-red-600">Denda / Dana Kebajikan:</span><span class="text-[10px] font-black text-right uppercase text-red-600">+ Rp ${formatRp(dendaVal)}</span></div>` : '';
+            let strukDendaHtml = dendaVal > 0 ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-red-600">Denda/Amal:</span><span class="text-[10px] font-black text-right uppercase text-red-600">+ Rp ${formatRp(dendaVal)}</span></div>` : '';
 
+            // Layout struk lebih rapi untuk lebar sempit
             document.getElementById('isiStruk').innerHTML = `
                 <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold">Tgl/Waktu:</span><span class="text-[10px] font-bold text-right">${new Date().toLocaleString('id-ID')}</span></div>
                 <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-slate-400">No. Transaksi:</span><span class="text-[10px] font-black text-right brand-color">${window.tempIdTransaksi}</span></div>
                 <div class="flex-between mb-4"><span class="text-[10px] uppercase font-bold text-slate-400">No. Kontrak:</span><span class="text-[10px] font-black text-right">${data.idKontrak}</span></div>
                 
                 <div class="flex-between mb-1"><span class="text-xs font-black uppercase">Pelanggan:</span><span class="text-xs font-black text-right uppercase brand-color">${data.nama}</span></div>
-                <div class="flex-between mb-4"><span class="text-xs font-black uppercase">Unit/Barang:</span><span class="text-xs font-black text-right uppercase">${data.barang || '-'}</span></div>
+                <div class="flex-between mb-4"><span class="text-xs font-black uppercase">Barang:</span><span class="text-xs font-black text-right uppercase">${data.barang || '-'}</span></div>
                 
-                <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold">Keterangan:</span><span class="text-[10px] font-black text-right uppercase">${isLunas ? 'Pelunasan Muroqoshoh' : 'Angsuran Ke-' + cicilanEl.value}</span></div>
+                <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold">Keterangan:</span><span class="text-[10px] font-black text-right uppercase">${isLunas ? 'Pelunasan Full' : 'Angsuran Ke-' + cicilanEl.value}</span></div>
                 
                 <div class="solid-line"></div>
-                <div class="flex-between mb-1 items-center"><span class="text-[11px] font-black uppercase">Angsuran Pokok:</span><span class="text-sm font-black">Rp ${formatRp(nominalVal)}</span></div>
+                <div class="flex-between mb-1 items-center"><span class="text-[11px] font-black uppercase">Angsuran:</span><span class="text-sm font-black">Rp ${formatRp(nominalVal)}</span></div>
                 ${strukDiskonHtml}
                 ${strukDendaHtml}
                 <div class="dashed-line"></div>
@@ -264,7 +302,7 @@
                 <div class="flex-between my-2 items-center"><span class="text-base font-black brand-color uppercase">Total Kas:</span><span class="text-[26px] font-black brand-color tracking-tighter">Rp ${formatRp(tBayar)}</span></div>
                 <div class="solid-line"></div>
                 
-                <div class="flex-between mt-3"><span class="text-[10px] uppercase font-bold">Sisa Hutang Pokok:</span><span class="text-sm font-black text-right uppercase">Rp ${formatRp(sisaBaru)}</span></div>`;
+                <div class="flex-between mt-3"><span class="text-[10px] uppercase font-bold">Sisa Utang:</span><span class="text-sm font-black text-right uppercase">Rp ${formatRp(sisaBaru)}</span></div>`;
             return { data, cicilan: cicilanEl.value, nominalVal, dendaVal, totalBayarPlusDenda: tBayar, sisaBaru, isLunas, idTransaksi: window.tempIdTransaksi };
         };
 
@@ -339,6 +377,7 @@
             }, 200);
         }
 
+        // FUNGSI CETAK UNTUK RAWBT / PRINTER THERMAL
         function cetakStrukTajam() {
             if (!currentSavedData) return showToast("Data transaksi belum ada!", "error");
             const p = currentSavedData;
@@ -349,13 +388,13 @@
                 const ketCicilan = p.isLunas ? 'Pelunasan Full' : 'Angsuran Ke-' + p.cicilan;
                 const barang = p.data.barang ? p.data.barang : '-';
 
-                let struk = "        ZENITH CELL         \n Gadget Syariah Kota Malang \n--------------------------------\n";
-                struk += "Tgl     : " + tgl + "\nNo.Trans: " + p.idTransaksi + "\nKasir   : " + KASIR_AKTIF + "\n--------------------------------\n";
-                struk += "No.Kntrk: " + p.data.idKontrak + "\nCustomer: " + p.data.nama.toUpperCase() + "\nUnit    : " + barang.toUpperCase() + "\nKet     : " + ketCicilan + "\n--------------------------------\n";
-                struk += "Angsuran: Rp " + formatRp(p.nominalVal) + "\n";
-                if(p.dendaVal > 0) struk += "Denda   : Rp " + formatRp(p.dendaVal) + "\n";
-                if(p.isLunas) struk += "Diskon  : Rp " + formatRp(window.currentDiskon) + "\n";
-                struk += "--------------------------------\nTOTAL   : Rp " + formatRp(p.totalBayarPlusDenda) + "\nSisa Utg: Rp " + formatRp(p.sisaBaru) + "\n--------------------------------\n     Alhamdulillah Sah!     \n Terima kasih, moga berkah! \n\n\n\n"; 
+                let struk = "      ZENITH CELL       \n  Gadget Syariah Malang \n------------------------\n";
+                struk += "Tgl  : " + tgl + "\nTrans: " + p.idTransaksi + "\nKasir: " + KASIR_AKTIF + "\n------------------------\n";
+                struk += "Kntrk: " + p.data.idKontrak + "\nNama : " + p.data.nama.toUpperCase() + "\nUnit : " + barang.toUpperCase() + "\nKet  : " + ketCicilan + "\n------------------------\n";
+                struk += "Angsr: Rp " + formatRp(p.nominalVal) + "\n";
+                if(p.dendaVal > 0) struk += "Denda: Rp " + formatRp(p.dendaVal) + "\n";
+                if(p.isLunas) struk += "Diskn: Rp " + formatRp(window.currentDiskon) + "\n";
+                struk += "------------------------\nTOTAL: Rp " + formatRp(p.totalBayarPlusDenda) + "\nSisa : Rp " + formatRp(p.sisaBaru) + "\n------------------------\n   Alhamdulillah Sah!   \n Terima kasih, berkah! \n\n\n\n"; 
 
                 window.location.href = "intent:" + encodeURIComponent(struk) + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
             } else {
