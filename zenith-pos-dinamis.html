@@ -49,12 +49,10 @@
             <form id="posForm" class="space-y-6 flex-grow">
                 <div>
                     <label class="block text-[11px] font-extrabold text-slate-400 mb-2 uppercase tracking-widest px-1">1. Pilih Pelanggan Aktif</label>
-                    
                     <div class="relative mb-3">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i></div>
                         <input type="text" id="searchCustomer" oninput="filterCustomer()" placeholder="Cari nama pelanggan..." class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all shadow-sm">
                     </div>
-
                     <div id="customerGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 lg:max-h-64 overflow-y-auto no-scrollbar p-1"></div>
                 </div>
 
@@ -132,12 +130,13 @@
         lucide.createIcons();
         let dbCustomers = [], isSaved = false, currentSavedData = null; window.currentDiskon = 0;
         
+        // FITUR BARU: ID ALFANUMERIK (ZC)
         function buatIdTransaksi(kodeTipe) {
             const now = new Date(); const yy = String(now.getFullYear()).slice(-2);
             const mm = String(now.getMonth() + 1).padStart(2, '0'); const dd = String(now.getDate()).padStart(2, '0');
             const hh = String(now.getHours()).padStart(2, '0'); const mins = String(now.getMinutes()).padStart(2, '0');
             const random = Math.floor(Math.random() * 90 + 10);
-            return `${kodeTipe}${yy}${mm}${dd}${hh}${mins}${random}`;
+            return `ZC${kodeTipe}-${yy}${mm}${dd}-${hh}${mins}-${random}`;
         }
         const formatRp = (n) => new Intl.NumberFormat('id-ID').format(n);
         const parseRp = (s) => parseInt(s.toString().replace(/[^0-9]/g, '')) || 0;
@@ -150,7 +149,6 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-        // FUNGSI RENDER & PENCARIAN PELANGGAN
         function renderCustomerGrid(dataList) {
             const grid = document.getElementById('customerGrid');
             grid.innerHTML = '';
@@ -268,7 +266,7 @@
                 catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru) 
             };
             
-            // FIRE AND FORGET (Kirim background, biarkan browser lanjut tanpa peduli respons/redirect)
+            // FIRE AND FORGET (Kirim background, biarkan browser lanjut tanpa peduli respons)
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
             
             // MUNCULKAN STRUK HANYA DALAM 0.3 DETIK (SAT-SET)
