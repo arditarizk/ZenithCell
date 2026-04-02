@@ -77,7 +77,6 @@
                             <span class="absolute left-3 text-red-500 font-bold text-sm">Rp</span>
                             <input type="text" id="denda" inputmode="numeric" placeholder="0" class="w-full pl-9 pr-3 py-3 bg-white border border-red-200 rounded-xl text-red-700 font-bold text-sm outline-none focus:border-red-500 transition-all">
                         </div>
-                        <p class="text-[8px] font-bold text-red-500/80 leading-tight">*Catatan: Uang denda ini tidak diakui sebagai keuntungan Zenith Cell, melainkan disalurkan untuk kepentingan sosial.</p>
                     </div>
                 </div>
             </form>
@@ -103,7 +102,6 @@
                         <div class="text-center mt-2">
                             <p class="text-sm font-black uppercase tracking-widest brand-color">Terima Kasih!</p>
                             <div class="my-4 brand-bg py-2 px-3"><p class="text-[10px] font-black uppercase brand-color italic">Layanan Gadget Syariah</p></div>
-                            <p class="text-[8px] font-bold leading-relaxed opacity-60 uppercase">Barang yang sudah dibeli tidak dapat ditukar/dikembalikan. Simpan struk ini sebagai bukti sah.</p>
                         </div>
                     </div>
                 </div>
@@ -130,13 +128,13 @@
         lucide.createIcons();
         let dbCustomers = [], isSaved = false, currentSavedData = null; window.currentDiskon = 0;
         
-        // FITUR BARU: ID ALFANUMERIK (ZC)
-        function buatIdTransaksi(kodeTipe) {
+        // PENGGUNAAN KODE TRANSAKSI BARU: TRX
+        function buatIdTransaksi() {
             const now = new Date(); const yy = String(now.getFullYear()).slice(-2);
             const mm = String(now.getMonth() + 1).padStart(2, '0'); const dd = String(now.getDate()).padStart(2, '0');
             const hh = String(now.getHours()).padStart(2, '0'); const mins = String(now.getMinutes()).padStart(2, '0');
             const random = Math.floor(Math.random() * 90 + 10);
-            return `ZC${kodeTipe}-${yy}${mm}${dd}-${hh}${mins}-${random}`;
+            return `TRX-${yy}${mm}${dd}-${hh}${mins}-${random}`;
         }
         const formatRp = (n) => new Intl.NumberFormat('id-ID').format(n);
         const parseRp = (s) => parseInt(s.toString().replace(/[^0-9]/g, '')) || 0;
@@ -188,8 +186,12 @@
             
             document.getElementById('nominal').value = formatRp(c.cicilanPerBulan);
             document.getElementById('denda').value = "";
-            document.getElementById('btnProsesContainer').classList.remove('hidden');
-            document.getElementById('btnProsesContainerMobile').classList.remove('hidden');
+            
+            // Tampilkan kembali tombol Container (menggunakan style.display agar tidak kalah sama Tailwind lg:block)
+            document.getElementById('btnProsesContainer').style.display = 'block';
+            if(document.getElementById('btnProsesContainerMobile')) {
+                document.getElementById('btnProsesContainerMobile').style.display = 'block';
+            }
             
             document.getElementById('cicilanGrid').innerHTML = `
                 <label class="flex-1"><input type="radio" name="cicilan" value="${c.cicilanKe}" class="peer sr-only" checked onchange="document.getElementById('nominal').value='${formatRp(c.cicilanPerBulan)}'; renderPreview()"><div class="px-5 py-3 rounded-xl bg-white border-2 border-slate-200 peer-checked:bg-slate-900 peer-checked:text-white text-slate-600 font-black text-xs text-center transition-all flex flex-col items-center"><span>Bulan Ke-${c.cicilanKe}</span><span class="text-[8px] font-bold opacity-70 mt-0.5">Bulanan</span></div></label>
@@ -206,7 +208,9 @@
             
             const data = dbCustomers.find(c => c.idKontrak === custRadio.value);
             let isLunas = cicilanEl.value === 'Pelunasan';
-            if (!window.tempIdTransaksi || window.isLunasTemp !== isLunas) { window.tempIdTransaksi = buatIdTransaksi(isLunas ? 3 : 2); window.isLunasTemp = isLunas; }
+            
+            // GENERATE ID TRANSAKSI
+            if (!window.tempIdTransaksi || window.isLunasTemp !== isLunas) { window.tempIdTransaksi = buatIdTransaksi(); window.isLunasTemp = isLunas; }
             
             let sisaHutangAsli = data.hutang - data.terbayar;
             let sisaBaru = Math.max(0, isLunas ? 0 : sisaHutangAsli - nominalVal);
@@ -240,7 +244,7 @@
 
         ['nominal', 'denda'].forEach(id => document.getElementById(id).addEventListener('input', (e) => { if(isSaved) return; e.target.value = formatRp(parseRp(e.target.value)); renderPreview(); }));
 
-        // OPTIMISTIC UI: SAT SET TANPA AWAIT FETCH (Anti Lemot)
+        // OPTIMISTIC UI: SAT-SET & FORCED DISPLAY NONE
         const eksekusiSimpan = (e) => {
             if(e) e.preventDefault();
             const p = renderPreview(); 
@@ -266,10 +270,9 @@
                 catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru) 
             };
             
-            // FIRE AND FORGET (Kirim background, biarkan browser lanjut tanpa peduli respons)
+            // FIRE AND FORGET (Langsung tembak)
             fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
             
-            // MUNCULKAN STRUK HANYA DALAM 0.3 DETIK (SAT-SET)
             setTimeout(() => {
                 isSaved = true; 
                 currentSavedData = p;
@@ -277,9 +280,17 @@
                 document.getElementById('nominal').disabled = true; 
                 document.getElementById('denda').disabled = true;
                 document.getElementById('formSection').style.opacity = '0.3';
-                document.getElementById('btnProsesContainer').classList.add('hidden'); 
-                if(document.getElementById('btnProsesContainerMobile')) document.getElementById('btnProsesContainerMobile').classList.add('hidden');
-                document.getElementById('actionButtons').classList.replace('hidden', 'flex');
+                
+                // MENGGUNAKAN STYLE DISPLAY NONE SECARA PAKSA AGAR TIDAK KALAH SAMA CSS TAILWIND (lg:block)
+                document.getElementById('btnProsesContainer').style.display = 'none';
+                if(document.getElementById('btnProsesContainerMobile')) {
+                    document.getElementById('btnProsesContainerMobile').style.display = 'none';
+                }
+
+                // Tampilkan Navigasi Struk & WA (Menggunakan class flex)
+                const actionBtns = document.getElementById('actionButtons');
+                actionBtns.classList.remove('hidden');
+                actionBtns.classList.add('flex');
                 
                 showToast(p.isLunas ? "LUNAS! Riwayat telah dicatat." : "Berhasil Disimpan!", "success");
                 
@@ -288,7 +299,7 @@
         };
 
         document.getElementById('btnProses').addEventListener('click', eksekusiSimpan);
-        document.getElementById('btnProsesMobile').addEventListener('click', eksekusiSimpan);
+        if(document.getElementById('btnProsesMobile')) document.getElementById('btnProsesMobile').addEventListener('click', eksekusiSimpan);
 
         async function captureAndShare(mode) {
             if(!currentSavedData) return;
@@ -313,13 +324,10 @@
                             const a = document.createElement('a'); a.download = fileName; a.href = URL.createObjectURL(blob); a.click();
                         }
                     }, "image/png");
-                } catch(e) {
-                    showToast("Gagal memproses struk.", "error");
-                }
+                } catch(e) { showToast("Gagal memproses struk.", "error"); }
             }, 200);
         }
 
-        // FORMAT RAWBT DIKEMBALIKAN 100% PERSIS DENGAN ORIGINALNYA
         function cetakStrukTajam() {
             if (!currentSavedData) return showToast("Data transaksi belum ada!", "error");
             const p = currentSavedData;
