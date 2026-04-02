@@ -116,9 +116,10 @@
         lucide.createIcons(); 
         let promoMarginAktif = null;
         
-        function buatIdTransaksi(kode) { 
+        // KODE KONTRAK BARU: ZCK
+        function buatIdKontrak() { 
             const d=new Date(); 
-            return `ZC${kode}-${String(d.getFullYear()).slice(-2)}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}-${Math.floor(Math.random()*90+10)}`; 
+            return `ZCK-${String(d.getFullYear()).slice(-2)}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}-${Math.floor(Math.random()*90+10)}`; 
         }
 
         function showToast(m, t='error') { 
@@ -173,7 +174,6 @@
         document.getElementById('nik').addEventListener('input', function() { this.value = this.value.replace(/[^0-9]/g, '').substring(0, 16); });
         document.getElementById('wa').addEventListener('input', function() { let v = this.value.replace(/[^0-9]/g, ''); if(v.startsWith('62')) v='0'+v.substring(2); this.value=v.substring(0,15); });
 
-        // PERBAIKAN: DIRECT KE WHATSAPP (FIRE AND FORGET)
         document.getElementById('pengajuanForm').addEventListener('submit', (e) => {
             e.preventDefault(); 
             const n = document.getElementById('nik').value; 
@@ -202,20 +202,17 @@
                 margin: promoMarginAktif || (document.getElementById('pilihJalur').value==="VIP"?15:25) 
             };
             
-            const id = buatIdTransaksi(1);
+            const id = buatIdKontrak();
             
-            // 1. Tembak data ke Google Sheets (Bypass loading/error)
             fetch(CONFIG.API_URL, { 
                 method: 'POST', 
                 mode: 'no-cors', 
                 body: JSON.stringify({ tipe: "PENGAJUAN_BARU", idKontrak: id, timestamp: new Date().toLocaleString('id-ID'), ...data }) 
             });
 
-            // 2. Langsung Buka WhatsApp tanpa menunggu
             const waMsg = `Assalamu'alaikum Admin Zenith Cell.\n\nPermisi, saya bermaksud mengajukan pembiayaan dengan rincian sebagai berikut:\n\nID Pengajuan: ${id}\nNama: ${data.nama}\nBarang: ${data.barang}\nHarga Pokok: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor} Bulan\nJatuh Tempo: Tgl ${data.jatuhTempo}\nSkema: ${data.margin}% (${data.jaminan})\n\nBerikut saya lampirkan foto KTP dan jaminan fisik (jika ada).\nMohon arahannya untuk proses verifikasi lebih lanjut. Terima kasih.`;
             window.open(`https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(waMsg)}`, '_blank');
             
-            // 3. Tampilkan Modal Sukses
             document.getElementById('instruksiModal').classList.replace('hidden', 'flex'); 
             setTimeout(()=>document.getElementById('instruksiModal').classList.remove('opacity-0'), 10);
         });
