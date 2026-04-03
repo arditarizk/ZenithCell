@@ -1,201 +1,94 @@
 <!DOCTYPE html>
-<html lang="id" class="antialiased">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Server Admin - Reminder Zenith</title>
-    <link rel="icon" type="image/png" href="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/6f184ccb-599f-4527-b31f-f416b7dc6b8d.png">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="config.js"></script>
-    <script>
-        const KASIR_AKTIF = localStorage.getItem('kasirZenithAktif');
-        if (!KASIR_AKTIF) { window.location.replace('index.html'); }
-    </script>
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
-        .glass-card { background: #ffffff; border: 1px solid #f1f5f9; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.05); }
-        .spinner { border: 3px solid rgba(16, 185, 129, 0.3); border-top: 3px solid #10b981; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }</style>
 </head>
-<body class="text-slate-800 lg:p-8 min-h-screen flex flex-col items-center selection:bg-emerald-200">
-
-    <main class="w-full max-w-md lg:max-w-3xl mx-auto bg-white lg:glass-card lg:rounded-[2.5rem] lg:shadow-2xl relative z-10 flex flex-col min-h-screen lg:min-h-0 pb-10 lg:pb-6">
+<body class="p-5 lg:p-10 flex flex-col items-center">
+    <main class="w-full max-w-md bg-white rounded-3xl p-6 shadow-xl border border-slate-100">
         
-        <header class="px-6 pt-8 pb-5 flex items-center justify-between border-b border-slate-100 bg-white lg:rounded-t-[2.5rem] shrink-0">
-            <a href="index.html" class="p-2.5 bg-slate-50 border border-slate-100 rounded-full text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 active:scale-95 transition-all">
-                <i data-lucide="arrow-left" class="w-5 h-5"></i>
-            </a>
+        <header class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+            <a href="index.html" class="p-2 bg-slate-50 rounded-full text-slate-500"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
             <div class="text-right">
-                <h1 class="font-black text-xl text-slate-900 leading-none">Server Reminder</h1>
-                <p class="text-[10px] font-bold text-red-500 uppercase mt-1.5 tracking-widest flex items-center justify-end gap-1"><i data-lucide="bell-ring" class="w-3 h-3"></i> Otoritas Admin</p>
+                <h1 class="font-black text-xl text-slate-900">Reminder Tagihan</h1>
+                <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest">Otomatisasi WA</p>
             </div>
         </header>
 
-        <div class="p-6 flex-grow flex flex-col">
-            <div class="flex justify-between items-center mb-6">
-                <p class="text-xs font-bold text-slate-500">Otomatisasi WA Tagihan</p>
-                <button onclick="fetchDataTagihan()" class="p-2.5 bg-emerald-50 rounded-xl text-emerald-600 active:scale-95 transition-all flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest">
-                    <i data-lucide="refresh-cw" class="w-4 h-4"></i> Sinkronisasi
-                </button>
-            </div>
-
-            <div class="flex gap-2 mb-6 bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
-                <button onclick="setFilter('TELAT')" id="btnFilterTelat" class="flex-1 py-2.5 rounded-xl font-bold text-xs bg-red-500 text-white shadow-sm transition-all">Tunggakan</button>
-                <button onclick="setFilter('WARNING')" id="btnFilterWarning" class="flex-1 py-2.5 rounded-xl font-bold text-xs text-slate-500 hover:bg-white transition-all">H-3 Tempo</button>
-            </div>
-
-            <div id="loadingState" class="hidden flex-col items-center justify-center py-10">
-                <div class="spinner mb-3"></div>
-                <p class="text-xs font-bold text-slate-400">Menarik data dari server...</p>
-            </div>
-
-            <div id="emptyState" class="hidden flex-col items-center justify-center py-10 text-center">
-                <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-3"><i data-lucide="check-circle" class="w-8 h-8 text-emerald-500"></i></div>
-                <h3 class="font-black text-slate-800 mb-1">Alhamdulillah Bersih!</h3>
-                <p class="text-xs font-medium text-slate-500">Tidak ada nasabah dalam daftar ini.</p>
-            </div>
-
-            <div id="listContainer" class="space-y-3">
-                </div>
+        <div class="flex gap-2 mb-6">
+            <button onclick="setFilter('TELAT')" id="btnFilterTelat" class="flex-1 py-3 rounded-xl font-bold text-xs bg-red-500 text-white transition-all">Tunggakan</button>
+            <button onclick="setFilter('WARNING')" id="btnFilterWarning" class="flex-1 py-3 rounded-xl font-bold text-xs bg-slate-100 text-slate-500 transition-all">H-3 Tempo</button>
         </div>
+
+        <div id="loadingState" class="text-center py-10 font-bold text-slate-400 text-sm">Menarik data dari Google Sheets...</div>
+
+        <div id="listContainer" class="space-y-3"></div>
+
     </main>
 
     <script>
         lucide.createIcons();
         const formatRp = (n) => new Intl.NumberFormat('id-ID').format(n);
-        
         let allCustomers = [];
-        let activeFilter = 'TELAT'; // TELAT atau WARNING
+        let activeFilter = 'TELAT'; 
 
         async function fetchDataTagihan() {
-            const listContainer = document.getElementById('listContainer');
-            const loading = document.getElementById('loadingState');
-            const empty = document.getElementById('emptyState');
-            
-            listContainer.innerHTML = '';
-            empty.classList.add('hidden');
-            loading.classList.remove('hidden');
-            loading.classList.add('flex');
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('listContainer').innerHTML = '';
 
             try {
                 const res = await fetch(CONFIG.API_URL + "?action=getAll&nocache=" + Date.now());
                 const result = await res.json();
                 
-                // Ambil semua data pelanggan yang BELUM LUNAS
+                // Ambil data pelanggan yang belum lunas
                 allCustomers = (result.data || []).filter(c => c.nama && (c.hutang - c.terbayar) > 0);
-                
-                prosesLogikaTanggal();
+                renderList();
             } catch(e) {
-                loading.classList.replace('flex', 'hidden');
-                listContainer.innerHTML = `<div class="p-4 bg-red-50 text-red-500 text-xs font-bold rounded-2xl text-center border border-red-100">Gagal terhubung ke Server Google Sheets.</div>`;
+                document.getElementById('loadingState').innerText = "Gagal terhubung ke Server.";
             }
-        }
-
-        function prosesLogikaTanggal() {
-            // INI ADALAH "OTAK BARU" YANG SINKRON DENGAN CEK TAGIHAN
-            const dateSekarang = new Date();
-            const tglSkrg = dateSekarang.getDate();
-            const blnSkrg = dateSekarang.getMonth() + 1;
-            const thnSkrg = dateSekarang.getFullYear();
-
-            // Memisahkan kategori
-            let listTelat = [];
-            let listWarning = [];
-
-            allCustomers.forEach(c => {
-                let angkaTgl = parseInt(c.jatuhTempo);
-                let targetBln = blnSkrg;
-                let targetTahunInt = thnSkrg;
-                let bulanTerakhirDB = parseInt(c.bulanTerakhirBayar) || 0;
-
-                // Penentuan Bulan Target Pembayaran Berikutnya
-                if (bulanTerakhirDB !== 0) {
-                    targetBln = bulanTerakhirDB + 1; 
-                } else {
-                    if (c.cicilanKe == 1 && tglSkrg > angkaTgl) { targetBln = blnSkrg + 1; }
-                }
-                
-                if (targetBln > 12) { 
-                    targetBln -= 12; 
-                    targetTahunInt++; 
-                }
-
-                // Kalkulasi Selisih Waktu Presisi
-                let dateHariIniValid = new Date(dateSekarang.getFullYear(), blnSkrg - 1, tglSkrg);
-                let dateJatuhTempoValid = new Date(targetTahunInt, targetBulanInt - 1, angkaTgl);
-                
-                let selisihWaktu = dateHariIniValid.getTime() - dateJatuhTempoValid.getTime();
-                let selisihHari = Math.floor(selisihWaktu / (1000 * 3600 * 24));
-
-                let cicilanPerBln = parseInt(c.cicilanPerBulan) || Math.round(parseInt(c.hutang)/6); 
-
-                // MENGKLASIFIKASIKAN NASABAH
-                if (selisihHari > 0) {
-                    // Masuk daftar TELAT (Diva Maulana TIDAK akan masuk sini jika belum lewat bulannya)
-                    c.keteranganStatus = `Telat ${selisihHari} Hari`;
-                    c.nominalKirim = cicilanPerBln;
-                    listTelat.push(c);
-                } else if (selisihHari >= -3 && selisihHari <= 0) {
-                    // Masuk daftar WARNING (H-3 sampai Hari H)
-                    c.keteranganStatus = selisihHari === 0 ? "Jatuh Tempo Hari Ini" : `H${selisihHari} Tempo`;
-                    c.nominalKirim = cicilanPerBln;
-                    listWarning.push(c);
-                }
-            });
-
-            renderList(activeFilter === 'TELAT' ? listTelat : listWarning);
         }
 
         function setFilter(tipe) {
             activeFilter = tipe;
-            const btnTelat = document.getElementById('btnFilterTelat');
-            const btnWarning = document.getElementById('btnFilterWarning');
-
-            if (tipe === 'TELAT') {
-                btnTelat.className = "flex-1 py-2.5 rounded-xl font-bold text-xs bg-red-500 text-white shadow-sm transition-all";
-                btnWarning.className = "flex-1 py-2.5 rounded-xl font-bold text-xs text-slate-500 hover:bg-white transition-all";
-            } else {
-                btnWarning.className = "flex-1 py-2.5 rounded-xl font-bold text-xs bg-amber-500 text-white shadow-sm transition-all";
-                btnTelat.className = "flex-1 py-2.5 rounded-xl font-bold text-xs text-slate-500 hover:bg-white transition-all";
-            }
-
-            prosesLogikaTanggal();
+            document.getElementById('btnFilterTelat').className = tipe === 'TELAT' ? "flex-1 py-3 rounded-xl font-bold text-xs bg-red-500 text-white transition-all" : "flex-1 py-3 rounded-xl font-bold text-xs bg-slate-100 text-slate-500 transition-all";
+            document.getElementById('btnFilterWarning').className = tipe === 'WARNING' ? "flex-1 py-3 rounded-xl font-bold text-xs bg-amber-500 text-white transition-all" : "flex-1 py-3 rounded-xl font-bold text-xs bg-slate-100 text-slate-500 transition-all";
+            renderList();
         }
 
-        function renderList(dataToRender) {
+        function renderList() {
+            document.getElementById('loadingState').classList.add('hidden');
             const listContainer = document.getElementById('listContainer');
-            const loading = document.getElementById('loadingState');
-            const empty = document.getElementById('emptyState');
-            
-            loading.classList.replace('flex', 'hidden');
             listContainer.innerHTML = '';
 
-            if (dataToRender.length === 0) {
-                empty.classList.remove('hidden');
-                empty.classList.add('flex');
+            // Filter MURNI dari data Backend (Code.gs)
+            const filteredData = allCustomers.filter(c => c.kategoriStatus === activeFilter);
+
+            if (filteredData.length === 0) {
+                listContainer.innerHTML = `<div class="text-center py-10 font-bold text-slate-400 text-xs">Alhamdulillah, tidak ada data di kategori ini.</div>`;
                 return;
             }
 
-            empty.classList.add('hidden');
+            filteredData.forEach(c => {
+                let badgeClass = activeFilter === 'TELAT' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600';
+                let nominal = parseInt(c.cicilanPerBulan) || Math.round(parseInt(c.hutang)/6);
 
-            dataToRender.forEach(c => {
-                let badgeColor = activeFilter === 'TELAT' ? 'bg-red-100 text-red-600 border-red-200' : 'bg-amber-100 text-amber-600 border-amber-200';
-                
                 listContainer.innerHTML += `
-                    <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                        <div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <h3 class="font-black text-slate-800 uppercase tracking-tight">${c.nama}</h3>
-                                <span class="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border ${badgeColor}">${c.keteranganStatus}</span>
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col gap-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-black text-slate-800 uppercase">${c.nama}</h3>
+                                <p class="text-[10px] font-bold text-slate-500">Angsuran Ke-${c.cicilanKe}</p>
                             </div>
-                            <p class="text-[10px] font-bold text-slate-500 mb-1">Tagihan: Rp ${formatRp(c.nominalKirim)} <span class="opacity-50">|</span> Angsuran Ke-${c.cicilanKe}</p>
-                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Sisa Hutang: Rp ${formatRp(c.hutang - c.terbayar)}</p>
+                            <span class="px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest ${badgeClass}">${c.keteranganStatus}</span>
                         </div>
-                        <button onclick="kirimWA('${c.wa}', '${c.nama}', '${c.keteranganStatus}', ${c.nominalKirim}, '${c.barang}')" class="w-full sm:w-auto bg-[#25D366] text-white px-5 py-3 rounded-xl font-extrabold text-xs active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md">
-                            <i data-lucide="send" class="w-4 h-4"></i> Tegur via WA
+                        <button onclick="kirimWA('${c.wa}', '${c.nama}', '${c.keteranganStatus}', ${nominal}, '${c.barang}')" class="w-full bg-[#25D366] text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 active:scale-95">
+                            <i data-lucide="send" class="w-4 h-4"></i> Kirim WA Peringatan
                         </button>
                     </div>
                 `;
@@ -207,17 +100,13 @@
             let wa = waRaw.toString().replace(/[^0-9]/g, '');
             if (wa.startsWith('0')) wa = '62' + wa.substring(1);
             
-            let pesan = "";
-            if (activeFilter === 'TELAT') {
-                pesan = `Assalamu'alaikum Kak *${nama.toUpperCase()}*,\n\nMohon maaf mengganggu waktunya. Ini admin *Zenith Cell*.\n\nKami ingin mengingatkan bahwa tagihan angsuran untuk *${barang}* senilai *Rp ${formatRp(nominal)}* sudah melewati jatuh tempo bulanan (${status}).\n\nAgar tidak terkena denda keterlambatan (dana amal), mohon kerjasamanya untuk segera melakukan pelunasan ya Kak. Terima kasih banyak atas pengertiannya. 🙏`;
-            } else {
-                pesan = `Assalamu'alaikum Kak *${nama.toUpperCase()}*,\n\nIni admin *Zenith Cell*.\n\nSekadar mengingatkan bahwa jadwal angsuran Kakak untuk *${barang}* senilai *Rp ${formatRp(nominal)}* akan jatuh tempo sebentar lagi (${status}).\n\nYuk pertahankan status VVIP Lancar-nya dengan melakukan pembayaran tepat waktu. Semangat dan sehat selalu Kak! 🚀`;
-            }
+            let pesan = activeFilter === 'TELAT' 
+                ? `Assalamu'alaikum Kak *${nama}*,\n\nIni admin Zenith Cell. Kami ingin mengingatkan tagihan untuk *${barang}* senilai *Rp ${formatRp(nominal)}* sudah melewati jatuh tempo (${status}).\n\nMohon segera diproses agar tidak terkena denda amal ya Kak.` 
+                : `Assalamu'alaikum Kak *${nama}*,\n\nIni admin Zenith Cell. Tagihan untuk *${barang}* senilai *Rp ${formatRp(nominal)}* akan segera jatuh tempo (${status}).\n\nYuk pertahankan status VVIP-nya!`;
 
             window.open(`https://api.whatsapp.com/send?phone=${wa}&text=${encodeURIComponent(pesan)}`, '_blank');
         }
 
-        // Jalankan saat pertama kali buka
         fetchDataTagihan();
     </script>
 </body>
