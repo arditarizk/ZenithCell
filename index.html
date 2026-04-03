@@ -209,12 +209,19 @@
     <script>
         lucide.createIcons();
 
+        // LOGO DAN NAMA TOKO DINAMIS DARI CONFIG.JS
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof CONFIG !== 'undefined') {
                 if (CONFIG.LOGO_URL) document.getElementById('logoUtama').src = CONFIG.LOGO_URL;
                 if (CONFIG.NAMA_TOKO) {
                     document.getElementById('namaTokoUtama').innerText = CONFIG.NAMA_TOKO;
                     document.title = `${CONFIG.NAMA_TOKO} - Gadget Syariah`;
+                }
+                
+                // FIX: MUNCULKAN PAPAN PENGUMUMAN JIKA ADA TEKS DI CONFIG
+                if (CONFIG.TEKS_PENGUMUMAN && CONFIG.TEKS_PENGUMUMAN.trim() !== "") {
+                    document.getElementById('pengumumanContainer').classList.remove('hidden');
+                    document.getElementById('teksPengumuman').innerText = CONFIG.TEKS_PENGUMUMAN;
                 }
             }
         });
@@ -236,7 +243,7 @@
         function bukaModalInfo(tipe) { 
             const titleEl = document.getElementById('infoTitle'); const contentEl = document.getElementById('infoContent');
             
-            // KONTEN MODAL INFO / KAMUS (KEMBALI LENGKAP)
+            // ISI MODAL UNTUK TRUST BADGES
             if (tipe === 'syariah') {
                 titleEl.innerHTML = `<i data-lucide="leaf" class="w-5 h-5 text-emerald-500"></i> 100% Syariah`;
                 contentEl.innerHTML = `<div class="p-3 bg-emerald-50 rounded-xl mb-3 border border-emerald-100 flex items-center justify-center"><i data-lucide="leaf" class="w-8 h-8 text-emerald-500"></i></div><p class="font-bold text-slate-800 text-center">Bebas Riba & Denda Ghaib</p><p class="text-sm text-slate-600 mt-2 text-center">Semua transaksi menggunakan akad Murabahah (Jual Beli) yang sah. Tidak ada sistem bunga berbunga (riba) maupun denda keterlambatan yang memakan untung.</p>`;
@@ -246,12 +253,14 @@
             } else if (tipe === 'bi_checking') {
                 titleEl.innerHTML = `<i data-lucide="zap" class="w-5 h-5 text-amber-500"></i> Tanpa BI Checking`;
                 contentEl.innerHTML = `<div class="p-3 bg-amber-50 rounded-xl mb-3 border border-amber-100 flex items-center justify-center"><i data-lucide="user-check" class="w-8 h-8 text-amber-500"></i></div><p class="font-bold text-slate-800 text-center">Persetujuan Internal</p><p class="text-sm text-slate-600 mt-2 text-center">Kami tidak menggunakan sistem SLIK OJK / BI Checking bank konvensional. Penilaian kelayakan kredit murni berdasarkan wawancara dan verifikasi internal Zenith Cell.</p>`;
-            } else if (tipe === 'muroqoshoh') {
+            }
+            // ISI MODAL UNTUK FITUR SYARIAH LAINNYA
+            else if (tipe === 'muroqoshoh') {
                 titleEl.innerText = "Pelunasan Muroqoshoh";
                 contentEl.innerHTML = `<div class="p-3 bg-amber-50 rounded-xl mb-3 border border-amber-100 flex items-center justify-center"><i data-lucide="zap" class="w-8 h-8 text-amber-500"></i></div><p class="font-bold text-slate-800">Apa itu Diskon Pelunasan Cepat?</p><p>Dalam akad syariah, Zenith Cell memfasilitasi program <b>Muroqoshoh</b> (pemberian Ibra' atau potongan harga) bagi nasabah yang memiliki iktikad baik untuk melunasi seluruh sisa tagihannya lebih cepat.</p><p class="font-bold text-slate-800 mt-2">Berapa besar potongannya?</p><p>Sistem kami secara otomatis akan memberikan <b>potongan 10% dari total sisa tagihan akhir</b> Anda saat pelunasan.</p>`;
             } else if (tipe === 'kamus') {
                 titleEl.innerText = "Kamus Fintech Syariah";
-                contentEl.innerHTML = `<p class="font-bold text-indigo-700 text-sm">1. Akad Murabahah</p><p class="mb-2">Akad jual beli di mana pihak Zenith Cell menyatakan harga beli asli dari supplier, dan menjualnya kepada nasabah dengan tambahan margin (keuntungan) yang disepakati secara transparan sejak awal.</p><p class="font-bold text-indigo-700 text-sm">2. Ibra' (Diskon)</p><p class="mb-2">Potongan atas sisa piutang/tagihan yang diberikan oleh toko kepada nasabah yang melakukan pelunasan dipercepat (Muroqoshoh).</p><p class="font-bold text-indigo-700 text-sm">3. Bebas Gharar</p><p class="mb-2">Gharar berarti ketidakpastian. Di Zenith Cell, tidak ada biaya tersembunyi, penambahan denda tak terduga, atau fluktuasi cicilan. Angsuran Anda bersifat <i>Fix Price</i> dari awal hingga akhir.</p><p class="font-bold text-indigo-700 text-sm">4. Tabayyun</p><p>Proses restrukturisasi utang (memperpanjang tenor) tanpa tambahan bunga jika nasabah terkena musibah finansial yang menghambat pembayaran.</p>`;
+                contentEl.innerHTML = `<p class="font-bold text-indigo-700 text-sm">1. Akad Murabahah</p><p class="mb-2 text-xs">Akad jual beli di mana pihak Zenith Cell menyatakan harga beli asli dari supplier, dan menjualnya kepada nasabah dengan tambahan margin (keuntungan) yang disepakati secara transparan sejak awal.</p><p class="font-bold text-indigo-700 text-sm">2. Ibra' (Diskon)</p><p class="mb-2 text-xs">Potongan atas sisa piutang/tagihan yang diberikan oleh toko kepada nasabah yang melakukan pelunasan dipercepat (Muroqoshoh).</p><p class="font-bold text-indigo-700 text-sm">3. Bebas Gharar</p><p class="mb-2 text-xs">Gharar berarti ketidakpastian. Di Zenith Cell, tidak ada biaya tersembunyi, penambahan denda tak terduga, atau fluktuasi cicilan. Angsuran Anda bersifat <i>Fix Price</i> dari awal hingga akhir.</p><p class="font-bold text-indigo-700 text-sm">4. Tabayyun</p><p class="text-xs">Proses restrukturisasi utang (memperpanjang tenor) tanpa tambahan bunga jika nasabah terkena musibah finansial yang menghambat pembayaran.</p>`;
             }
             lucide.createIcons(); modalInfo.classList.replace('hidden', 'flex'); setTimeout(() => { modalInfo.classList.remove('opacity-0'); cardInfo.classList.remove('translate-y-full'); }, 10); 
         }
@@ -261,7 +270,7 @@
         function bukaModalHukum(tipe) { 
             const titleEl = document.getElementById('hukumTitle'); const contentEl = document.getElementById('hukumContent'); 
             
-            // KONTEN MODAL HUKUM (KEMBALI LENGKAP)
+            // KONTEN MODAL HUKUM LENGKAP
             if (tipe === 'privasi') { 
                 titleEl.innerHTML = `<i data-lucide="shield-check" class="w-5 h-5 text-emerald-500"></i> Kebijakan Privasi Data`; 
                 contentEl.innerHTML = `
