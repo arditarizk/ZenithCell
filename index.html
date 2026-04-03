@@ -21,6 +21,11 @@
         .scrolling-text { display: inline-block; padding-left: 100%; animation: scrollText 35s linear infinite; will-change: transform; }
         @keyframes scrollText { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
         
+        /* CSS UNTUK GALERI LOOPING (BUKTI REAL) */
+        .gallery-track { display: flex; width: max-content; animation: scrollGallery 25s linear infinite; }
+        .gallery-track:hover { animation-play-state: paused; /* Berhenti saat disentuh */ }
+        @keyframes scrollGallery { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        
         /* DARK MODE - PERFECTED */
         body.dark-mode { background-color: #0f172a; color: #f8fafc; }
         body.dark-mode .clean-card, body.dark-mode main, body.dark-mode header, body.dark-mode nav { background-color: #1e293b !important; border-color: #334155 !important; }
@@ -142,6 +147,73 @@
                 </div>
             </div>
         </div>
+
+        <section class="mb-10 w-full max-w-4xl mx-auto px-2 lg:px-8">
+            <div class="flex justify-between items-end mb-4 px-2">
+                <div>
+                    <h2 class="text-xs lg:text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><i data-lucide="camera" class="w-4 h-4 lg:w-5 lg:h-5 text-emerald-500"></i> Penyerahan Unit</h2>
+                    <p class="text-[10px] lg:text-xs text-slate-500 font-medium mt-1">Bukti nyata #TanpaRiba bersama Zenith Cell.</p>
+                </div>
+            </div>
+            
+            <div class="relative w-full overflow-hidden rounded-3xl bg-slate-50 border border-slate-100 shadow-inner py-4 group">
+                <div class="absolute inset-y-0 left-0 w-12 lg:w-24 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none dark:from-[#334155]"></div>
+                <div class="absolute inset-y-0 right-0 w-12 lg:w-24 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none dark:from-[#334155]"></div>
+                
+                <div class="gallery-track flex gap-4 px-4">
+                    
+                    <div class="w-40 lg:w-48 h-56 lg:h-64 shrink-0 rounded-2xl overflow-hidden relative shadow-md">
+                        <img src="https://images.unsplash.com/photo-1598327105666-5b89351cb31b?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700" alt="Penyerahan HP">
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-8">
+                            <p class="text-white text-[10px] font-bold">Diva - Infinix Hot 40</p>
+                        </div>
+                    </div>
+                    <div class="w-40 lg:w-48 h-56 lg:h-64 shrink-0 rounded-2xl overflow-hidden relative shadow-md">
+                        <img src="https://images.unsplash.com/photo-1605236453806-6ff36851218e?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700" alt="Penyerahan HP">
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-8">
+                            <p class="text-white text-[10px] font-bold">Vivi - iPhone 13</p>
+                        </div>
+                    </div>
+                    <div class="w-40 lg:w-48 h-56 lg:h-64 shrink-0 rounded-2xl overflow-hidden relative shadow-md">
+                        <img src="https://images.unsplash.com/photo-1556656793-08538906a9f8?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700" alt="Penyerahan HP">
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-8">
+                            <p class="text-white text-[10px] font-bold">Samsul - Samsung A54</p>
+                        </div>
+                    </div>
+                    <div class="w-40 lg:w-48 h-56 lg:h-64 shrink-0 rounded-2xl overflow-hidden relative shadow-md">
+                        <img src="https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700" alt="Penyerahan HP">
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-8">
+                            <p class="text-white text-[10px] font-bold">Rafli - Xiaomi Redmi 12</p>
+                        </div>
+                    </div>
+
+                    <div class="w-40 lg:w-48 h-56 lg:h-64 shrink-0 rounded-2xl overflow-hidden relative shadow-md">
+                        <img src="https://images.unsplash.com/photo-1598327105666-5b89351cb31b?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700" alt="Penyerahan HP">
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-8">
+                            <p class="text-white text-[10px] font-bold">Diva - Infinix Hot 40</p>
+                        </div>
+                    </div>
+                    <div class="w-40 lg:w-48 h-56 lg:h-64 shrink-0 rounded-2xl overflow-hidden relative shadow-md">
+                        <img src="https://images.unsplash.com/photo-1605236453806-6ff36851218e?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700" alt="Penyerahan HP">
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-8">
+                            <p class="text-white text-[10px] font-bold">Vivi - iPhone 13</p>
+                        </div>
+                    </div>
+                    <div class="w-40 lg:w-48 h-56 lg:h-64 shrink-0 rounded-2xl overflow-hidden relative shadow-md">
+                        <img src="https://images.unsplash.com/photo-1556656793-08538906a9f8?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700" alt="Penyerahan HP">
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-8">
+                            <p class="text-white text-[10px] font-bold">Samsul - Samsung A54</p>
+                        </div>
+                    </div>
+                    <div class="w-40 lg:w-48 h-56 lg:h-64 shrink-0 rounded-2xl overflow-hidden relative shadow-md">
+                        <img src="https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700" alt="Penyerahan HP">
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 pt-8">
+                            <p class="text-white text-[10px] font-bold">Rafli - Xiaomi Redmi 12</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <section class="mb-10 w-full max-w-4xl mx-auto px-2 lg:px-8">
             <h2 class="text-xs lg:text-sm font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2 px-2"><i data-lucide="heart-handshake" class="w-4 h-4 lg:w-5 lg:h-5 text-emerald-500"></i> Kisah Nyata Pelanggan</h2>
