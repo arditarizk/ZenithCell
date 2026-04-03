@@ -176,7 +176,7 @@
 
         const formatNomorWA = (wa) => { let n = (wa || "").toString().replace(/[^0-9]/g, ''); if (n.startsWith('0')) return '62' + n.substring(1); if (n.startsWith('8')) return '62' + n; return n; };
 
-        // LOGIKA PINDAH 3 TAB (DENGAN GENERATOR)
+        // LOGIKA PINDAH 3 TAB
         function switchTab(tab) {
             currentTab = tab;
             document.getElementById('tab-antrean').className = tab === 'antrean' ? 'flex-1 min-w-[100px] py-3 rounded-lg text-[11px] font-black tab-active transition-all tracking-wider' : 'flex-1 min-w-[100px] py-3 rounded-lg text-[11px] font-black tab-inactive hover:bg-slate-200 transition-all tracking-wider';
@@ -193,9 +193,39 @@
 
         function refreshData() { currentTab === 'antrean' ? fetchAntrean() : fetchTagihan(); }
 
-        // FUNGSI GENERATOR CONFIG.JS SAKTI
+        // ========================================================
+        // FIX: AUTO-SAVE LOCAL STORAGE UNTUK PENGATURAN WEB
+        // ========================================================
+        function saveConfigDraft() {
+            const draft = {
+                nama: document.getElementById('confNama').value,
+                logo: document.getElementById('confLogo').value,
+                teks: document.getElementById('confTeks').value,
+                api: document.getElementById('confApi').value,
+                wa: document.getElementById('confWa').value
+            };
+            localStorage.setItem('zenithConfigDraft', JSON.stringify(draft));
+        }
+
+        // Memasang pendeteksi ketikan di setiap kolom
+        ['confNama', 'confLogo', 'confTeks', 'confApi', 'confWa'].forEach(id => {
+            document.getElementById(id).addEventListener('input', saveConfigDraft);
+        });
+
         function renderFormPengaturan() {
-            if (typeof CONFIG !== 'undefined') {
+            // Cek apakah ada draft yang tersimpan sebelumnya
+            const savedDraft = localStorage.getItem('zenithConfigDraft');
+            
+            if (savedDraft) {
+                // Jika ada draft, tampilkan draft terakhir
+                const draft = JSON.parse(savedDraft);
+                document.getElementById('confNama').value = draft.nama || "";
+                document.getElementById('confLogo').value = draft.logo || "";
+                document.getElementById('confTeks').value = draft.teks || "";
+                document.getElementById('confApi').value = draft.api || "";
+                document.getElementById('confWa').value = draft.wa || "";
+            } else if (typeof CONFIG !== 'undefined') {
+                // Jika tidak ada draft, ambil dari config.js default
                 document.getElementById('confNama').value = CONFIG.NAMA_TOKO || "Zenith Cell";
                 document.getElementById('confLogo').value = CONFIG.LOGO_URL || "";
                 document.getElementById('confTeks').value = CONFIG.TEKS_PENGUMUMAN || "";
@@ -217,6 +247,9 @@
             document.getElementById('hasilConfig').classList.remove('hidden');
             document.getElementById('hasilConfig').scrollIntoView({behavior: "smooth"});
             lucide.createIcons();
+            
+            // Setelah di-generate, hapus draft agar bersih untuk next edit
+            localStorage.removeItem('zenithConfigDraft');
         }
 
         window.salinConfig = async function() {
@@ -225,6 +258,10 @@
                 showToast("Kode Config berhasil disalin!", "success");
             } catch(e) { showToast("Gagal. Blok teks dan copy manual.", "error"); }
         }
+
+        // ========================================================
+        // SISA KODE LAINNYA TETAP AMAN DAN TIDAK ADA YANG DIUBAH
+        // ========================================================
 
         async function fetchAntrean() {
             const container = document.getElementById('pendingList');
