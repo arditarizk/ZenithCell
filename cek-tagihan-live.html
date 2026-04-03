@@ -14,8 +14,6 @@
         .glass-card { background: rgba(255, 255, 255, 0.98); border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }
         .shining-badge { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #fcd34d 100%); color: #78350f; animation: pulse-soft 2s infinite; }
         @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
-        .spinner { border: 3px solid rgba(16, 185, 129, 0.3); border-top: 3px solid #10b981; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .animate-fade-in { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .progress-bar-animated { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -46,10 +44,16 @@
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <i data-lucide="phone" class="w-4 h-4 text-emerald-500"></i>
                         </div>
+                        
                         <input type="tel" id="waInput" placeholder="Contoh: 08123456789" required class="w-full pl-11 pr-24 py-4 bg-transparent text-sm font-bold outline-none text-slate-800 placeholder-slate-400">
+                        
                         <div class="absolute inset-y-0 right-1 pr-1 flex items-center gap-1 z-20">
-                            <button type="button" onclick="pasteWA()" class="p-2 bg-white border border-slate-200 rounded-lg text-slate-500 hover:text-emerald-600 shadow-sm active:scale-95 transition-all" title="Paste"><i data-lucide="clipboard" class="w-4 h-4"></i></button>
-                            <button type="button" onclick="clearWA()" class="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-red-500 shadow-sm active:scale-95 transition-all hidden group-focus-within:block" title="Hapus"><i data-lucide="x" class="w-4 h-4"></i></button>
+                            <button type="button" onclick="pasteWA()" class="p-2 bg-white border border-slate-200 rounded-lg text-slate-500 hover:text-emerald-600 shadow-sm active:scale-95 transition-all" title="Paste">
+                                <i data-lucide="clipboard" class="w-4 h-4"></i>
+                            </button>
+                            <button type="button" onclick="clearWA()" class="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-red-500 shadow-sm active:scale-95 transition-all hidden group-focus-within:block" title="Hapus">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -66,7 +70,9 @@
                         <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1" id="greetingText">Ahlan wa Sahlan,</p>
                         <h2 class="font-black text-lg text-slate-900 uppercase tracking-tight truncate max-w-[180px] sm:max-w-xs" id="resNama">Nama</h2>
                     </div>
-                    <div id="badgeRapor" class="shining-badge px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md flex items-center gap-1.5 shrink-0"><i data-lucide="star" class="w-3.5 h-3.5"></i> VVIP</div>
+                    <div id="badgeRapor" class="shining-badge px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md flex items-center gap-1.5 shrink-0">
+                        <i data-lucide="star" class="w-3.5 h-3.5"></i> VVIP
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -82,6 +88,7 @@
 
                 <div class="bg-slate-900 p-6 rounded-3xl shadow-xl text-white relative overflow-hidden flex flex-col gap-4">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 blur-3xl rounded-full -mr-10 -mt-10 pointer-events-none"></div>
+                    
                     <div class="flex justify-between items-end relative z-10">
                         <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Sisa Tagihan Pokok</p>
@@ -95,6 +102,7 @@
                             <p class="font-black text-xl text-white leading-none"><span id="resCicilanKe">0</span> <span class="text-sm text-slate-500 font-bold" id="resTotalTenor">/ 0</span></p>
                         </div>
                     </div>
+
                     <div class="relative z-10 w-full pt-2 border-t border-white/10 mt-2">
                         <div class="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">
                             <span>Terkumpul: Rp <span id="resTerbayar">0</span></span>
@@ -165,7 +173,6 @@
         const formatRp = (n) => new Intl.NumberFormat('id-ID').format(n);
         let toastTimer;
 
-        // FUNGSI TOAST ANTI-TUMPUK
         function showToast(msg, type = 'success') {
             const container = document.getElementById('toastContainer');
             container.innerHTML = ''; 
@@ -212,8 +219,14 @@
             
             const btn = document.getElementById('btnCari');
             const err = document.getElementById('errorMsg');
-            btn.disabled = true; btn.innerHTML = `<div class="spinner border-emerald-300 border-top-emerald-500"></div> Mencari...`;
-            err.classList.add('hidden'); document.getElementById('hasilCard').classList.replace('flex', 'hidden');
+            
+            // FIX: ANIMASI LOADING MENGGUNAKAN LUCIDE + TAILWIND (DIJAMIN MUTER!)
+            btn.disabled = true; 
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Sedang Mencari Data...`;
+            lucide.createIcons(); // Wajib dirender ulang agar ikon loading muncul
+
+            err.classList.add('hidden'); 
+            document.getElementById('hasilCard').classList.replace('flex', 'hidden');
             document.getElementById('progressBar').style.width = '0%';
 
             try {
@@ -234,7 +247,11 @@
                 err.innerHTML = `<i data-lucide="wifi-off" class="w-3.5 h-3.5 inline"></i> Sistem Error: Gagal terhubung ke server.`; 
                 err.classList.remove('hidden');
             }
-            btn.disabled = false; btn.innerHTML = `<i data-lucide="search" class="w-5 h-5 text-emerald-400"></i> Cek Status Pembayaran`; lucide.createIcons();
+            
+            // KEMBALIKAN TOMBOL KE SEMULA
+            btn.disabled = false; 
+            btn.innerHTML = `<i data-lucide="search" class="w-5 h-5 text-emerald-400"></i> Cek Status Pembayaran`; 
+            lucide.createIcons();
         });
 
         function tampilkanHasil(data) {
@@ -260,10 +277,14 @@
             
             setTimeout(() => { document.getElementById('progressBar').style.width = `${persen}%`; }, 200);
 
+            // ==========================================
+            // FIX: LOGIKA TANGGAL (MEMBACA BULAN & TAHUN)
+            // ==========================================
             const namaBulanArr = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-            const tglSkrg = new Date().getDate();
-            const blnSkrg = new Date().getMonth() + 1;
-            let thnSkrg = new Date().getFullYear();
+            const dateSekarang = new Date();
+            const tglSkrg = dateSekarang.getDate();
+            const blnSkrg = dateSekarang.getMonth() + 1; // Bulan asli (1-12)
+            let thnSkrg = dateSekarang.getFullYear();
             
             let angkaTgl = parseInt(data.jatuhTempo);
             let targetBln = blnSkrg;
@@ -272,10 +293,12 @@
             if (bulanTerakhirDB !== 0) {
                 targetBln = bulanTerakhirDB + 1; 
             } else {
-                if (data.cicilanKe == 1 && tglSkrg > angkaTgl) { targetBln = blnSkrg + 1; }
+                if (tglSkrg > angkaTgl) { targetBln = blnSkrg + 1; }
             }
             if (targetBln > 12) { targetBln -= 12; thnSkrg++; }
             
+            targetBulanInt = targetBln; targetTahunInt = thnSkrg;
+
             document.getElementById('resTempoFull').innerText = `${angkaTgl} ${namaBulanArr[targetBln]} ${thnSkrg}`;
 
             const badge = document.getElementById('badgeRapor');
@@ -284,13 +307,10 @@
             const rekCard = document.getElementById('rekeningCard');
             
             if (sisaHutang <= 0) {
-                // FIX TYPO CLASSNAME DISINI YANG KEMARIN BIKIN CRASH
                 badge.className = "px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md flex items-center gap-1.5 bg-emerald-500 text-white shrink-0";
                 badge.innerHTML = `<i data-lucide="award" class="w-4 h-4"></i> LUNAS`;
-                
                 btnKal.style.display = 'none';
                 rekCard.style.display = 'none';
-                
                 document.getElementById('resTempoFull').innerText = "Sudah Lunas";
                 document.getElementById('resTempoFull').classList.replace("text-slate-900", "text-emerald-500");
                 motTeks.innerText = "✨ Alhamdulillah! Gadget impian resmi jadi milik Kakak 100%. Semoga berkah dan ditunggu pesanan selanjutnya! ✨";
@@ -299,14 +319,20 @@
                 btnKal.style.display = 'flex';
                 rekCard.style.display = 'block';
                 
-                if (bulanTerakhirDB !== blnSkrg && tglSkrg > angkaTgl) {
+                // MENGHITUNG SELISIH HARI SECARA PRESISI DENGAN OBJEK DATE
+                let dateHariIniValid = new Date(dateSekarang.getFullYear(), blnSkrg - 1, tglSkrg);
+                let dateJatuhTempoValid = new Date(targetTahunInt, targetBulanInt - 1, angkaTgl);
+                
+                let selisihWaktu = dateHariIniValid.getTime() - dateJatuhTempoValid.getTime();
+                let selisihHari = Math.floor(selisihWaktu / (1000 * 3600 * 24));
+
+                if (selisihHari > 0) {
                     badge.className = "px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md flex items-center gap-1.5 bg-red-100 text-red-600 animate-pulse border border-red-200 shrink-0";
-                    badge.innerHTML = `<i data-lucide="alert-circle" class="w-4 h-4"></i> Telat ${tglSkrg - angkaTgl} Hari`;
+                    badge.innerHTML = `<i data-lucide="alert-circle" class="w-4 h-4"></i> Telat ${selisihHari} Hari`;
                     motTeks.innerHTML = `<span class="text-red-500">Astaghfirullah, sudah lewat jatuh tempo nih Kak. Yuk segera tunaikan kewajibannya agar rezeki makin lancar! 🤲</span>`;
                 } else {
                     badge.className = "shining-badge px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md flex items-center gap-1.5 shrink-0";
                     badge.innerHTML = `<i data-lucide="star" class="w-4 h-4"></i> VVIP Lancar`;
-                    
                     if (persen < 30) motTeks.innerText = "🚀 Bismillah! Perjalanan baru dimulai, semangat terus kerjanya ya Kak!";
                     else if (persen >= 30 && persen < 70) motTeks.innerText = "🔥 Masya Allah, udah lumayan jauh nih perjalanannya. Keep going Kak!";
                     else motTeks.innerText = "✨ Alhamdulillah, sikit lagi lunas Kak! Tetap istiqomah ya! 🚀";
@@ -314,15 +340,11 @@
 
                 const judulEvent = encodeURIComponent(`Angsuran HP (${data.barang})`);
                 const descEvent = encodeURIComponent(`Halo ${data.nama}, waktunya bayar angsuran Zenith Cell bulan ini senilai Rp ${formatRp(cicilanPerBln)} agar rapor VVIP Kakak aman. Semangat!`);
-                
-                const eventDate = new Date(thnSkrg, targetBln - 1, angkaTgl, 8, 0, 0);
-                const yyyy = eventDate.getFullYear();
-                const mm = String(eventDate.getMonth() + 1).padStart(2, '0');
-                const dd = String(eventDate.getDate()).padStart(2, '0');
-                
+                const yyyy = dateJatuhTempoValid.getFullYear();
+                const mm = String(dateJatuhTempoValid.getMonth() + 1).padStart(2, '0');
+                const dd = String(dateJatuhTempoValid.getDate()).padStart(2, '0');
                 const tglMulai = `${yyyy}${mm}${dd}T080000`; 
                 const tglSelesai = `${yyyy}${mm}${dd}T090000`;
-                
                 btnKal.href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${judulEvent}&dates=${tglMulai}/${tglSelesai}&details=${descEvent}`;
             }
 
