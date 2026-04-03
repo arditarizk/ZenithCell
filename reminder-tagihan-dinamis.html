@@ -10,7 +10,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="config.js"></script>
     <script>
-        // FITUR KEAMANAN PROFESIONAL: Blokir akses langsung via URL
         const KASIR_AKTIF = localStorage.getItem('kasirZenithAktif');
         if (!KASIR_AKTIF) { window.location.replace('index.html'); }
     </script>
@@ -59,6 +58,43 @@
             </div>
         </div>
     </main>
+
+    <div id="tabayyunModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[120] hidden items-center justify-center p-4 opacity-0 transition-opacity">
+        <div class="bg-white rounded-[2rem] p-6 max-w-md w-full shadow-2xl transform scale-95 transition-transform" id="tabayyunCard">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                <div>
+                    <h2 class="font-black text-base text-slate-900 flex items-center gap-2"><i data-lucide="handshake" class="w-5 h-5 text-indigo-500"></i> Tabayyun Akad</h2>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase mt-0.5" id="tabayyunNama">Nama Pelanggan</p>
+                </div>
+                <button onclick="closeModalTabayyun()" class="p-2 bg-slate-50 rounded-full"><i data-lucide="x" class="w-4 h-4 text-slate-400"></i></button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex justify-between items-center">
+                    <span class="text-[10px] font-black text-indigo-700 uppercase">Sisa Hutang Pokok</span>
+                    <span class="font-black text-indigo-900 text-sm" id="tabSisaHutang">Rp 0</span>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 mb-1">Ubah Jatuh Tempo (Tgl)</label>
+                    <input type="number" id="tabJatuhTempo" min="1" max="31" class="w-full p-3 bg-white border border-slate-200 focus:border-indigo-500 rounded-xl font-bold text-sm outline-none">
+                    <p class="text-[8px] font-bold text-slate-400 mt-1">*Bisa dimundurkan jika nasabah gajian di tanggal berbeda.</p>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 mb-1">Perpanjang Sisa Tenor (Bulan)</label>
+                    <input type="number" id="tabTenor" min="1" oninput="kalkulasiTabayyun()" class="w-full p-3 bg-white border border-slate-200 focus:border-indigo-500 rounded-xl font-bold text-sm outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-extrabold text-slate-500 mb-1">Angsuran Bulanan Baru</label>
+                    <input type="text" id="tabCicilan" class="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl font-black text-indigo-600 text-lg outline-none" readonly>
+                </div>
+            </div>
+
+            <button id="btnSimpanTabayyun" class="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3.5 rounded-xl shadow-lg active:scale-95 transition-all">SIMPAN KESEPAKATAN BARU</button>
+        </div>
+    </div>
 
     <div id="accModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-center items-center px-4 opacity-0 transition-opacity">
         <div class="bg-white w-full max-w-md rounded-[2rem] p-6 shadow-2xl transform scale-95 transition-transform" id="accModalContent">
@@ -115,6 +151,7 @@
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
         
         let currentTab = 'antrean', allTagihanData = [], currentActiveData = null, dataTolakSementara = null, targetWaLink = "";
+        let dataTabayyunAktif = null;
 
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
@@ -185,15 +222,13 @@
             const container = document.getElementById('customerList');
             container.innerHTML = `<div class="col-span-full text-center py-10"><div class="spinner mx-auto mb-2"></div></div>`;
             try {
+                // KARENA API SUDAH PINTAR, SEMUA DATA DITERIMA MATANG DARI SERVER
                 const res = await fetch(`${CONFIG.API_URL}?action=getAll&nocache=${Date.now()}`);
                 allTagihanData = (await res.json()).data.filter(c => (parseRupiah(c.hutang) - parseRupiah(c.terbayar)) > 0);
                 filterTagihan();
             } catch(e) { container.innerHTML = `<div class="col-span-full text-red-500 text-center py-10">Gagal Memuat Pelanggan</div>`; }
         }
 
-        // =========================================================================
-        // FIX: LOGIKA TANGGAL SINKRON DENGAN CEK TAGIHAN (MENCEGAT DATA BACKEND)
-        // =========================================================================
         function filterTagihan() {
             const k = (document.getElementById('searchInput').value || "").toLowerCase();
             const filtered = allTagihanData.filter(p => (p.nama || "").toLowerCase().includes(k));
@@ -201,48 +236,23 @@
             
             if(filtered.length === 0) { container.innerHTML = `<div class="col-span-full text-center py-10 bg-white rounded-2xl border text-slate-400 font-bold text-xs uppercase">Tidak Ada Data</div>`; return; }
             
-            const dateSekarang = new Date();
-            const tglSkrg = dateSekarang.getDate();
-            const blnSkrg = dateSekarang.getMonth() + 1;
-            let thnSkrg = dateSekarang.getFullYear();
             const namaBulan = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
             filtered.forEach(p => {
-                let angkaTgl = parseInt(p.jatuhTempo) || 1;
-                let targetBln = blnSkrg;
-                let bulanTerakhirDB = parseInt(p.bulanTerakhirBayar) || 0;
-
-                // Penentuan Bulan
-                if (bulanTerakhirDB !== 0) {
-                    targetBln = bulanTerakhirDB + 1; 
-                } else {
-                    if (p.cicilanKe == 1 && tglSkrg > angkaTgl) { targetBln = blnSkrg + 1; }
-                }
+                // LANGSUNG MEMBACA STATUS DARI BACKEND
+                let targetBulan = p.targetBulan;
+                let targetTahun = p.targetTahun;
+                let statusBe = p.statusPembayaran;
+                let isTelat = p.selisihHari > 0;
                 
-                let targetThn = thnSkrg;
-                if (targetBln > 12) { targetBln -= 12; targetThn++; }
-
-                // HITUNG SELISIH HARI
-                let dateHariIniValid = new Date(thnSkrg, blnSkrg - 1, tglSkrg);
-                let dateJatuhTempoValid = new Date(targetThn, targetBln - 1, angkaTgl);
-                
-                let selisihWaktu = dateHariIniValid.getTime() - dateJatuhTempoValid.getTime();
-                let selisihHari = Math.floor(selisihWaktu / (1000 * 3600 * 24));
-
-                let isTelat = selisihHari > 0;
-                let statusDinamic = isTelat ? `TELAT ${selisihHari} HARI` : "LANCAR";
-
-                // Panggil renderTagihanCard milikmu dengan data yang sudah diperbaiki
-                container.innerHTML += renderTagihanCard(p, namaBulan, targetBln, targetThn, statusDinamic, isTelat);
+                container.innerHTML += renderTagihanCard(p, namaBulan, targetBulan, targetTahun, statusBe, isTelat);
             });
             lucide.createIcons();
         }
 
-        // =========================================================================
-        // KODE MILIKMU YANG DIBIARKAN UTUH (HANYA MENERIMA PARAMETER STATUS BARU)
-        // =========================================================================
         function renderTagihanCard(p, namaBulan, targetBulan, targetTahun, statusBe, isTelat) {
             let sisaBulanIni = p.cicilanPerBulan > 0 ? p.cicilanPerBulan : Math.round(p.hutang / 6);
+            let sisaHutangGlobal = p.hutang - p.terbayar;
             let angkaTanggal = parseInt(p.jatuhTempo) || 1;
             let tglLengkap = `${angkaTanggal} ${namaBulan[targetBulan]} ${targetTahun}`;
             
@@ -253,6 +263,9 @@
             let btnBg = isTelat ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700";
             let btnIcon = isTelat ? "alert-circle" : "bell";
             let btnText = isTelat ? "KIRIM TEGURAN WA" : "KIRIM PENGINGAT WA";
+
+            // Tombol Tabayyun
+            let btnTabayyun = `<button onclick="bukaModalTabayyun('${p.idKontrak}', '${p.nama}', '${p.wa}', ${sisaHutangGlobal}, ${angkaTanggal})" class="w-full mt-2 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-100 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 active:scale-95 transition-all"><i data-lucide="handshake" class="w-3.5 h-3.5"></i> RESTRUKTURISASI (TABAYYUN)</button>`;
 
             return `
                 <div class="bg-white p-5 rounded-2xl border shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between h-full">
@@ -268,9 +281,77 @@
                             <div class="text-right"><p class="text-[8px] font-bold text-slate-400 uppercase">Jatuh Tempo</p><p class="font-black text-slate-700 text-xs">Tgl ${angkaTanggal}</p></div>
                         </div>
                     </div>
-                    <button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${tglLengkap}', '${namaBulan[targetBulan]}', ${isTelat})" class="w-full mt-4 py-3 ${btnBg} rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 active:scale-95 transition-all"><i data-lucide="${btnIcon}" class="w-3.5 h-3.5"></i> ${btnText}</button>
+                    <div>
+                        <button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${tglLengkap}', '${namaBulan[targetBulan]}', ${isTelat})" class="w-full mt-4 py-3 ${btnBg} rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 active:scale-95 transition-all"><i data-lucide="${btnIcon}" class="w-3.5 h-3.5"></i> ${btnText}</button>
+                        ${btnTabayyun}
+                    </div>
                 </div>`;
         }
+
+        // FUNGSI TABAYYUN
+        window.bukaModalTabayyun = function(id, nama, wa, sisaHutang, tglTempo) {
+            dataTabayyunAktif = { idKontrak: id, nama, wa, sisaHutang };
+            document.getElementById('tabayyunNama').innerText = nama;
+            document.getElementById('tabSisaHutang').innerText = `Rp ${formatRupiah(sisaHutang)}`;
+            document.getElementById('tabJatuhTempo').value = tglTempo;
+            document.getElementById('tabTenor').value = "";
+            document.getElementById('tabCicilan').value = "Rp 0";
+
+            document.getElementById('tabayyunModal').classList.replace('hidden', 'flex');
+            setTimeout(() => { document.getElementById('tabayyunModal').classList.remove('opacity-0'); document.getElementById('tabayyunCard').classList.remove('scale-95'); }, 10);
+        }
+
+        window.closeModalTabayyun = function() {
+            document.getElementById('tabayyunModal').classList.add('opacity-0'); document.getElementById('tabayyunCard').classList.add('scale-95');
+            setTimeout(() => document.getElementById('tabayyunModal').classList.replace('flex', 'hidden'), 300);
+        }
+
+        window.kalkulasiTabayyun = function() {
+            let tenor = parseInt(document.getElementById('tabTenor').value);
+            if (!tenor || tenor < 1 || !dataTabayyunAktif) {
+                document.getElementById('tabCicilan').value = "Rp 0";
+                return;
+            }
+            let cicilanBaru = Math.round(dataTabayyunAktif.sisaHutang / tenor);
+            document.getElementById('tabCicilan').value = `Rp ${formatRupiah(cicilanBaru)}`;
+        }
+
+        document.getElementById('btnSimpanTabayyun').addEventListener('click', async () => {
+            if (!dataTabayyunAktif) return;
+            let tglBaru = parseInt(document.getElementById('tabJatuhTempo').value);
+            let tenorBaru = parseInt(document.getElementById('tabTenor').value);
+            
+            if (!tglBaru || tglBaru < 1 || tglBaru > 31) return showToast("Tanggal tempo tidak valid", "error");
+            if (!tenorBaru || tenorBaru < 1) return showToast("Masukkan sisa tenor", "error");
+
+            let btn = document.getElementById('btnSimpanTabayyun');
+            btn.innerHTML = "MENYIMPAN..."; btn.disabled = true;
+
+            let cicilanBaru = Math.round(dataTabayyunAktif.sisaHutang / tenorBaru);
+
+            const payload = {
+                tipe: "TABAYYUN_UPDATE",
+                idKontrak: dataTabayyunAktif.idKontrak,
+                nama: dataTabayyunAktif.nama,
+                wa: dataTabayyunAktif.wa,
+                jatuhTempoBaru: tglBaru,
+                cicilanBaru: cicilanBaru
+            };
+
+            try {
+                await fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                
+                const msg = `Assalamu'alaikum Kak ${payload.nama}.\n\nBerdasarkan pengajuan Tabayyun (Restrukturisasi), admin Zenith Cell telah menyetujui penyesuaian akad Kakak.\n\n*Detail Baru:*\nJatuh Tempo: Tanggal ${payload.jatuhTempoBaru} setiap bulannya\nAngsuran: Rp ${formatRupiah(payload.cicilanBaru)}\n\nSemoga dengan penyesuaian ini membawa keberkahan dan kelancaran rezeki bagi kita semua. Amin.`;
+                window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent(msg)}`, '_blank');
+                
+                closeModalTabayyun();
+                showToast("Data Tabayyun Disimpan!");
+                setTimeout(fetchTagihan, 1500);
+            } catch (e) {
+                showToast("Gagal menyimpan data", "error");
+            }
+            btn.innerHTML = "SIMPAN KESEPAKATAN BARU"; btn.disabled = false;
+        });
 
         window.bukaModalAcc = function(encoded) {
             const data = JSON.parse(decodeURIComponent(encoded)); currentActiveData = data;
