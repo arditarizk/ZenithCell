@@ -1,5 +1,5 @@
 // ==========================================
-// MASTER API ZENITH CELL (V18 - SUPER STABIL)
+// MASTER API ZENITH CELL (V19 - SINGLE SOURCE OF TRUTH & TABAYYUN)
 // ==========================================
 
 function getOrCreateSheet(ss, sheetName) {
@@ -12,7 +12,6 @@ function createJsonResponse(data) {
   return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
 }
 
-// Pembersih ID Anti-Error
 function cleanId(id) {
   return String(id).replace(/['" ]/g, '').trim().toUpperCase();
 }
@@ -39,7 +38,8 @@ function doPost(e) {
         var dP = sP.getDataRange().getValues();
         for (var i = 1; i < dP.length; i++) {
           if (cleanId(dP[i][0]) === cleanId(payload.idKontrak)) { 
-            sP.getRange(i + 1, 18).setValue("ACC"); break;
+            sP.getRange(i + 1, 18).setValue("ACC");
+            break;
           }
         }
       }
@@ -57,7 +57,8 @@ function doPost(e) {
         var dP = sP.getDataRange().getValues();
         for (var i = 1; i < dP.length; i++) {
           if (cleanId(dP[i][0]) === cleanId(payload.idKontrak)) { 
-            sP.getRange(i + 1, 18).setValue("DITOLAK"); break;
+            sP.getRange(i + 1, 18).setValue("DITOLAK");
+            break;
           }
         }
       }
@@ -71,7 +72,6 @@ function doPost(e) {
         sT.getRange("A1:I1").setFontWeight("bold").setBackground("#f3e8ff");
       }
       sT.appendRow(["'" + cleanId(payload.idTransaksi), payload.waktu, "'" + cleanId(payload.idKontrak), payload.nama, "'"+payload.whatsapp, payload.cicilanKe, payload.nominalMasuk, payload.dendaMasuk || 0, payload.catatan]);
-      
       var sL = ss.getSheetByName("Pelanggan");
       if (sL) {
         var dL = sL.getDataRange().getValues();
@@ -96,7 +96,6 @@ function doPost(e) {
         sT.getRange("A1:I1").setFontWeight("bold").setBackground("#f3e8ff");
       }
       sT.appendRow(["'" + cleanId(payload.idTransaksi), payload.waktu, "'" + cleanId(payload.idKontrak), payload.nama, "'"+payload.whatsapp, "LUNAS FULL", payload.nominalMasuk, payload.dendaMasuk || 0, payload.catatan]);
-      
       if (sR.getLastRow() === 0) {
         sR.appendRow(["ID Kontrak", "Nama Pelanggan", "No WA", "Barang", "Total Hutang Awal", "Status Kredit"]);
         sR.getRange("A1:F1").setFontWeight("bold").setBackground("#dcfce7");
@@ -112,6 +111,32 @@ function doPost(e) {
       }
       return createJsonResponse({status: "success"});
     }
+
+    // ==========================================
+    // FITUR BARU: TABAYYUN (RESTRUKTURISASI)
+    // ==========================================
+    if (payload.tipe === "TABAYYUN_UPDATE") {
+      var sL = ss.getSheetByName("Pelanggan");
+      if (sL) {
+        var dL = sL.getDataRange().getValues();
+        for (var i = 1; i < dL.length; i++) {
+          if (cleanId(dL[i][0]) === cleanId(payload.idKontrak)) {
+            if (payload.jatuhTempoBaru) sL.getRange(i+1, 8).setValue(payload.jatuhTempoBaru);
+            if (payload.cicilanBaru) sL.getRange(i+1, 7).setValue(payload.cicilanBaru);
+            
+            // Catat ke transaksi agar jejak audit aman
+            var sT = getOrCreateSheet(ss, "Transaksi");
+            var d = new Date();
+            var idTrans = "TBY" + String(d.getFullYear()).slice(-2) + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0') + String(Math.floor(Math.random()*1000));
+            sT.appendRow(["'" + idTrans, d.toLocaleString('id-ID'), "'" + cleanId(payload.idKontrak), payload.nama, "'" + payload.wa, "TABAYYUN", 0, 0, "Tempo Baru: Tgl " + payload.jatuhTempoBaru + " | Angsuran: Rp " + payload.cicilanBaru]);
+            
+            return createJsonResponse({status: "success"});
+          }
+        }
+      }
+      return createJsonResponse({status: "error", message: "Data tidak ditemukan"});
+    }
+
     return createJsonResponse({status: "error", message: "Tipe POST tidak valid"});
   } catch (e) { return createJsonResponse({status: "error", msg: "Server Error: " + e.toString()}); }
 }
@@ -139,25 +164,55 @@ function doGet(e) {
       return createJsonResponse({status: "success", data: res});
     }
 
+    // ==========================================
+    // LOGIKA TANGGAL TERPUSAT (SINGLE SOURCE OF TRUTH)
+    // ==========================================
+    var tz = ss.getSpreadsheetTimeZone();
+    var dNow = new Date();
+    var tglSekarang = parseInt(Utilities.formatDate(dNow, tz, "dd"));
+    var blnSekarang = parseInt(Utilities.formatDate(dNow, tz, "MM"));
+    var thnSekarang = parseInt(Utilities.formatDate(dNow, tz, "yyyy"));
+
+    function hitungStatusJatuhTempo(jatuhTempoDB, bulanTerakhirDB, cicilanKeDB) {
+        var targetBln = blnSekarang;
+        if (bulanTerakhirDB !== 0) {
+            targetBln = bulanTerakhirDB + 1;
+        } else {
+            if (cicilanKeDB == 1 && tglSekarang > jatuhTempoDB) { targetBln = blnSekarang + 1; }
+        }
+        var targetThn = thnSekarang;
+        if (targetBln > 12) { targetBln -= 12; targetThn++; }
+
+        var dateHariIni = new Date(thnSekarang, blnSekarang - 1, tglSekarang);
+        var dateJatuhTempo = new Date(targetThn, targetBln - 1, jatuhTempoDB);
+        var selisihHari = Math.floor((dateHariIni.getTime() - dateJatuhTempo.getTime()) / (1000 * 3600 * 24));
+        
+        var statusSkor = "LANCAR";
+        if (selisihHari > 0) { statusSkor = "TELAT " + selisihHari + " HARI"; }
+        
+        return { targetBln: targetBln, targetThn: targetThn, selisihHari: selisihHari, statusSkor: statusSkor };
+    }
+
     if (action === "getAll") {
       var s = ss.getSheetByName("Pelanggan");
       if (!s || s.getLastRow() < 2) return createJsonResponse({status: "success", data: []});
       var d = s.getDataRange().getValues();
       var res = [];
-      var tglSekarang = new Date().getDate(); 
-      var blnSekarang = new Date().getMonth() + 1;
+      
       for (var i = 1; i < d.length; i++) {
         var jatuhTempoDB = parseInt(d[i][7]) || 1;
         var bulanTerakhirDB = parseInt(d[i][9]) || 0;
-        var statusSkor = "LANCAR";
-        if (bulanTerakhirDB !== blnSekarang && tglSekarang > jatuhTempoDB) {
-           statusSkor = "TELAT " + (tglSekarang - jatuhTempoDB) + " HARI";
-        }
+        var cicilanKeDB = parseInt(d[i][8]) || 1;
+
+        var kalkulasi = hitungStatusJatuhTempo(jatuhTempoDB, bulanTerakhirDB, cicilanKeDB);
+
         res.push({ 
           idKontrak: cleanId(d[i][0]), nama: d[i][1] || "", wa: (d[i][2] || "").toString().replace(/[^0-9]/g, ''), 
           barang: d[i][3] || "", hutang: parseInt(d[i][4]) || 0, terbayar: parseInt(d[i][5]) || 0, 
           cicilanPerBulan: parseInt(d[i][6]) || 0, jatuhTempo: jatuhTempoDB, 
-          cicilanKe: parseInt(d[i][8]) || 1, bulanTerakhirBayar: bulanTerakhirDB, statusPembayaran: statusSkor
+          cicilanKe: cicilanKeDB, bulanTerakhirBayar: bulanTerakhirDB, 
+          statusPembayaran: kalkulasi.statusSkor, selisihHari: kalkulasi.selisihHari,
+          targetBulan: kalkulasi.targetBln, targetTahun: kalkulasi.targetThn
         });
       }
       return createJsonResponse({status: "success", data: res});
@@ -170,9 +225,16 @@ function doGet(e) {
         var d = s.getDataRange().getValues();
         for (var i = 1; i < d.length; i++) {
           if (String(d[i][2]).replace(/[^0-9]/g, '') === sw) {
+            var jatuhTempoDB = parseInt(d[i][7]) || 1;
+            var bulanTerakhirDB = parseInt(d[i][9]) || 0;
+            var cicilanKeDB = parseInt(d[i][8]) || 1;
+            var kalkulasi = hitungStatusJatuhTempo(jatuhTempoDB, bulanTerakhirDB, cicilanKeDB);
+
             return createJsonResponse({status: "success", data: { 
               nama: d[i][1], wa: sw, barang: d[i][3], totalHutang: parseInt(d[i][4])||0, terbayar: parseInt(d[i][5])||0, 
-              cicilanPerBulan: parseInt(d[i][6])||0, jatuhTempo: d[i][7], cicilanKe: parseInt(d[i][8])||1, bulanTerakhirBayar: parseInt(d[i][9])||0
+              cicilanPerBulan: parseInt(d[i][6])||0, jatuhTempo: jatuhTempoDB, cicilanKe: cicilanKeDB, 
+              bulanTerakhirBayar: bulanTerakhirDB, statusPembayaran: kalkulasi.statusSkor, selisihHari: kalkulasi.selisihHari,
+              targetBulan: kalkulasi.targetBln, targetTahun: kalkulasi.targetThn
             }});
           }
         }
