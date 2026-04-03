@@ -3,421 +3,379 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Server Admin - Zenith Cell</title>
+    <title>Zenith Cell - Gadget Syariah Kota Malang</title>
     <link rel="icon" type="image/png" href="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/6f184ccb-599f-4527-b31f-f416b7dc6b8d.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="config.js"></script>
-    <script>
-        const KASIR_AKTIF = localStorage.getItem('kasirZenithAktif');
-        if (!KASIR_AKTIF) { window.location.replace('index.html'); }
-    </script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
-        .tab-active { background-color: #0f172a; color: white; font-weight: 800; }
-        .tab-inactive { background-color: transparent; color: #64748b; font-weight: 600; }
-        .spinner { border: 3px solid rgba(245, 158, 11, 0.3); border-top: 3px solid #f59e0b; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; overflow-x: hidden; transition: background-color 0.3s, color 0.3s; }
+        .clean-card { background: #ffffff; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px -5px rgba(0,0,0,0.03); transition: all 0.3s; }
+        .faq-content { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.4s ease, opacity 0.4s ease; }
+        .faq-item.active .faq-content { max-height: 400px; opacity: 1; }
+        .faq-item.active i.chevron { transform: rotate(180deg); color: #10b981; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        .marquee-wrapper { display: block; width: 100%; overflow: hidden; white-space: nowrap; box-sizing: border-box; }
+        .scrolling-text { display: inline-block; padding-left: 100%; animation: scrollText 35s linear infinite; will-change: transform; }
+        @keyframes scrollText { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+        
+        /* DARK MODE - PERFECTED */
+        body.dark-mode { background-color: #0f172a; color: #f8fafc; }
+        body.dark-mode .clean-card, body.dark-mode main, body.dark-mode header, body.dark-mode nav { background-color: #1e293b !important; border-color: #334155 !important; }
+        body.dark-mode .bg-white { background-color: #1e293b !important; }
+        body.dark-mode .bg-slate-50 { background-color: #334155 !important; border-color: #475569 !important; }
+        body.dark-mode .text-slate-900, body.dark-mode .text-slate-800, body.dark-mode .text-slate-700 { color: #f8fafc !important; }
+        body.dark-mode .text-slate-600, body.dark-mode .text-slate-500 { color: #cbd5e1 !important; }
+        
+        body.dark-mode .bg-emerald-50 { background-color: rgba(16, 185, 129, 0.15) !important; border-color: rgba(16, 185, 129, 0.3) !important; }
+        body.dark-mode .text-emerald-600 { color: #34d399 !important; }
+        
+        body.dark-mode #hukumCard, body.dark-mode #infoCard, body.dark-mode #pinCard { background-color: #1e293b !important; border: 1px solid #334155; }
+        body.dark-mode .border-b, body.dark-mode .border-t { border-color: #334155 !important; }
+        body.dark-mode #sidebarMenu { background-color: #0f172a !important; border-color: #334155 !important; }
+        
+        /* Efek Gradien Medsos */
+        .ig-gradient { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); }
     </style>
 </head>
-<body class="text-slate-800 lg:p-8 min-h-screen flex selection:bg-amber-200">
+<body class="text-slate-800 selection:bg-emerald-200 min-h-screen flex flex-col">
 
-    <div id="toastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 w-full max-w-sm px-4 pointer-events-none"></div>
+    <div id="toastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 pointer-events-none w-full max-w-sm px-4"></div>
 
-    <main class="m-auto w-full max-w-md lg:max-w-7xl bg-transparent lg:bg-white lg:rounded-[2.5rem] lg:p-8 lg:shadow-xl relative z-10 flex flex-col min-h-screen lg:min-h-[85vh]">
-        <header class="mb-5 flex items-center justify-between bg-white p-3.5 lg:p-5 rounded-2xl shadow-sm border mx-4 mt-4 lg:m-0">
-            <a href="index.html" class="p-2.5 bg-slate-50 rounded-xl text-slate-500 mr-3 hover:bg-slate-100 transition-colors"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
-            <div class="flex items-center gap-3 flex-grow">
-                <div class="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center"><i data-lucide="layout-dashboard" class="w-6 h-6 text-amber-400"></i></div>
-                <div><h1 class="font-black text-lg lg:text-xl leading-none">Server Admin</h1><p class="text-[10px] font-bold text-amber-600 uppercase mt-1 tracking-wider" id="labelAdmin">Monitoring Panel</p></div>
+    <main class="w-full max-w-md lg:max-w-5xl px-5 pt-8 pb-32 lg:pb-10 relative z-10 flex flex-col lg:bg-white lg:rounded-[3rem] lg:shadow-2xl lg:p-10 lg:my-8 mx-auto flex-grow">
+        
+        <header class="mb-8 text-center flex flex-col items-center relative w-full max-w-4xl mx-auto">
+            <button onclick="toggleDarkMode()" class="absolute top-0 left-0 lg:left-4 p-2.5 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-emerald-500 active:scale-95 transition-all" id="btnDarkMode">
+                <i data-lucide="moon" class="w-5 h-5"></i>
+            </button>
+            <button onclick="bukaSidebar()" class="absolute top-0 right-0 lg:right-4 p-2.5 bg-white rounded-xl shadow-sm border border-slate-100 text-slate-400 hover:text-emerald-500 active:scale-95 transition-all">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+
+            <div class="w-24 h-24 lg:w-28 lg:h-28 bg-white p-1.5 rounded-[1.5rem] shadow-sm border border-slate-100 flex items-center justify-center mb-5 mt-2">
+                <img src="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/5daa1530-3351-436c-abc0-38c81c73669f.png" class="w-full h-full object-contain rounded-[1.25rem]">
             </div>
+
+            <h1 class="font-extrabold text-3xl lg:text-4xl text-slate-900 tracking-tight leading-none mb-2">Zenith Cell</h1>
+            <p class="text-[10px] lg:text-xs font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 inline-block px-3 py-1.5 rounded-lg border border-emerald-100">Gadget Syariah</p>
             
-            <div class="flex gap-2">
-                <button onclick="refreshData()" class="p-3 bg-amber-50 rounded-xl text-amber-700 hover:bg-amber-100 transition-colors" title="Muat Ulang Data"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
-                <button onclick="logoutKasir()" class="p-3 bg-red-50 rounded-xl text-red-600 hover:bg-red-100 transition-colors" title="Keluar"><i data-lucide="log-out" class="w-5 h-5"></i></button>
-            </div>
+            <a href="https://goo.gl/maps/VEiZSuUpKaf3tkip6" target="_blank" class="flex items-center justify-center gap-1.5 text-slate-500 text-[10px] font-medium mt-4 bg-white px-3 py-2 rounded-xl shadow-sm border border-slate-100 hover:bg-slate-50 transition-all w-full max-w-[280px]">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-emerald-500 shrink-0"></i><p class="truncate">Jl. Sanan 5a, Purwantoro, Kota Malang</p><i data-lucide="external-link" class="w-3 h-3 text-slate-300 ml-auto shrink-0"></i>
+            </a>
         </header>
 
-        <div class="px-4 lg:px-0 flex flex-col flex-grow">
-            <div class="flex gap-2 mb-6 bg-white p-1.5 rounded-xl shadow-sm border border-slate-200 max-w-md mx-auto lg:mx-0 w-full">
-                <button onclick="switchTab('antrean')" id="tab-antrean" class="flex-1 py-2.5 rounded-lg text-xs tab-active transition-all">Antrean ACC</button>
-                <button onclick="switchTab('tagihan')" id="tab-tagihan" class="flex-1 py-2.5 rounded-lg text-xs tab-inactive transition-all">Tagihan Aktif</button>
-            </div>
-
-            <div id="viewAntrean" class="flex flex-col flex-grow">
-                <div id="pendingList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-10"></div>
-            </div>
-
-            <div id="viewTagihan" class="hidden flex flex-col flex-grow">
-                <div class="relative mb-6 max-w-md">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i></div>
-                    <input type="text" id="searchInput" oninput="filterTagihan()" placeholder="Cari nama pelanggan..." class="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-amber-400 shadow-sm">
-                </div>
-                <div id="customerList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-10"></div>
+        <div id="pengumumanContainer" class="hidden relative bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-[1rem] shadow-md shadow-emerald-500/20 mb-6 flex items-center px-4 py-4 min-h-[64px] max-w-4xl mx-auto w-full">
+            <div class="bg-white/20 p-2.5 rounded-xl shrink-0 relative z-10 mr-3 backdrop-blur-sm"><i data-lucide="megaphone" class="w-5 h-5 text-white"></i></div>
+            <div class="marquee-wrapper">
+                <p id="teksPengumuman" class="scrolling-text text-xs lg:text-sm font-bold tracking-wide uppercase leading-relaxed"></p>
             </div>
         </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 w-full max-w-4xl mx-auto">
+            <a href="https://drive.google.com/file/d/1F60-0ehwwyXGNVumFBFsBx60EiNt0d1i/view?usp=drive_link" target="_blank" class="clean-card p-4 rounded-2xl flex items-center lg:flex-col lg:text-center gap-3 lg:gap-4 hover:border-emerald-200 active:scale-95 transition-all group cursor-pointer">
+                <div class="w-12 h-12 lg:w-16 lg:h-16 bg-emerald-50 rounded-xl lg:rounded-2xl flex items-center justify-center text-emerald-600 shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors"><i data-lucide="file-text" class="w-6 h-6 lg:w-8 lg:h-8"></i></div>
+                <div class="flex-grow lg:flex-none text-left lg:text-center">
+                    <h3 class="font-bold text-xs lg:text-base text-slate-800">Perjanjian Akad</h3>
+                    <p class="text-[9px] lg:text-xs text-slate-500 mt-0.5">Lihat PDF Form</p>
+                </div>
+            </a>
+            <a href="cek-tagihan-live.html" class="clean-card p-4 rounded-2xl flex items-center lg:flex-col lg:text-center gap-3 lg:gap-4 hover:border-blue-200 active:scale-95 transition-all group cursor-pointer">
+                <div class="w-12 h-12 lg:w-16 lg:h-16 bg-blue-50 rounded-xl lg:rounded-2xl flex items-center justify-center text-blue-600 shrink-0 group-hover:bg-blue-500 group-hover:text-white transition-colors"><i data-lucide="search" class="w-6 h-6 lg:w-8 lg:h-8"></i></div>
+                <div class="flex-grow lg:flex-none text-left lg:text-center">
+                    <h3 class="font-bold text-xs lg:text-base text-slate-800">Cek Sisa Tagihan</h3>
+                    <p class="text-[9px] lg:text-xs text-slate-500 mt-0.5">Rapor & Kalender</p>
+                </div>
+            </a>
+            <a href="Kalkulator Cicilan.html" class="clean-card p-4 rounded-2xl flex items-center lg:flex-col lg:text-center gap-3 lg:gap-4 hover:border-amber-200 active:scale-95 transition-all group cursor-pointer">
+                <div class="w-12 h-12 lg:w-16 lg:h-16 bg-amber-50 rounded-xl lg:rounded-2xl flex items-center justify-center text-amber-600 shrink-0 group-hover:bg-amber-500 group-hover:text-white transition-colors"><i data-lucide="calculator" class="w-6 h-6 lg:w-8 lg:h-8"></i></div>
+                <div class="flex-grow lg:flex-none text-left lg:text-center">
+                    <h3 class="font-bold text-xs lg:text-base text-slate-800">Simulasi Kredit</h3>
+                    <p class="text-[9px] lg:text-xs text-slate-500 mt-0.5">Hitung angsuran</p>
+                </div>
+            </a>
+            <a href="form-pengajuan.html" class="clean-card p-4 rounded-2xl flex items-center lg:flex-col lg:text-center gap-3 lg:gap-4 hover:border-teal-200 active:scale-95 transition-all group cursor-pointer">
+                <div class="w-12 h-12 lg:w-16 lg:h-16 bg-teal-50 rounded-xl lg:rounded-2xl flex items-center justify-center text-teal-600 shrink-0 group-hover:bg-teal-500 group-hover:text-white transition-colors"><i data-lucide="clipboard-list" class="w-6 h-6 lg:w-8 lg:h-8"></i></div>
+                <div class="flex-grow lg:flex-none text-left lg:text-center">
+                    <h3 class="font-bold text-xs lg:text-base text-slate-800">Ajukan Sekarang</h3>
+                    <p class="text-[9px] lg:text-xs text-slate-500 mt-0.5">Isi form pendaftaran</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 w-full max-w-4xl mx-auto mb-8 px-1 lg:px-0">
+            <div class="bg-emerald-50/70 p-3 rounded-2xl border border-emerald-100 flex flex-col items-center text-center justify-center">
+                <i data-lucide="leaf" class="w-5 h-5 text-emerald-600 mb-1.5"></i>
+                <p class="text-[9px] font-black text-emerald-800 uppercase tracking-tight">100% Syariah</p>
+            </div>
+            <div class="bg-blue-50/70 p-3 rounded-2xl border border-blue-100 flex flex-col items-center text-center justify-center">
+                <i data-lucide="shield-check" class="w-5 h-5 text-blue-600 mb-1.5"></i>
+                <p class="text-[9px] font-black text-blue-800 uppercase tracking-tight">Data Aman</p>
+            </div>
+            <div class="bg-amber-50/70 p-3 rounded-2xl border border-amber-100 flex flex-col items-center text-center justify-center">
+                <i data-lucide="zap" class="w-5 h-5 text-amber-600 mb-1.5"></i>
+                <p class="text-[9px] font-black text-amber-800 uppercase tracking-tight">Tanpa BI Checking</p>
+            </div>
+        </div>
+
+        <div class="w-full max-w-4xl mx-auto mb-10 px-1 lg:px-0">
+            <div class="clean-card p-5 lg:p-6 rounded-3xl bg-white border border-emerald-100 shadow-md flex flex-col gap-4 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+                <div class="flex items-center gap-4 relative z-10">
+                    <div class="w-12 h-12 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="shopping-bag" class="w-6 h-6 text-emerald-500"></i></div>
+                    <div>
+                        <h3 class="font-black text-sm lg:text-base text-slate-800">Request Gadget Impian (Jastip)</h3>
+                        <p class="text-[10px] lg:text-xs text-slate-500 mt-0.5">Paste link Shopee/Tokopedia di sini, kami hitungkan cicilannya!</p>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 w-full mt-1 relative z-10">
+                    <div class="relative flex-grow flex items-center bg-slate-50 border border-slate-200 rounded-xl shadow-sm focus-within:border-emerald-500 transition-all">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i data-lucide="link" class="w-4 h-4 text-emerald-500"></i></div>
+                        <input type="url" id="linkJastip" placeholder="Contoh: https://shopee.co.id/..." class="w-full pl-11 pr-20 py-3.5 bg-transparent text-xs lg:text-sm font-bold outline-none rounded-xl">
+                        <div class="absolute inset-y-0 right-0 pr-2 flex items-center gap-0.5">
+                            <button type="button" onclick="pasteJastip()" class="p-2 text-slate-400 hover:text-emerald-500 transition-colors" title="Tempel / Paste"><i data-lucide="clipboard" class="w-4 h-4"></i></button>
+                            <button type="button" onclick="clearJastip()" class="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Hapus"><i data-lucide="x" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                    <button onclick="prosesJastip()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3.5 rounded-xl font-extrabold text-xs active:scale-95 transition-all shadow-md flex justify-center items-center gap-1.5 shrink-0 w-full sm:w-auto"><i data-lucide="send" class="w-4 h-4"></i> Hitung Cicilan</button>
+                </div>
+            </div>
+        </div>
+
+        <section class="mb-10 w-full max-w-4xl mx-auto px-2 lg:px-8">
+            <h2 class="text-xs lg:text-sm font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2 px-2"><i data-lucide="heart-handshake" class="w-4 h-4 lg:w-5 lg:h-5 text-emerald-500"></i> Kisah Nyata Pelanggan</h2>
+            <div class="flex overflow-x-auto gap-4 pb-4 no-scrollbar snap-x px-2">
+                <div class="min-w-[260px] max-w-[280px] clean-card bg-white rounded-3xl p-5 shadow-sm snap-center">
+                    <div class="flex items-center gap-1 mb-3 text-amber-400"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                    <p class="text-xs text-slate-600 font-medium italic mb-5 leading-relaxed">"Alhamdulillah bisa upgrade iPhone buat kerjaan tanpa takut dosa riba. Cicilannya beneran flat sampai lunas, ga ada biaya admin ghaib."</p>
+                    <div class="flex items-center gap-3 border-t border-slate-100 pt-3">
+                        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-black text-[10px] shrink-0">D</div>
+                        <div><p class="text-[10px] font-black text-slate-800">Diva Maulana</p><p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Infinix Hot 40 Pro</p></div>
+                    </div>
+                </div>
+                <div class="min-w-[260px] max-w-[280px] clean-card bg-white rounded-3xl p-5 shadow-sm snap-center">
+                    <div class="flex items-center gap-1 mb-3 text-amber-400"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                    <p class="text-xs text-slate-600 font-medium italic mb-5 leading-relaxed">"Adminnya enak banget diajak diskusi. Web cek tagihannya juga canggih, jadi ga pernah kelupaan jadwal bayar tiap bulan."</p>
+                    <div class="flex items-center gap-3 border-t border-slate-100 pt-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-black text-[10px] shrink-0">V</div>
+                        <div><p class="text-[10px] font-black text-slate-800">Vivi Nur</p><p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">iPhone 13</p></div>
+                    </div>
+                </div>
+                <div class="min-w-[260px] max-w-[280px] clean-card bg-white rounded-3xl p-5 shadow-sm snap-center">
+                    <div class="flex items-center gap-1 mb-3 text-amber-400"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
+                    <p class="text-xs text-slate-600 font-medium italic mb-5 leading-relaxed">"Sempat nunggak karena musibah, tapi Zenith Cell ngasih restrukturisasi (Tabayyun) tanpa denda tambahan. Sangat meringankan!"</p>
+                    <div class="flex items-center gap-3 border-t border-slate-100 pt-3">
+                        <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-black text-[10px] shrink-0">S</div>
+                        <div><p class="text-[10px] font-black text-slate-800">Samsul A.</p><p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Samsung A54</p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-10 w-full max-w-4xl mx-auto px-2 lg:px-8">
+            <h2 class="text-xs lg:text-sm font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2 px-2"><i data-lucide="message-circle-question" class="w-4 h-4 lg:w-5 lg:h-5 text-emerald-500"></i> FAQ & Edukasi Syariah</h2>
+            <div class="space-y-3 px-2">
+                <div class="faq-item clean-card p-5 lg:p-6 rounded-2xl cursor-pointer hover:shadow-md transition-shadow" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center"><h3 class="font-bold text-sm lg:text-base text-slate-800">Apa itu Akad Murabahah?</h3><i data-lucide="chevron-down" class="chevron w-5 h-5 text-slate-400 transition-transform"></i></div>
+                    <div class="faq-content text-xs lg:text-sm text-slate-500 leading-relaxed border-t border-slate-100 mt-0 pt-0"><div class="pt-3"><b>Murabahah</b> adalah transaksi jual beli di mana kami (Zenith Cell) membelikan barang yang Anda butuhkan, lalu menjualnya kembali kepada Anda dengan <b>Margin</b> (keuntungan) yang disepakati bersama secara transparan di awal.</div></div>
+                </div>
+                <div class="faq-item clean-card p-5 lg:p-6 rounded-2xl cursor-pointer hover:shadow-md transition-shadow" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center"><h3 class="font-bold text-sm lg:text-base text-slate-800">Bebas Riba & Gharar?</h3><i data-lucide="chevron-down" class="chevron w-5 h-5 text-slate-400 transition-transform"></i></div>
+                    <div class="faq-content text-xs lg:text-sm text-slate-500 leading-relaxed border-t border-slate-100 mt-0 pt-0"><div class="pt-3">Pastinya! Kami <b>Tanpa Riba</b> (tidak ada bunga berbunga) dan <b>Tanpa Gharar</b> (semua info harga & spesifikasi jelas di awal). Harga yang disepakati saat akad tidak akan berubah sampai lunas.</div></div>
+                </div>
+                <div class="faq-item clean-card p-5 lg:p-6 rounded-2xl cursor-pointer hover:shadow-md transition-shadow" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center"><h3 class="font-bold text-sm lg:text-base text-slate-800">Terlambat bayar kena denda?</h3><i data-lucide="chevron-down" class="chevron w-5 h-5 text-slate-400 transition-transform"></i></div>
+                    <div class="faq-content text-xs lg:text-sm text-slate-500 leading-relaxed border-t border-slate-100 mt-0 pt-0"><div class="pt-3">Sistem kami murni syariah <b>Tanpa Denda</b> yang bersifat memakan untung. Terlambat tidak akan menambah nilai pokok hutang Anda (Bebas Riba). Namun, demi kedisiplinan, sanksi keterlambatan akan disalurkan ke lembaga amal/sosial. Jika terjadi musibah, Anda berhak mengajukan <b>Tabayyun</b> (Restrukturisasi).</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-10 w-full max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-5">Ikuti Perjalanan Kami</h2>
+            <div class="flex justify-center gap-4">
+                <a href="https://instagram.com" target="_blank" class="w-12 h-12 ig-gradient text-white rounded-2xl flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                <a href="https://tiktok.com" target="_blank" class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
+                </a>
+                <a href="https://facebook.com" target="_blank" class="w-12 h-12 bg-[#1877F2] text-white rounded-2xl flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-transform"><i data-lucide="facebook" class="w-5 h-5 fill-current"></i></a>
+            </div>
+        </section>
+
+        <footer class="text-center mt-auto pb-4 pt-6 border-t border-slate-100 w-full max-w-4xl mx-auto">
+            <div class="flex flex-wrap items-center justify-center gap-3 mb-4">
+                <button onclick="bukaModalHukum('privasi')" class="text-[10px] lg:text-xs font-bold text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1 active:scale-95"><i data-lucide="shield-check" class="w-3.5 h-3.5 lg:w-4 lg:h-4"></i> Privasi Data</button>
+                <span class="text-slate-300 text-[10px] lg:text-xs">|</span>
+                <button onclick="bukaModalHukum('snk')" class="text-[10px] lg:text-xs font-bold text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1 active:scale-95"><i data-lucide="scale" class="w-3.5 h-3.5 lg:w-4 lg:h-4"></i> S&K Akad Syariah</button>
+            </div>
+            <div class="text-[9px] lg:text-[10px] font-medium text-slate-400 leading-relaxed mb-4">
+                &copy; 2026 Zenith Cell Ecosystem.<br>
+                <span class="text-slate-300 flex items-center justify-center gap-1 mt-1.5">Developed with <i data-lucide="heart" class="w-3 h-3 text-red-400 fill-current"></i> by <span class="font-bold text-slate-500">Ardita Rizki Fauzi</span></span>
+            </div>
+        </footer>
     </main>
 
-    <div id="tabayyunModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[120] hidden items-center justify-center p-4 opacity-0 transition-opacity">
-        <div class="bg-white rounded-[2rem] p-6 max-w-md w-full shadow-2xl transform scale-95 transition-transform" id="tabayyunCard">
-            <div class="flex justify-between items-center mb-4 pb-2 border-b">
-                <div>
-                    <h2 class="font-black text-base text-slate-900 flex items-center gap-2"><i data-lucide="handshake" class="w-5 h-5 text-indigo-500"></i> Tabayyun Akad</h2>
-                    <p class="text-[9px] font-bold text-slate-400 uppercase mt-0.5" id="tabayyunNama">Nama Pelanggan</p>
-                </div>
-                <button onclick="closeModalTabayyun()" class="p-2 bg-slate-50 rounded-full"><i data-lucide="x" class="w-4 h-4 text-slate-400"></i></button>
-            </div>
-            
-            <div class="space-y-4">
-                <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 flex justify-between items-center">
-                    <span class="text-[10px] font-black text-indigo-700 uppercase">Sisa Hutang Pokok</span>
-                    <span class="font-black text-indigo-900 text-sm" id="tabSisaHutang">Rp 0</span>
-                </div>
+    <nav class="fixed lg:hidden bottom-5 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-white/95 backdrop-blur-md rounded-3xl p-2 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] z-50 border border-slate-100 transition-colors">
+        <div class="flex justify-around items-center relative">
+            <a href="index.html" class="flex flex-col items-center gap-1 p-2 text-emerald-500"><i data-lucide="home" class="w-5 h-5"></i><span class="text-[8px] font-bold uppercase">Home</span></a>
+            <a href="Kalkulator Cicilan.html" class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-slate-700 transition-colors"><i data-lucide="calculator" class="w-5 h-5"></i><span class="text-[8px] font-bold uppercase">Hitung</span></a>
+            <button onclick="requestPin('zenith-pos-dinamis.html')" class="bg-emerald-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg -mt-12 border-[6px] border-[#f8fafc] active:scale-90 transition-all"><i data-lucide="plus" class="w-6 h-6"></i></button>
+            <a href="cek-tagihan-live.html" class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-slate-700 transition-colors"><i data-lucide="search" class="w-5 h-5"></i><span class="text-[8px] font-bold uppercase">Cek</span></a>
+            <button onclick="bukaSidebar()" class="flex flex-col items-center gap-1 p-2 text-slate-400 hover:text-slate-700 transition-colors"><i data-lucide="menu" class="w-5 h-5"></i><span class="text-[8px] font-bold uppercase">Menu</span></button>
+        </div>
+    </nav>
 
-                <div>
-                    <label class="block text-[10px] font-extrabold text-slate-500 mb-1">Ubah Jatuh Tempo (Tgl)</label>
-                    <input type="number" id="tabJatuhTempo" min="1" max="31" class="w-full p-3 bg-white border border-slate-200 focus:border-indigo-500 rounded-xl font-bold text-sm outline-none">
-                    <p class="text-[8px] font-bold text-slate-400 mt-1">*Bisa dimundurkan jika nasabah gajian di tanggal berbeda.</p>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-extrabold text-slate-500 mb-1">Perpanjang Sisa Tenor (Bulan)</label>
-                    <input type="number" id="tabTenor" min="1" oninput="kalkulasiTabayyun()" class="w-full p-3 bg-white border border-slate-200 focus:border-indigo-500 rounded-xl font-bold text-sm outline-none">
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-extrabold text-slate-500 mb-1">Angsuran Bulanan Baru</label>
-                    <input type="text" id="tabCicilan" class="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl font-black text-indigo-600 text-lg outline-none" readonly>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[90] opacity-0 pointer-events-none transition-opacity duration-300" onclick="tutupSidebar()"></div>
+    <aside id="sidebarMenu" class="fixed top-0 right-0 h-full w-72 bg-slate-50 shadow-2xl z-[100] transform translate-x-full transition-transform duration-300 flex flex-col border-l border-slate-200">
+        <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-white shrink-0"><h3 class="font-black text-slate-800 flex items-center gap-2"><i data-lucide="compass" class="w-5 h-5 text-emerald-500"></i> Eksplorasi</h3><button onclick="tutupSidebar()" class="p-1.5 bg-slate-50 rounded-full text-slate-400 hover:text-red-500 active:scale-95 transition-all"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+        <div class="p-4 flex-grow space-y-4 overflow-y-auto no-scrollbar pb-10">
+            <div>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Layanan Islami Harian</p>
+                <div class="space-y-2">
+                    <a href="https://jadwalsholat.nu.or.id/" target="_blank" class="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-emerald-200 rounded-2xl active:scale-95 transition-all shadow-sm group">
+                        <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-emerald-500 transition-colors"><i data-lucide="clock-4" class="w-5 h-5 text-emerald-600 group-hover:text-white"></i></div>
+                        <div class="text-left flex-grow"><h4 class="font-bold text-xs text-slate-800">Jadwal Sholat</h4><p class="text-[9px] text-slate-500">Akurat se-Indonesia (NU)</p></div>
+                        <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-300"></i>
+                    </a>
+                    <a href="https://quran.nu.or.id/" target="_blank" class="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-emerald-200 rounded-2xl active:scale-95 transition-all shadow-sm group">
+                        <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-emerald-500 transition-colors"><i data-lucide="book-open" class="w-5 h-5 text-emerald-600 group-hover:text-white"></i></div>
+                        <div class="text-left flex-grow"><h4 class="font-bold text-xs text-slate-800">Al-Qur'an Digital</h4><p class="text-[9px] text-slate-500">Lengkap dengan Tafsir</p></div>
+                        <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-300"></i>
+                    </a>
                 </div>
             </div>
 
-            <button id="btnSimpanTabayyun" class="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3.5 rounded-xl shadow-lg active:scale-95 transition-all">SIMPAN KESEPAKATAN BARU</button>
+            <div class="pt-2 border-t border-slate-200">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1 mt-2">Edukasi & Fitur Syariah</p>
+                <div class="space-y-2">
+                    <button onclick="tutupSidebar(); setTimeout(() => bukaModalInfo('muroqoshoh'), 300)" class="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-amber-200 rounded-2xl active:scale-95 transition-all shadow-sm group">
+                        <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-amber-500 transition-colors"><i data-lucide="zap" class="w-5 h-5 text-amber-600 group-hover:text-white"></i></div>
+                        <div class="text-left flex-grow"><h4 class="font-bold text-xs text-slate-800">Diskon Pelunasan</h4><p class="text-[9px] text-slate-500">Program Muroqoshoh</p></div>
+                        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>
+                    </button>
+                    <button onclick="tutupSidebar(); setTimeout(() => bukaModalInfo('kamus'), 300)" class="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 hover:border-indigo-200 rounded-2xl active:scale-95 transition-all shadow-sm group">
+                        <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-indigo-500 transition-colors"><i data-lucide="library" class="w-5 h-5 text-indigo-600 group-hover:text-white"></i></div>
+                        <div class="text-left flex-grow"><h4 class="font-bold text-xs text-slate-800">Kamus Akad</h4><p class="text-[9px] text-slate-500">Istilah Fintech Syariah</p></div>
+                        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-300"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-200">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1 mt-2">Otoritas (Admin)</p>
+                <div class="space-y-2">
+                    <button onclick="tutupSidebar(); setTimeout(() => requestPin('zenith-pos-dinamis.html'), 300)" class="w-full flex items-center gap-3 p-3 bg-emerald-500 text-white rounded-2xl active:scale-95 transition-transform shadow-md"><div class="w-10 h-10 bg-emerald-600/50 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="smartphone-charging" class="w-5 h-5 text-white"></i></div><div class="text-left"><h4 class="font-bold text-xs">Kasir POS</h4><p class="text-[9px] text-emerald-100">Input Pembayaran</p></div></button>
+                    <button onclick="tutupSidebar(); setTimeout(() => requestPin('reminder-tagihan-dinamis.html'), 300)" class="w-full flex items-center gap-3 p-3 bg-slate-900 text-white rounded-2xl active:scale-95 transition-transform shadow-md"><div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i></div><div class="text-left"><h4 class="font-bold text-xs">Server Admin</h4><p class="text-[9px] text-slate-400">Panel Manajemen</p></div></button>
+                </div>
+            </div>
+        </div>
+        <div class="p-4 border-t border-slate-200 text-center bg-white shrink-0"><p class="text-[9px] font-bold text-slate-400">Zenith Cell Ecosystem v2.0</p></div>
+    </aside>
+
+    <div id="hukumModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col items-center justify-end px-2 pb-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl transform translate-y-full transition-transform max-h-[85vh] overflow-y-auto no-scrollbar" id="hukumCard">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b"><h3 class="text-base font-black text-slate-900 flex items-center gap-2" id="hukumTitle">S&K</h3><button onclick="tutupModalHukum()" class="p-1.5 bg-slate-100 rounded-full text-slate-500 hover:bg-red-50 hover:text-red-500 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+            <div id="hukumContent" class="space-y-4 text-xs lg:text-sm text-slate-600 leading-relaxed font-medium pb-2"></div>
+            <button onclick="tutupModalHukum()" class="w-full bg-slate-900 text-white font-bold py-3.5 rounded-xl mt-4 active:scale-95 shadow-lg">Saya Mengerti & Sepakat</button>
+        </div>
+    </div>
+    
+    <div id="infoModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col items-center justify-end px-2 pb-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-[2rem] p-6 w-full max-w-md shadow-2xl transform translate-y-full transition-transform max-h-[85vh] overflow-y-auto no-scrollbar" id="infoCard">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b"><h3 class="text-base font-black text-slate-900" id="infoTitle">Informasi</h3><button onclick="tutupModalInfo()" class="p-1.5 bg-slate-100 rounded-full text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+            <div id="infoContent" class="space-y-3 text-xs lg:text-sm text-slate-600 leading-relaxed font-medium"></div>
+            <button onclick="tutupModalInfo()" class="w-full bg-emerald-500 text-white font-bold py-3.5 rounded-xl mt-6 active:scale-95">Tutup</button>
         </div>
     </div>
 
-    <div id="accModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-center items-center px-4 opacity-0 transition-opacity">
-        <div class="bg-white w-full max-w-md rounded-[2rem] p-6 shadow-2xl transform scale-95 transition-transform" id="accModalContent">
-            <div class="flex justify-between items-center mb-5 pb-3 border-b"><h2 class="font-black text-base text-slate-900">Finalisasi Akad</h2><button onclick="closeModalAcc()" class="p-2 bg-slate-50 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div>
-            <div class="space-y-4">
-                <div class="bg-slate-50 p-4 rounded-2xl border"><div class="flex justify-between mb-1"><p class="text-[9px] text-slate-400 font-black uppercase" id="accIdKontrak">...</p><span id="badgeMarginFinal" class="text-[8px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">MARGIN: --%</span></div><p class="font-black text-slate-800 text-base" id="accNama">...</p><p class="text-[11px] font-semibold text-slate-500" id="accBarang">...</p></div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-[10px] font-extrabold text-slate-500 mb-1">Tgl Tempo</label><input type="number" id="accJatuhTempo" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div>
-                    <div><label class="block text-[10px] font-extrabold text-slate-500 mb-1">Tenor (Bln)</label><input type="number" id="accTenor" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none" disabled></div>
-                </div>
-                <div><label class="block text-[10px] font-extrabold text-slate-500 mb-1">Total Harga Jual</label><input type="text" id="accTotalHutang" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div>
-                <div><label class="block text-[10px] font-extrabold text-slate-500 mb-1">Cicilan Per Bulan</label><input type="text" id="accCicilan" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div>
-            </div>
-            <button id="btnKonfirmasiAcc" class="w-full mt-6 bg-emerald-500 text-white font-extrabold py-4 rounded-xl shadow-lg active:scale-95 transition-transform">ACC & NOTIFIKASI WA</button>
-        </div>
-    </div>
-
-    <div id="tolakModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-[2rem] p-6 max-w-[320px] w-full text-center shadow-2xl transform scale-95 transition-transform" id="tolakCard">
-            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="alert-triangle" class="w-8 h-8 text-red-500"></i></div>
-            <h3 class="text-lg font-extrabold text-slate-900 mb-1">Tolak Pengajuan?</h3>
-            <p class="text-slate-500 text-xs mb-6 leading-relaxed">Pengajuan atas nama <strong id="tolakNamaUser" class="text-slate-700"></strong> akan ditolak dan disembunyikan dari antrean.</p>
-            <div class="flex gap-3">
-                <button onclick="closeTolakModal()" class="flex-1 bg-slate-100 font-bold py-3.5 rounded-xl text-slate-600 text-sm active:scale-95 transition-all">Batal</button>
-                <button id="btnConfirmTolak" class="flex-1 bg-red-500 text-white font-bold py-3.5 rounded-xl text-sm active:scale-95 transition-all">Ya, Tolak</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="waModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-center items-center px-4 opacity-0 transition-opacity">
-        <div class="bg-white w-full max-w-md rounded-[2rem] p-6 shadow-2xl transform scale-95 transition-transform">
-            <div class="flex justify-between items-center mb-4 pb-2 border-b">
-                <h2 class="font-black text-base text-slate-900 flex items-center gap-2" id="waHeaderTitle"><i data-lucide="send" class="w-4 h-4 text-emerald-500"></i> Pesan Tagihan</h2>
-                <button onclick="closeWaModal()" class="p-2 bg-slate-50 rounded-full"><i data-lucide="x" class="w-4 h-4 text-slate-400"></i></button>
-            </div>
-            <textarea id="pesanWA" rows="8" class="w-full p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl text-xs font-medium outline-none resize-none"></textarea>
-            <button id="btnKirimWA" class="w-full mt-4 bg-[#25D366] text-white font-bold py-3 rounded-xl active:scale-95 flex justify-center gap-2 shadow-lg"><i data-lucide="message-circle" class="w-4 h-4"></i> Kirim ke WhatsApp</button>
+    <div id="pinModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden items-center justify-center p-4 opacity-0 transition-opacity">
+        <div class="bg-white rounded-[2rem] p-6 max-w-[300px] w-full text-center shadow-2xl transform scale-95 transition-transform" id="pinCard">
+            <button onclick="closePin()" class="absolute top-4 right-4 p-1.5 bg-slate-100 rounded-full text-slate-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+            <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mx-auto mb-3"><i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i></div>
+            <h3 class="text-lg font-extrabold text-slate-900 mb-1">Akses Admin</h3>
+            <p id="pinMsg" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest transition-colors">Masuk untuk melanjutkan</p>
+            <form id="pinForm">
+                <input type="text" id="usernameInput" placeholder="ID Pengguna" required class="w-full text-center py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm outline-none mt-5 focus:border-emerald-500 transition-all uppercase">
+                <input type="password" id="pinInput" placeholder="Sandi Admin" required class="w-full text-center py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-base outline-none mt-3 focus:border-emerald-500 tracking-widest transition-all">
+                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl mt-4 active:scale-95 transition-all shadow-sm">Masuk Sistem</button>
+            </form>
         </div>
     </div>
 
     <script>
         lucide.createIcons();
-        
-        function logoutKasir() {
-            localStorage.removeItem('kasirZenithAktif');
-            window.location.replace('index.html');
-        }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('labelAdmin').innerText = `Admin: ${KASIR_AKTIF}`;
-        });
-
-        const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num);
-        const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
-        
-        let currentTab = 'antrean', allTagihanData = [], currentActiveData = null, dataTolakSementara = null, targetWaLink = "";
-        let dataTabayyunAktif = null;
-
-        function showToast(message, type = 'success') {
+        function showToast(msg, type = 'error') {
             const toast = document.createElement('div');
-            const bgColor = type === 'success' ? 'bg-emerald-500' : 'bg-red-500';
-            toast.className = `${bgColor} text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 transform -translate-y-10 opacity-0 transition-all duration-300 w-full pointer-events-auto`;
-            toast.innerHTML = `<span class="text-sm font-bold">${message}</span>`;
-            document.getElementById('toastContainer').appendChild(toast);
-            setTimeout(() => { toast.classList.remove('-translate-y-10', 'opacity-0'); }, 10);
-            setTimeout(() => { toast.classList.add('-translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3500);
+            toast.className = `${type === 'success' ? 'bg-emerald-500' : 'bg-red-500'} text-white px-5 py-3.5 rounded-2xl shadow-xl fixed top-5 left-1/2 -translate-x-1/2 z-[1000] min-w-[250px] font-bold text-sm text-center transition-all`;
+            toast.innerText = msg; document.getElementById('toastContainer').appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
         }
 
-        const formatNomorWA = (wa) => {
-            let n = (wa || "").toString().replace(/[^0-9]/g, '');
-            if (n.startsWith('0')) return '62' + n.substring(1);
-            if (n.startsWith('8')) return '62' + n;
-            return n;
-        };
+        if (typeof CONFIG !== 'undefined' && CONFIG.PENGUMUMAN_AKTIF && CONFIG.TEKS_PENGUMUMAN) {
+            document.getElementById('pengumumanContainer').classList.remove('hidden');
+            document.getElementById('teksPengumuman').innerText = CONFIG.TEKS_PENGUMUMAN;
+        }
 
-        function refreshData() { currentTab === 'antrean' ? fetchAntrean() : fetchTagihan(); }
+        let isDarkMode = localStorage.getItem('zenithDarkMode') === 'true';
+        if(isDarkMode) document.body.classList.add('dark-mode');
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode; localStorage.setItem('zenithDarkMode', isDarkMode);
+            isDarkMode ? document.body.classList.add('dark-mode') : document.body.classList.remove('dark-mode');
+        }
+
+        async function pasteJastip() { try { const text = await navigator.clipboard.readText(); document.getElementById('linkJastip').value = text; } catch (err) { showToast("Tahan dan pilih 'Tempel'", "error"); } }
+        function clearJastip() { document.getElementById('linkJastip').value = ''; document.getElementById('linkJastip').focus(); }
+        function prosesJastip() {
+            const link = document.getElementById('linkJastip').value;
+            if(!link) return showToast("Mohon masukkan link Shopee/Tokopedia!", "error");
+            window.open(`https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(`Assalamu'alaikum Admin Zenith Cell,\n\nSaya ingin menggunakan layanan *Jastip Gadget Impian*.\n\n*Link Barang:* ${link}\n\nMohon bantu hitungkan skema pembiayaan Syariahnya. Terima kasih!`)}`, '_blank');
+        }
+
+        function bukaSidebar() { document.getElementById('sidebarOverlay').classList.remove('opacity-0', 'pointer-events-none'); document.getElementById('sidebarMenu').classList.remove('translate-x-full'); }
+        function tutupSidebar() { document.getElementById('sidebarOverlay').classList.add('opacity-0', 'pointer-events-none'); document.getElementById('sidebarMenu').classList.add('translate-x-full'); }
+        function toggleFaq(el) { const isActive = el.classList.contains('active'); document.querySelectorAll('.faq-item').forEach(item => item.classList.remove('active')); if (!isActive) el.classList.add('active'); }
+
+        const modalHukum = document.getElementById('hukumModal'), cardHukum = document.getElementById('hukumCard');
+        function bukaModalHukum(tipe) { 
+            const titleEl = document.getElementById('hukumTitle'); const contentEl = document.getElementById('hukumContent');
+            if (tipe === 'privasi') {
+                titleEl.innerHTML = `<i data-lucide="shield-check" class="w-5 h-5 text-emerald-500"></i> Kebijakan Privasi Data`;
+                contentEl.innerHTML = `<div><p class="font-bold text-emerald-700 text-sm mb-1">1. Keamanan Identitas Diri</p><p>Kami menghargai privasi Anda. Data pribadi yang dikirimkan (NIK KTP, Nomor HP, Alamat) dijamin kerahasiaannya dengan standar keamanan internal Zenith Cell.</p></div><div><p class="font-bold text-emerald-700 text-sm mb-1">2. Anti Penyalahgunaan Data</p><p>Kami menjamin bahwa data nasabah tidak akan pernah diperjualbelikan atau dibagikan kepada pihak ketiga (termasuk aplikasi pinjaman online atau marketing eksternal).</p></div>`;
+            } else if (tipe === 'snk') {
+                titleEl.innerHTML = `<i data-lucide="scale" class="w-5 h-5 text-emerald-500"></i> S&K Akad Syariah`;
+                contentEl.innerHTML = `<div class="p-3 bg-emerald-50 rounded-xl mb-2 border border-emerald-100"><p class="text-emerald-800 italic text-xs">"Hai orang-orang yang beriman, penuhilah akad-akad itu..." (QS. Al-Ma'idah: 1)</p></div><div><p class="font-bold text-emerald-700 text-sm mb-1">1. Status Kepemilikan & Akad</p><p>Transaksi ini murni menggunakan akad <b>Murabahah (Jual Beli)</b>. Zenith Cell berposisi sebagai Penjual barang, dan Anda sebagai Pembeli.</p></div><div><p class="font-bold text-emerald-700 text-sm mb-1">2. Bebas Gharar</p><p>Harga jual yang telah disepakati di awal bersifat final. Nominal cicilan per bulan <b>tidak akan pernah berubah</b> hingga lunas.</p></div><div><p class="font-bold text-emerald-700 text-sm mb-1">3. Keterlambatan (Ta'zir)</p><p>Sistem kami tidak menerapkan bunga denda. Sanksi keterlambatan 100% disalurkan sebagai Dana Sosial/Amal.</p></div>`;
+            }
+            lucide.createIcons(); modalHukum.classList.replace('hidden', 'flex'); setTimeout(() => { modalHukum.classList.remove('opacity-0'); cardHukum.classList.remove('translate-y-full'); }, 10); 
+        }
+        function tutupModalHukum() { modalHukum.classList.add('opacity-0'); cardHukum.classList.add('translate-y-full'); setTimeout(() => { modalHukum.classList.replace('flex', 'hidden'); }, 300); }
         
-        function switchTab(tab) {
-            currentTab = tab;
-            document.getElementById('tab-antrean').className = tab === 'antrean' ? 'flex-1 py-2.5 rounded-lg text-xs tab-active transition-all' : 'flex-1 py-2.5 rounded-lg text-xs tab-inactive transition-all';
-            document.getElementById('tab-tagihan').className = tab === 'tagihan' ? 'flex-1 py-2.5 rounded-lg text-xs tab-active transition-all' : 'flex-1 py-2.5 rounded-lg text-xs tab-inactive transition-all';
-            document.getElementById('viewAntrean').style.display = tab === 'antrean' ? 'flex' : 'none';
-            document.getElementById('viewTagihan').style.display = tab === 'tagihan' ? 'flex' : 'none';
-            refreshData(); 
-        }
-
-        async function fetchAntrean() {
-            const container = document.getElementById('pendingList');
-            container.innerHTML = `<div class="col-span-full text-center py-10"><div class="spinner mx-auto mb-2"></div></div>`;
-            try {
-                const res = await fetch(`${CONFIG.API_URL}?action=getPending&nocache=${Date.now()}`);
-                const result = await res.json();
-                const data = result.data || [];
-                
-                container.innerHTML = data.length === 0 ? `<div class="col-span-full text-center py-10 bg-white rounded-2xl border text-slate-400 font-bold text-xs">Antrean Kosong</div>` : '';
-                
-                data.forEach((p) => {
-                    let hClean = parseRupiah(p.harga) - parseRupiah(p.dp);
-                    let marginVal = parseInt(p.margin) || 25; 
-                    let rekTotal = hClean + (hClean * (marginVal / 100)); 
-                    let rekBulan = Math.round(rekTotal / (parseInt(p.tenor) || 5));
-                    let dataJson = encodeURIComponent(JSON.stringify({ ...p, rekTotal, rekBulan, marginAktif: marginVal }));
-
-                    container.innerHTML += `
-                        <div class="bg-white p-5 rounded-2xl border shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between h-full">
-                            <div>
-                                <div class="flex justify-between items-start mb-2">
-                                    <h3 class="font-black text-slate-900 text-sm leading-tight">${p.nama || "No Name"}</h3>
-                                    <span class="text-[9px] font-black px-2 py-1 rounded bg-slate-100 text-slate-600 shrink-0">${p.tenor} BLN</span>
-                                </div>
-                                <p class="text-[10px] font-bold text-slate-500">${p.barang || "-"}</p>
-                                <span class="text-[8px] font-black px-1.5 py-0.5 rounded mt-2 inline-block bg-amber-100 text-amber-700">MARGIN: ${marginVal}%</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-50">
-                                <button onclick="bukaModalTolak('${p.idKontrak}', '${p.nama}', '${p.wa}', '${p.barang}')" class="py-2.5 bg-red-50 text-red-600 rounded-xl text-[10px] font-black active:scale-95 transition-all">TOLAK</button>
-                                <button onclick="bukaModalAcc('${dataJson}')" class="py-2.5 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black active:scale-95 transition-all">HITUNG ACC</button>
-                            </div>
-                        </div>`;
-                });
-                lucide.createIcons();
-            } catch(e) { container.innerHTML = `<div class="col-span-full text-red-500 text-center py-10">Gagal Memuat Antrean</div>`; }
-        }
-
-        async function fetchTagihan() {
-            const container = document.getElementById('customerList');
-            container.innerHTML = `<div class="col-span-full text-center py-10"><div class="spinner mx-auto mb-2"></div></div>`;
-            try {
-                // KARENA API SUDAH PINTAR, SEMUA DATA DITERIMA MATANG DARI SERVER
-                const res = await fetch(`${CONFIG.API_URL}?action=getAll&nocache=${Date.now()}`);
-                allTagihanData = (await res.json()).data.filter(c => (parseRupiah(c.hutang) - parseRupiah(c.terbayar)) > 0);
-                filterTagihan();
-            } catch(e) { container.innerHTML = `<div class="col-span-full text-red-500 text-center py-10">Gagal Memuat Pelanggan</div>`; }
-        }
-
-        function filterTagihan() {
-            const k = (document.getElementById('searchInput').value || "").toLowerCase();
-            const filtered = allTagihanData.filter(p => (p.nama || "").toLowerCase().includes(k));
-            const container = document.getElementById('customerList'); container.innerHTML = '';
-            
-            if(filtered.length === 0) { container.innerHTML = `<div class="col-span-full text-center py-10 bg-white rounded-2xl border text-slate-400 font-bold text-xs uppercase">Tidak Ada Data</div>`; return; }
-            
-            const namaBulan = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-
-            filtered.forEach(p => {
-                // LANGSUNG MEMBACA STATUS DARI BACKEND
-                let targetBulan = p.targetBulan;
-                let targetTahun = p.targetTahun;
-                let statusBe = p.statusPembayaran;
-                let isTelat = p.selisihHari > 0;
-                
-                container.innerHTML += renderTagihanCard(p, namaBulan, targetBulan, targetTahun, statusBe, isTelat);
-            });
-            lucide.createIcons();
-        }
-
-        function renderTagihanCard(p, namaBulan, targetBulan, targetTahun, statusBe, isTelat) {
-            let sisaBulanIni = p.cicilanPerBulan > 0 ? p.cicilanPerBulan : Math.round(p.hutang / 6);
-            let sisaHutangGlobal = p.hutang - p.terbayar;
-            let angkaTanggal = parseInt(p.jatuhTempo) || 1;
-            let tglLengkap = `${angkaTanggal} ${namaBulan[targetBulan]} ${targetTahun}`;
-            
-            let badgeHtml = isTelat 
-                ? `<span class="bg-red-100 text-red-600 px-1.5 py-0.5 rounded text-[8px] font-black animate-pulse border border-red-200 shrink-0">${statusBe}</span>`
-                : `<span class="bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded text-[8px] font-black border border-emerald-200 shrink-0">LANCAR</span>`;
-            
-            let btnBg = isTelat ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700";
-            let btnIcon = isTelat ? "alert-circle" : "bell";
-            let btnText = isTelat ? "KIRIM TEGURAN WA" : "KIRIM PENGINGAT WA";
-
-            // Tombol Tabayyun
-            let btnTabayyun = `<button onclick="bukaModalTabayyun('${p.idKontrak}', '${p.nama}', '${p.wa}', ${sisaHutangGlobal}, ${angkaTanggal})" class="w-full mt-2 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-100 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 active:scale-95 transition-all"><i data-lucide="handshake" class="w-3.5 h-3.5"></i> RESTRUKTURISASI (TABAYYUN)</button>`;
-
-            return `
-                <div class="bg-white p-5 rounded-2xl border shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between h-full">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <h3 class="font-black text-xs text-slate-800 uppercase leading-tight mb-1 flex items-center gap-2 flex-wrap">${p.nama} ${badgeHtml}</h3>
-                                <p class="text-[9px] font-bold text-slate-400">ID: ${p.idKontrak} • Ke-${p.cicilanKe}</p>
-                            </div>
-                        </div>
-                        <div class="mt-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex justify-between items-center">
-                            <div><p class="text-[8px] font-bold text-slate-400 uppercase">Tagihan Bulan Ini</p><p class="font-black text-slate-900 text-sm">Rp ${formatRupiah(sisaBulanIni)}</p></div>
-                            <div class="text-right"><p class="text-[8px] font-bold text-slate-400 uppercase">Jatuh Tempo</p><p class="font-black text-slate-700 text-xs">Tgl ${angkaTanggal}</p></div>
-                        </div>
-                    </div>
-                    <div>
-                        <button onclick="bukaPesanWA('${p.nama}', '${p.wa}', '${p.cicilanKe}', '${sisaBulanIni}', '${tglLengkap}', '${namaBulan[targetBulan]}', ${isTelat})" class="w-full mt-4 py-3 ${btnBg} rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 active:scale-95 transition-all"><i data-lucide="${btnIcon}" class="w-3.5 h-3.5"></i> ${btnText}</button>
-                        ${btnTabayyun}
-                    </div>
-                </div>`;
-        }
-
-        // FUNGSI TABAYYUN
-        window.bukaModalTabayyun = function(id, nama, wa, sisaHutang, tglTempo) {
-            dataTabayyunAktif = { idKontrak: id, nama, wa, sisaHutang };
-            document.getElementById('tabayyunNama').innerText = nama;
-            document.getElementById('tabSisaHutang').innerText = `Rp ${formatRupiah(sisaHutang)}`;
-            document.getElementById('tabJatuhTempo').value = tglTempo;
-            document.getElementById('tabTenor').value = "";
-            document.getElementById('tabCicilan').value = "Rp 0";
-
-            document.getElementById('tabayyunModal').classList.replace('hidden', 'flex');
-            setTimeout(() => { document.getElementById('tabayyunModal').classList.remove('opacity-0'); document.getElementById('tabayyunCard').classList.remove('scale-95'); }, 10);
-        }
-
-        window.closeModalTabayyun = function() {
-            document.getElementById('tabayyunModal').classList.add('opacity-0'); document.getElementById('tabayyunCard').classList.add('scale-95');
-            setTimeout(() => document.getElementById('tabayyunModal').classList.replace('flex', 'hidden'), 300);
-        }
-
-        window.kalkulasiTabayyun = function() {
-            let tenor = parseInt(document.getElementById('tabTenor').value);
-            if (!tenor || tenor < 1 || !dataTabayyunAktif) {
-                document.getElementById('tabCicilan').value = "Rp 0";
-                return;
+        const modalInfo = document.getElementById('infoModal'), cardInfo = document.getElementById('infoCard');
+        function bukaModalInfo(tipe) { 
+            const titleEl = document.getElementById('infoTitle'); const contentEl = document.getElementById('infoContent');
+            if (tipe === 'muroqoshoh') {
+                titleEl.innerText = "Pelunasan Muroqoshoh";
+                contentEl.innerHTML = `<div class="p-3 bg-amber-50 rounded-xl mb-3 border border-amber-100 flex items-center justify-center"><i data-lucide="zap" class="w-8 h-8 text-amber-500"></i></div><p class="font-bold text-slate-800">Apa itu Diskon Pelunasan Cepat?</p><p>Dalam akad syariah, Zenith Cell memfasilitasi program <b>Muroqoshoh</b> (pemberian Ibra' atau potongan harga) bagi nasabah yang memiliki iktikad baik untuk melunasi seluruh sisa tagihannya lebih cepat.</p><p class="font-bold text-slate-800 mt-2">Berapa besar potongannya?</p><p>Sistem kami secara otomatis akan memberikan <b>potongan 10% dari total sisa tagihan akhir</b> Anda saat pelunasan.</p>`;
+            } else if (tipe === 'kamus') {
+                titleEl.innerText = "Kamus Fintech Syariah";
+                contentEl.innerHTML = `<p class="font-bold text-indigo-700 text-sm">1. Akad Murabahah</p><p class="mb-2">Akad jual beli di mana pihak Zenith Cell menyatakan harga beli asli dari supplier, dan menjualnya kepada nasabah dengan tambahan margin yang disepakati.</p><p class="font-bold text-indigo-700 text-sm">2. Ibra' (Diskon)</p><p class="mb-2">Potongan atas sisa piutang/tagihan yang diberikan oleh toko kepada nasabah yang melakukan pelunasan dipercepat.</p><p class="font-bold text-indigo-700 text-sm">3. Tabayyun</p><p>Proses restrukturisasi utang (memperpanjang tenor) tanpa tambahan bunga jika nasabah terkena musibah finansial.</p>`;
             }
-            let cicilanBaru = Math.round(dataTabayyunAktif.sisaHutang / tenor);
-            document.getElementById('tabCicilan').value = `Rp ${formatRupiah(cicilanBaru)}`;
+            lucide.createIcons(); modalInfo.classList.replace('hidden', 'flex'); setTimeout(() => { modalInfo.classList.remove('opacity-0'); cardInfo.classList.remove('translate-y-full'); }, 10); 
         }
+        function tutupModalInfo() { modalInfo.classList.add('opacity-0'); cardInfo.classList.add('translate-y-full'); setTimeout(() => { modalInfo.classList.replace('flex', 'hidden'); }, 300); }
 
-        document.getElementById('btnSimpanTabayyun').addEventListener('click', async () => {
-            if (!dataTabayyunAktif) return;
-            let tglBaru = parseInt(document.getElementById('tabJatuhTempo').value);
-            let tenorBaru = parseInt(document.getElementById('tabTenor').value);
-            
-            if (!tglBaru || tglBaru < 1 || tglBaru > 31) return showToast("Tanggal tempo tidak valid", "error");
-            if (!tenorBaru || tenorBaru < 1) return showToast("Masukkan sisa tenor", "error");
+        let pendingUrl = "";
+        function requestPin(url) { pendingUrl = url; document.getElementById('pinInput').value = ""; document.getElementById('usernameInput').value = ""; document.getElementById('pinModal').classList.replace('hidden', 'flex'); setTimeout(() => { document.getElementById('pinModal').classList.remove('opacity-0'); document.getElementById('pinCard').classList.remove('scale-95'); document.getElementById('usernameInput').focus(); }, 10); }
+        function closePin() { document.getElementById('pinModal').classList.add('opacity-0'); document.getElementById('pinCard').classList.add('scale-95'); setTimeout(() => { document.getElementById('pinModal').classList.replace('flex', 'hidden'); }, 300); }
 
-            let btn = document.getElementById('btnSimpanTabayyun');
-            btn.innerHTML = "MENYIMPAN..."; btn.disabled = true;
-
-            let cicilanBaru = Math.round(dataTabayyunAktif.sisaHutang / tenorBaru);
-
-            const payload = {
-                tipe: "TABAYYUN_UPDATE",
-                idKontrak: dataTabayyunAktif.idKontrak,
-                nama: dataTabayyunAktif.nama,
-                wa: dataTabayyunAktif.wa,
-                jatuhTempoBaru: tglBaru,
-                cicilanBaru: cicilanBaru
-            };
-
-            try {
-                await fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                
-                const msg = `Assalamu'alaikum Kak ${payload.nama}.\n\nBerdasarkan pengajuan Tabayyun (Restrukturisasi), admin Zenith Cell telah menyetujui penyesuaian akad Kakak.\n\n*Detail Baru:*\nJatuh Tempo: Tanggal ${payload.jatuhTempoBaru} setiap bulannya\nAngsuran: Rp ${formatRupiah(payload.cicilanBaru)}\n\nSemoga dengan penyesuaian ini membawa keberkahan dan kelancaran rezeki bagi kita semua. Amin.`;
-                window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent(msg)}`, '_blank');
-                
-                closeModalTabayyun();
-                showToast("Data Tabayyun Disimpan!");
-                setTimeout(fetchTagihan, 1500);
-            } catch (e) {
-                showToast("Gagal menyimpan data", "error");
-            }
-            btn.innerHTML = "SIMPAN KESEPAKATAN BARU"; btn.disabled = false;
+        document.getElementById('pinForm').addEventListener('submit', (e) => { 
+            e.preventDefault(); 
+            const user = document.getElementById('usernameInput').value.trim().toUpperCase(); const pass = document.getElementById('pinInput').value;
+            const adminData = typeof CONFIG !== 'undefined' && CONFIG.DAFTAR_ADMIN ? CONFIG.DAFTAR_ADMIN : {};
+            if ((adminData[user] && adminData[user].sandi === pass) || pass === CONFIG.PIN_ADMIN) { 
+                localStorage.setItem('kasirZenithAktif', adminData[user] ? adminData[user].namaLengkap : "Admin Pusat"); window.location.href = pendingUrl; 
+            } else { showToast("ID atau Sandi tidak valid!", "error"); } 
         });
-
-        window.bukaModalAcc = function(encoded) {
-            const data = JSON.parse(decodeURIComponent(encoded)); currentActiveData = data;
-            document.getElementById('accIdKontrak').innerText = data.idKontrak; 
-            document.getElementById('accNama').innerText = data.nama; 
-            document.getElementById('accBarang').innerText = data.barang;
-            document.getElementById('badgeMarginFinal').innerText = `MARGIN: ${data.marginAktif}%`;
-            document.getElementById('accJatuhTempo').value = data.jatuhTempo || 25; 
-            document.getElementById('accTenor').value = data.tenor;
-            document.getElementById('accTotalHutang').value = formatRupiah(data.rekTotal); 
-            document.getElementById('accCicilan').value = formatRupiah(data.rekBulan);
-            document.getElementById('accModal').classList.replace('hidden', 'flex'); 
-            setTimeout(() => { document.getElementById('accModal').classList.remove('opacity-0'); document.getElementById('accModalContent').classList.remove('scale-95'); }, 10);
-        };
-
-        window.closeModalAcc = function() { document.getElementById('accModal').classList.add('opacity-0'); document.getElementById('accModalContent').classList.add('scale-95'); setTimeout(() => document.getElementById('accModal').classList.replace('flex', 'hidden'), 300); };
-
-        document.getElementById('btnKonfirmasiAcc').addEventListener('click', () => {
-            const payload = { tipe: "ACC_PENGAJUAN", idKontrak: currentActiveData.idKontrak, wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: document.getElementById('accJatuhTempo').value, totalHutang: parseRupiah(document.getElementById('accTotalHutang').value), cicilanBulan: parseRupiah(document.getElementById('accCicilan').value) };
-            fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            const msg = `Assalamu'alaikum Kak ${payload.nama}.\n\nAlhamdulillah, pengajuan pembiayaan ${payload.barang} Kakak di Zenith Cell telah disetujui (ACC).\n\nUntuk memantau sisa tagihan dan jadwal pembayaran bulanan, silakan cek secara berkala melalui tautan berikut:\nhttps://zenith-cell.netlify.app/cek-tagihan-live.html\n\nTerima kasih atas kepercayaannya.`;
-            window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent(msg)}`, '_blank');
-            closeModalAcc(); showToast("Berhasil di-ACC!"); setTimeout(fetchAntrean, 1500);
-        });
-
-        window.bukaModalTolak = function(id, nama, wa, barang) {
-            dataTolakSementara = { id, nama, wa, barang }; document.getElementById('tolakNamaUser').innerText = nama;
-            const modal = document.getElementById('tolakModal'); modal.classList.replace('hidden', 'flex');
-            setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('tolakCard').classList.remove('scale-95'); }, 10);
-        }
-
-        window.closeTolakModal = function() {
-            const modal = document.getElementById('tolakModal'); modal.classList.add('opacity-0'); document.getElementById('tolakCard').classList.add('scale-95');
-            setTimeout(() => modal.classList.replace('flex', 'hidden'), 300);
-        }
-
-        document.getElementById('btnConfirmTolak').addEventListener('click', () => {
-            if (!dataTolakSementara) return;
-            const { id, nama, wa, barang } = dataTolakSementara;
-            fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", idKontrak: id }) });
-            const msg = `Assalamu'alaikum Kak ${nama}.\n\nTerima kasih telah mempercayakan pengajuan ${barang} di Zenith Cell.\n\nMohon maaf, setelah melalui proses verifikasi, untuk saat ini pengajuan Kakak belum dapat kami proses lebih lanjut.\n\nTerima kasih atas pengertiannya, semoga sehat selalu.`;
-            window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}&text=${encodeURIComponent(msg)}`, '_blank');
-            closeTolakModal(); showToast("Pengajuan ditolak", "error"); setTimeout(fetchAntrean, 1000);
-        });
-
-        window.bukaPesanWA = function(nama, wa, ke, nominal, tglLengkap, bulanTagihan, isTelat) {
-            const rek = `BCA - 8161292087 (a.n. Ardita Rizki Fauzi)\nBRI - 638501004971500 (a.n. Vivi Nur Damayanti)\nSeaBank - 901556541299 (a.n. Ardita Rizki Fauzi)`;
-            let m = "";
-            if(isTelat) {
-                m = `Assalamu'alaikum Kak ${nama}.\n\nPermisi Kak, dari Zenith Cell izin menginformasikan bahwa tagihan angsuran (Bulan Ke-${ke}) senilai Rp ${formatRupiah(nominal)} untuk bulan ${bulanTagihan} *telah melewati jatuh tempo* (Tgl ${tglLengkap}).\n\nMohon kerjasamanya untuk segera melakukan pelunasan angsuran melalui salah satu rekening berikut:\n\n${rek}\n\nJika sudah melakukan pembayaran, mohon abaikan pesan ini. Terima kasih.`;
-                document.getElementById('waHeaderTitle').innerHTML = `<i data-lucide="alert-circle" class="w-5 h-5 text-red-500"></i> Surat Peringatan WA`;
-                document.getElementById('pesanWA').className = "w-full p-3 bg-red-50/50 border border-red-100 rounded-xl text-xs font-medium outline-none resize-none text-red-900";
-            } else {
-                m = `Assalamu'alaikum Kak ${nama}.\n\nPermisi Kak, dari Zenith Cell izin menginformasikan bahwa tagihan angsuran (Bulan Ke-${ke}) senilai Rp ${formatRupiah(nominal)} untuk bulan ${bulanTagihan} akan jatuh tempo pada tanggal ${tglLengkap}.\n\nPembayaran dapat dilakukan melalui salah satu rekening berikut:\n\n${rek}\n\nTerima kasih atas kerja samanya.`;
-                document.getElementById('waHeaderTitle').innerHTML = `<i data-lucide="send" class="w-5 h-5 text-emerald-500"></i> Pesan Tagihan`;
-                document.getElementById('pesanWA').className = "w-full p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl text-xs font-medium outline-none resize-none";
-            }
-            document.getElementById('pesanWA').value = m; targetWaLink = `https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}`;
-            document.getElementById('waModal').classList.replace('hidden', 'flex'); lucide.createIcons();
-            setTimeout(() => { document.getElementById('waModal').classList.remove('opacity-0'); document.querySelector('#waModal > div').classList.remove('scale-95'); }, 10);
-        }
-        
-        window.closeWaModal = function() { document.getElementById('waModal').classList.add('opacity-0'); document.querySelector('#waModal > div').classList.add('scale-95'); setTimeout(() => document.getElementById('waModal').classList.replace('flex', 'hidden'), 300); };
-        document.getElementById('btnKirimWA').addEventListener('click', () => { window.open(`${targetWaLink}&text=${encodeURIComponent(document.getElementById('pesanWA').value)}`, '_blank'); closeWaModal(); });
-
-        refreshData();
     </script>
 </body>
 </html>
