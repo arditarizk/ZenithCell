@@ -90,9 +90,14 @@
                         </div>
                     </div>
 
-                    <button onclick="generateConfig()" class="w-full mt-8 bg-slate-900 hover:bg-slate-800 text-white font-black tracking-widest uppercase py-4 rounded-xl shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2">
-                        <i data-lucide="code-2" class="w-5 h-5 text-emerald-400"></i> BUAT KODE CONFIG
-                    </button>
+                    <div class="grid grid-cols-2 gap-3 mt-8">
+                        <button onclick="manualSaveDraft()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-black tracking-widest uppercase py-4 rounded-xl shadow-sm active:scale-95 transition-all flex justify-center items-center gap-2 border border-slate-200 text-[11px]">
+                            <i data-lucide="save" class="w-4 h-4 text-slate-500"></i> SIMPAN DRAFT
+                        </button>
+                        <button onclick="generateConfig()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-black tracking-widest uppercase py-4 rounded-xl shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2 text-[11px]">
+                            <i data-lucide="code-2" class="w-4 h-4 text-emerald-400"></i> BUAT KODE
+                        </button>
+                    </div>
                 </div>
 
                 <div id="hasilConfig" class="hidden bg-slate-900 p-6 rounded-3xl shadow-xl relative animate-fade-in border border-slate-700">
@@ -194,9 +199,9 @@
         function refreshData() { currentTab === 'antrean' ? fetchAntrean() : fetchTagihan(); }
 
         // ========================================================
-        // FIX: AUTO-SAVE LOCAL STORAGE UNTUK PENGATURAN WEB
+        // FUNGSI SIMPAN DRAFT MANUAL KE LOCAL STORAGE
         // ========================================================
-        function saveConfigDraft() {
+        window.manualSaveDraft = function() {
             const draft = {
                 nama: document.getElementById('confNama').value,
                 logo: document.getElementById('confLogo').value,
@@ -205,19 +210,12 @@
                 wa: document.getElementById('confWa').value
             };
             localStorage.setItem('zenithConfigDraft', JSON.stringify(draft));
+            showToast("Draft berhasil disimpan ke perangkat!", "success");
         }
 
-        // Memasang pendeteksi ketikan di setiap kolom
-        ['confNama', 'confLogo', 'confTeks', 'confApi', 'confWa'].forEach(id => {
-            document.getElementById(id).addEventListener('input', saveConfigDraft);
-        });
-
         function renderFormPengaturan() {
-            // Cek apakah ada draft yang tersimpan sebelumnya
             const savedDraft = localStorage.getItem('zenithConfigDraft');
-            
             if (savedDraft) {
-                // Jika ada draft, tampilkan draft terakhir
                 const draft = JSON.parse(savedDraft);
                 document.getElementById('confNama').value = draft.nama || "";
                 document.getElementById('confLogo').value = draft.logo || "";
@@ -225,7 +223,6 @@
                 document.getElementById('confApi').value = draft.api || "";
                 document.getElementById('confWa').value = draft.wa || "";
             } else if (typeof CONFIG !== 'undefined') {
-                // Jika tidak ada draft, ambil dari config.js default
                 document.getElementById('confNama').value = CONFIG.NAMA_TOKO || "Zenith Cell";
                 document.getElementById('confLogo').value = CONFIG.LOGO_URL || "";
                 document.getElementById('confTeks').value = CONFIG.TEKS_PENGUMUMAN || "";
@@ -248,8 +245,7 @@
             document.getElementById('hasilConfig').scrollIntoView({behavior: "smooth"});
             lucide.createIcons();
             
-            // Setelah di-generate, hapus draft agar bersih untuk next edit
-            localStorage.removeItem('zenithConfigDraft');
+            // Catatan: Draft tidak lagi dihapus saat generate, agar jika ingin diubah lagi draftnya tetap ada
         }
 
         window.salinConfig = async function() {
@@ -258,10 +254,6 @@
                 showToast("Kode Config berhasil disalin!", "success");
             } catch(e) { showToast("Gagal. Blok teks dan copy manual.", "error"); }
         }
-
-        // ========================================================
-        // SISA KODE LAINNYA TETAP AMAN DAN TIDAK ADA YANG DIUBAH
-        // ========================================================
 
         async function fetchAntrean() {
             const container = document.getElementById('pendingList');
