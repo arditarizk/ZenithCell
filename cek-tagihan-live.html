@@ -43,7 +43,9 @@
                 <div>
                     <label class="block text-[10px] font-extrabold text-slate-400 mb-2 uppercase tracking-widest px-1">Nomor WhatsApp Nasabah</label>
                     <div class="relative flex items-center bg-slate-50 border border-slate-200 rounded-[1.25rem] shadow-sm focus-within:border-emerald-500 focus-within:bg-white transition-all overflow-hidden group">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i data-lucide="phone" class="w-4 h-4 text-emerald-500"></i></div>
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i data-lucide="phone" class="w-4 h-4 text-emerald-500"></i>
+                        </div>
                         <input type="tel" id="waInput" placeholder="Contoh: 08123456789" required class="w-full pl-11 pr-24 py-4 bg-transparent text-sm font-bold outline-none text-slate-800 placeholder-slate-400">
                         <div class="absolute inset-y-0 right-1 pr-1 flex items-center gap-1 z-20">
                             <button type="button" onclick="pasteWA()" class="p-2 bg-white border border-slate-200 rounded-lg text-slate-500 hover:text-emerald-600 shadow-sm active:scale-95 transition-all" title="Paste"><i data-lucide="clipboard" class="w-4 h-4"></i></button>
@@ -70,17 +72,16 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
                         <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Objek Akad Pembiayaan</p>
-                        <p class="font-black text-slate-800 text-sm truncate" id="resBarang">iPhone 14 Pro Max</p>
+                        <p class="font-black text-slate-800 text-sm truncate" id="resBarang">iPhone</p>
                     </div>
                     <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
                         <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3 text-amber-500"></i> Jatuh Tempo Angsuran Berikutnya</p>
-                        <p class="font-black text-base text-slate-900" id="resTempoFull">2 Mei 2026</p>
+                        <p class="font-black text-base text-slate-900" id="resTempoFull">Tgl</p>
                     </div>
                 </div>
 
                 <div class="bg-slate-900 p-6 rounded-3xl shadow-xl text-white relative overflow-hidden flex flex-col gap-4">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 blur-3xl rounded-full -mr-10 -mt-10 pointer-events-none"></div>
-                    
                     <div class="flex justify-between items-end relative z-10">
                         <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Sisa Tagihan Pokok</p>
@@ -94,7 +95,6 @@
                             <p class="font-black text-xl text-white leading-none"><span id="resCicilanKe">0</span> <span class="text-sm text-slate-500 font-bold" id="resTotalTenor">/ 0</span></p>
                         </div>
                     </div>
-
                     <div class="relative z-10 w-full pt-2 border-t border-white/10 mt-2">
                         <div class="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">
                             <span>Terkumpul: Rp <span id="resTerbayar">0</span></span>
@@ -152,7 +152,7 @@
                 </div>
 
                 <div class="text-center px-4 mt-2 mb-2">
-                    <p class="text-xs font-bold text-slate-500 italic" id="motivationalText">"Alhamdulillah, sikit lagi lunas Kak! Tetap istiqomah ya! 🚀"</p>
+                    <p class="text-xs font-bold text-slate-500 italic" id="motivationalText"></p>
                 </div>
 
                 <a id="btnKalender" href="#" target="_blank" class="w-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-extrabold py-4 rounded-[1.25rem] active:scale-95 transition-all flex justify-center items-center gap-2 shadow-sm"><i data-lucide="calendar-plus" class="w-5 h-5"></i> Ingatkan Saya via Google Calendar</a>
@@ -163,32 +163,22 @@
     <script>
         lucide.createIcons();
         const formatRp = (n) => new Intl.NumberFormat('id-ID').format(n);
-        let toastTimer; // Variabel global untuk timer toast
+        let toastTimer;
 
-        // Fungsi Toast (Pesan Pop-up Notifikasi) - DIPERBAIKI VERSI ANTI-TUMPUK
+        // FUNGSI TOAST ANTI-TUMPUK
         function showToast(msg, type = 'success') {
             const container = document.getElementById('toastContainer');
-            
-            // Hapus semua toast yang ada di container
             container.innerHTML = ''; 
-            
-            // Batalkan timer lama agar durasi tidak bertumpuk
-            if (toastTimer) {
-                clearTimeout(toastTimer);
-            }
+            if (toastTimer) clearTimeout(toastTimer);
             
             const toast = document.createElement('div');
             toast.className = `${type === 'success' ? 'bg-emerald-500' : 'bg-red-500'} text-white px-5 py-3.5 rounded-2xl shadow-xl font-bold text-sm text-center transition-all animate-fade-in`;
             toast.innerText = msg; 
             container.appendChild(toast);
             
-            // Setel timer baru untuk menghapus toast setelah 3 detik
-            toastTimer = setTimeout(() => {
-                toast.remove();
-            }, 3000); 
+            toastTimer = setTimeout(() => { toast.remove(); }, 3000); 
         }
 
-        // Fungsi Salin (Copy) Teks Rekening - Memanggil showToast anti-tumpuk
         async function salinTeks(teks) {
             try {
                 await navigator.clipboard.writeText(teks);
@@ -294,9 +284,10 @@
             const rekCard = document.getElementById('rekeningCard');
             
             if (sisaHutang <= 0) {
-                badge.className = "px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md flex items-center gap-1.5 bg-emerald-500 text-white shrink-0"><i data-lucide="award" class="w-4 h-4"></i> LUNAS`;
+                // FIX TYPO CLASSNAME DISINI YANG KEMARIN BIKIN CRASH
+                badge.className = "px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md flex items-center gap-1.5 bg-emerald-500 text-white shrink-0";
+                badge.innerHTML = `<i data-lucide="award" class="w-4 h-4"></i> LUNAS`;
                 
-                // Hilangkan tombol kalender dan nomor rekening jika sudah lunas
                 btnKal.style.display = 'none';
                 rekCard.style.display = 'none';
                 
@@ -308,7 +299,6 @@
                 btnKal.style.display = 'flex';
                 rekCard.style.display = 'block';
                 
-                // --- LOGIKA JATUH TEMPO DIVA MAULANA & TELAT ---
                 if (bulanTerakhirDB !== blnSkrg && tglSkrg > angkaTgl) {
                     badge.className = "px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md flex items-center gap-1.5 bg-red-100 text-red-600 animate-pulse border border-red-200 shrink-0";
                     badge.innerHTML = `<i data-lucide="alert-circle" class="w-4 h-4"></i> Telat ${tglSkrg - angkaTgl} Hari`;
