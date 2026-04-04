@@ -1,5 +1,5 @@
 // ==========================================
-// MASTER API ZENITH CELL (V21 - CLOUD SETTINGS DRAFT)
+// MASTER API ZENITH CELL (V22 - FIX TARGET BULAN ABSOLUT YYYY-MM)
 // ==========================================
 
 function getOrCreateSheet(ss, sheetName) {
@@ -21,9 +21,6 @@ function doPost(e) {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var payload = JSON.parse(e.postData.contents);
     
-    // ==========================================
-    // FITUR BARU: SIMPAN DRAFT CONFIG KE CLOUD
-    // ==========================================
     if (payload.tipe === "SIMPAN_DRAFT_CONFIG") {
       var sC = getOrCreateSheet(ss, "DraftConfig");
       if (sC.getLastRow() === 0) {
@@ -62,9 +59,16 @@ function doPost(e) {
         sL.appendRow(["ID Kontrak", "Nama Pelanggan", "No WA", "Barang", "Total Hutang", "Sudah Terbayar", "Cicilan Per Bulan", "Tgl Jatuh Tempo", "Cicilan Ke", "Bulan Terakhir Bayar"]);
         sL.getRange("A1:J1").setFontWeight("bold").setBackground("#e0e7ff");
       }
+      
+      // LOGIKA BARU: Tentukan Target Bayar Pertama (Bulan Depan) berformat YYYY-MM
       var tz = ss.getSpreadsheetTimeZone();
-      var currentMonthAcc = parseInt(Utilities.formatDate(new Date(), tz, "MM"));
-      sL.appendRow(["'" + cleanId(payload.idKontrak), payload.nama, "'" + payload.wa, payload.barang, payload.totalHutang, 0, payload.cicilanBulan, payload.jatuhTempo, 1, currentMonthAcc]);
+      var dNow = new Date();
+      var targetBulan = parseInt(Utilities.formatDate(dNow, tz, "MM")) + 1;
+      var targetTahun = parseInt(Utilities.formatDate(dNow, tz, "yyyy"));
+      if (targetBulan > 12) { targetBulan -= 12; targetTahun++; }
+      var targetStr = targetTahun + "-" + String(targetBulan).padStart(2, '0');
+
+      sL.appendRow(["'" + cleanId(payload.idKontrak), payload.nama, "'" + payload.wa, payload.barang, payload.totalHutang, 0, payload.cicilanBulan, payload.jatuhTempo, 1, "'" + targetStr]);
       return createJsonResponse({status: "success"});
     }
 
@@ -96,7 +100,27 @@ function doPost(e) {
           if (cleanId(dL[i][0]) === cleanId(payload.idKontrak)) {
             sL.getRange(i+1, 6).setValue((parseInt(dL[i][5])||0) + parseInt(payload.nominalMasuk));
             sL.getRange(i+1, 9).setValue((parseInt(dL[i][8])||0) + 1);
-            sL.getRange(i+1, 10).setValue(payload.bulanIni); 
+            
+            // MAJUKAN TARGET JATUH TEMPO (Solusi Bayar 2x dalam sebulan)
+            var cTarget = String(dL[i][9]);
+            var tz = ss.getSpreadsheetTimeZone();
+            var dNow = new Date();
+            var tThn = parseInt(Utilities.formatDate(dNow, tz, "yyyy"));
+            var tBln;
+            
+            if (cTarget.indexOf("-") > -1) {
+                var p = cTarget.split("-");
+                tThn = parseInt(p[0]); tBln = parseInt(p[1]);
+                tBln++; // Bergeser maju 1 bulan ke depan secara absolut
+            } else {
+                // Fallback sistem lama jika datanya belum di-update
+                var oldBln = parseInt(cTarget) || 0;
+                if (oldBln !== 0) { tBln = oldBln + 2; } else { tBln = parseInt(Utilities.formatDate(dNow, tz, "MM")) + 2; }
+            }
+            if (tBln > 12) { tBln -= 12; tThn++; }
+            var nextTargetStr = tThn + "-" + String(tBln).padStart(2, '0');
+            
+            sL.getRange(i+1, 10).setValue("'" + nextTargetStr); 
             break;
           }
         }
@@ -160,9 +184,6 @@ function doGet(e) {
     var action = e.parameter.action;
     if (action === "ping") return createJsonResponse({status: "online"});
 
-    // ==========================================
-    // BACA DRAFT CONFIG DARI CLOUD
-    // ==========================================
     if (action === "getDraftConfig") {
       var sC = ss.getSheetByName("DraftConfig");
       if (!sC || sC.getLastRow() < 2) return createJsonResponse({status: "empty"});
@@ -193,16 +214,17 @@ function doGet(e) {
     var blnSekarang = parseInt(Utilities.formatDate(dNow, tz, "MM"));
     var thnSekarang = parseInt(Utilities.formatDate(dNow, tz, "yyyy"));
 
-    function hitungStatusJatuhTempo(jatuhTempoDB, bulanTerakhirDB, cicilanKeDB) {
-        var targetBln = blnSekarang;
-        if (bulanTerakhirDB !== 0) {
-            targetBln = bulanTerakhirDB + 1;
+    function hitungStatusJatuhTempo(jatuhTempoDB, cTargetStr) {
+        var targetBln, targetThn = thnSekarang;
+        
+        if (cTargetStr && cTargetStr.indexOf("-") > -1) {
+            var p = cTargetStr.split("-");
+            targetThn = parseInt(p[0]); targetBln = parseInt(p[1]);
         } else {
-            targetBln = blnSekarang + 1;
+            var oldBln = parseInt(cTargetStr) || 0;
+            if (oldBln !== 0) { targetBln = oldBln + 1; } else { targetBln = blnSekarang + 1; }
+            if (targetBln > 12) { targetBln -= 12; targetThn++; }
         }
-
-        var targetThn = thnSekarang;
-        if (targetBln > 12) { targetBln -= 12; targetThn++; }
 
         var dateHariIni = new Date(thnSekarang, blnSekarang - 1, tglSekarang);
         var dateJatuhTempo = new Date(targetThn, targetBln - 1, jatuhTempoDB);
@@ -222,16 +244,16 @@ function doGet(e) {
       
       for (var i = 1; i < d.length; i++) {
         var jatuhTempoDB = parseInt(d[i][7]) || 1;
-        var bulanTerakhirDB = parseInt(d[i][9]) || 0;
+        var cTargetStr = String(d[i][9]);
         var cicilanKeDB = parseInt(d[i][8]) || 1;
 
-        var kalkulasi = hitungStatusJatuhTempo(jatuhTempoDB, bulanTerakhirDB, cicilanKeDB);
+        var kalkulasi = hitungStatusJatuhTempo(jatuhTempoDB, cTargetStr);
 
         res.push({ 
           idKontrak: cleanId(d[i][0]), nama: d[i][1] || "", wa: (d[i][2] || "").toString().replace(/[^0-9]/g, ''), 
           barang: d[i][3] || "", hutang: parseInt(d[i][4]) || 0, terbayar: parseInt(d[i][5]) || 0, 
           cicilanPerBulan: parseInt(d[i][6]) || 0, jatuhTempo: jatuhTempoDB, 
-          cicilanKe: cicilanKeDB, bulanTerakhirBayar: bulanTerakhirDB, 
+          cicilanKe: cicilanKeDB, bulanTerakhirBayar: d[i][9], 
           statusPembayaran: kalkulasi.statusSkor, selisihHari: kalkulasi.selisihHari,
           targetBulan: kalkulasi.targetBln, targetTahun: kalkulasi.targetThn
         });
@@ -247,14 +269,14 @@ function doGet(e) {
         for (var i = 1; i < d.length; i++) {
           if (String(d[i][2]).replace(/[^0-9]/g, '') === sw) {
             var jatuhTempoDB = parseInt(d[i][7]) || 1;
-            var bulanTerakhirDB = parseInt(d[i][9]) || 0;
+            var cTargetStr = String(d[i][9]);
             var cicilanKeDB = parseInt(d[i][8]) || 1;
-            var kalkulasi = hitungStatusJatuhTempo(jatuhTempoDB, bulanTerakhirDB, cicilanKeDB);
+            var kalkulasi = hitungStatusJatuhTempo(jatuhTempoDB, cTargetStr);
 
             return createJsonResponse({status: "success", data: { 
               nama: d[i][1], wa: sw, barang: d[i][3], totalHutang: parseInt(d[i][4])||0, terbayar: parseInt(d[i][5])||0, 
               cicilanPerBulan: parseInt(d[i][6])||0, jatuhTempo: jatuhTempoDB, cicilanKe: cicilanKeDB, 
-              bulanTerakhirBayar: bulanTerakhirDB, statusPembayaran: kalkulasi.statusSkor, selisihHari: kalkulasi.selisihHari,
+              bulanTerakhirBayar: d[i][9], statusPembayaran: kalkulasi.statusSkor, selisihHari: kalkulasi.selisihHari,
               targetBulan: kalkulasi.targetBln, targetTahun: kalkulasi.targetThn
             }});
           }
