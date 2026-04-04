@@ -1,5 +1,5 @@
 const CONFIG = {
-    "API_URL": "https://script.google.com/macros/s/AKfycbyrWRdukm_15YB2FwawXCgDJULGerIAj-XPkxmTcf3oczJwq0Ys_GzO7CTTh-HaBZdTyg/exec",
+    "API_URL": "https://script.google.com/macros/s/AKfycbxZjy-qoKMor9CpwiVVy9ZvZfGiS4tlLIWFm0stkNRGXGOx8-TuhK4S1ndQa_r2_NAajg/exec",
     "WA_ADMIN": "62895410571547",
     "PIN_ADMIN": "zenith123",
     "DAFTAR_ADMIN": {
