@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="config.js?v=2"></script>
+    <script src="config.js?v=3"></script>
     <script>
         const KASIR_AKTIF = localStorage.getItem('kasirZenithAktif');
         if (!KASIR_AKTIF) { window.location.replace('index.html'); }
@@ -61,7 +61,13 @@
             </div>
 
             <div id="viewPengaturan" class="hidden flex-col flex-grow w-full max-w-md lg:max-w-xl mx-auto lg:mx-0 pb-10">
-                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-6">
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-6 relative">
+                    
+                    <div id="loadingCloud" class="hidden absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-3xl">
+                        <div class="spinner mb-3"></div>
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Menarik Data dari Cloud...</p>
+                    </div>
+
                     <h2 class="font-black text-slate-800 mb-5 flex items-center gap-2"><i data-lucide="paint-brush" class="w-5 h-5 text-indigo-500"></i> Identitas & Visual Web</h2>
                     <div class="space-y-4">
                         <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nama Toko Utama</label><input type="text" id="confNama" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm outline-none focus:border-indigo-400 transition-all shadow-inner"></div>
@@ -76,8 +82,8 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-3 mt-8">
-                        <button onclick="manualSaveDraft()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-black tracking-widest uppercase py-4 rounded-xl shadow-sm active:scale-95 transition-all flex justify-center items-center gap-2 border border-slate-200 text-[11px]">
-                            <i data-lucide="save" class="w-4 h-4 text-slate-500"></i> SIMPAN DRAFT
+                        <button id="btnSaveCloud" onclick="simpanKeCloud(event)" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-black tracking-widest uppercase py-4 rounded-xl shadow-sm active:scale-95 transition-all flex justify-center items-center gap-2 border border-slate-200 text-[11px]">
+                            <i data-lucide="cloud-upload" class="w-4 h-4 text-slate-500"></i> SIMPAN CLOUD
                         </button>
                         <button onclick="generateConfig()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-black tracking-widest uppercase py-4 rounded-xl shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2 text-[11px]">
                             <i data-lucide="code-2" class="w-4 h-4 text-emerald-400"></i> BUAT KODE
@@ -157,28 +163,62 @@
 
         function refreshData() { currentTab === 'antrean' ? fetchAntrean() : fetchTagihan(); }
 
-        window.manualSaveDraft = function() {
+        // ========================================================
+        // FITUR BARU: SIMPAN DRAFT LANGSUNG KE CLOUD
+        // ========================================================
+        window.simpanKeCloud = async function(event) {
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 text-slate-500 animate-spin"></i> MENYIMPAN...`;
+            btn.disabled = true;
+            lucide.createIcons();
+
             const draft = {
+                tipe: "SIMPAN_DRAFT_CONFIG",
                 nama: document.getElementById('confNama').value,
                 logo: document.getElementById('confLogo').value,
                 teks: document.getElementById('confTeks').value,
                 api: document.getElementById('confApi').value,
                 wa: document.getElementById('confWa').value
             };
-            localStorage.setItem('zenithConfigDraft', JSON.stringify(draft));
-            showToast("Draft berhasil disimpan ke perangkat!", "success");
+
+            try {
+                // Fetch tidak akan mem-block walau CORS, data tetap terkirim ke Google Sheets
+                await fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(draft) });
+                showToast("Draft tersimpan di Cloud! Bisa dibuka di Laptop.", "success");
+            } catch(e) {
+                showToast("Gagal menyimpan ke Cloud.", "error");
+            }
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         }
 
-        function renderFormPengaturan() {
-            const savedDraft = localStorage.getItem('zenithConfigDraft');
-            if (savedDraft) {
-                const draft = JSON.parse(savedDraft);
-                document.getElementById('confNama').value = draft.nama || "";
-                document.getElementById('confLogo').value = draft.logo || "";
-                document.getElementById('confTeks').value = draft.teks || "";
-                document.getElementById('confApi').value = draft.api || "";
-                document.getElementById('confWa').value = draft.wa || "";
-            } else if (typeof CONFIG !== 'undefined') {
+        async function renderFormPengaturan() {
+            document.getElementById('loadingCloud').classList.remove('hidden');
+            
+            try {
+                const res = await fetch(`${CONFIG.API_URL}?action=getDraftConfig&nocache=${Date.now()}`);
+                const result = await res.json();
+                
+                if (result.status === "success") {
+                    document.getElementById('confNama').value = result.data.nama || "";
+                    document.getElementById('confLogo').value = result.data.logo || "";
+                    document.getElementById('confTeks').value = result.data.teks || "";
+                    document.getElementById('confApi').value = result.data.api || "";
+                    document.getElementById('confWa').value = result.data.wa || "";
+                } else if (result.status === "empty") {
+                    // Jika cloud masih kosong, ambil bawaan dari file config.js
+                    fallbackToLocalConfig();
+                }
+            } catch (e) {
+                console.log("Error fetch draft:", e);
+                fallbackToLocalConfig();
+            }
+            document.getElementById('loadingCloud').classList.add('hidden');
+        }
+        
+        function fallbackToLocalConfig() {
+            if (typeof CONFIG !== 'undefined') {
                 document.getElementById('confNama').value = CONFIG.NAMA_TOKO || "Zenith Cell";
                 document.getElementById('confLogo').value = CONFIG.LOGO_URL || "";
                 document.getElementById('confTeks').value = CONFIG.TEKS_PENGUMUMAN || "";
@@ -251,7 +291,6 @@
             let sisaBulanIni = p.cicilanPerBulan > 0 ? p.cicilanPerBulan : Math.round(p.hutang / 6);
             let sisaHutangGlobal = p.hutang - p.terbayar; let angkaTanggal = parseInt(p.jatuhTempo) || 1;
             
-            // FIX: Menampilkan Tgl Lengkap (Angka Bulan Tahun)
             let tglLengkap = `${angkaTanggal} ${namaBulan[targetBulan]} ${targetTahun}`;
             
             let badgeHtml = isTelat ? `<span class="bg-red-100 text-red-600 px-1.5 py-0.5 rounded text-[8px] font-black animate-pulse border border-red-200 shrink-0">${statusBe}</span>` : `<span class="bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded text-[8px] font-black border border-emerald-200 shrink-0">LANCAR</span>`;
