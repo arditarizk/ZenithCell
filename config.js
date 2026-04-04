@@ -24,7 +24,7 @@ const CONFIG = {
         },
         "nawakewed": {
             "margin": 20,
-            "pesan": "Kode valid! Margin VVIP 20% 🎉"
+            "pesan": "Oyi Sam! Margin VVIP 20% Umak Mbois Lop🎉"
         },
         "temanvivi": {
             "margin": 20,
