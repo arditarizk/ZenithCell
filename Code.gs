@@ -1,5 +1,5 @@
 // ==========================================
-// MASTER API ZENITH CELL (V19 - SINGLE SOURCE OF TRUTH & TABAYYUN)
+// MASTER API ZENITH CELL (V21 - CLOUD SETTINGS DRAFT)
 // ==========================================
 
 function getOrCreateSheet(ss, sheetName) {
@@ -21,6 +21,21 @@ function doPost(e) {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var payload = JSON.parse(e.postData.contents);
     
+    // ==========================================
+    // FITUR BARU: SIMPAN DRAFT CONFIG KE CLOUD
+    // ==========================================
+    if (payload.tipe === "SIMPAN_DRAFT_CONFIG") {
+      var sC = getOrCreateSheet(ss, "DraftConfig");
+      if (sC.getLastRow() === 0) {
+        sC.appendRow(["Nama Toko", "Logo URL", "Teks Pengumuman", "API URL", "WA Admin"]);
+        sC.getRange("A1:E1").setFontWeight("bold").setBackground("#fef3c7");
+        sC.appendRow([payload.nama, payload.logo, payload.teks, payload.api, payload.wa]);
+      } else {
+        sC.getRange("A2:E2").setValues([[payload.nama, payload.logo, payload.teks, payload.api, payload.wa]]);
+      }
+      return createJsonResponse({status: "success"});
+    }
+
     if (payload.tipe === "PENGAJUAN_BARU") {
       var s = getOrCreateSheet(ss, "Pengajuan");
       if (s.getLastRow() === 0) {
@@ -47,7 +62,9 @@ function doPost(e) {
         sL.appendRow(["ID Kontrak", "Nama Pelanggan", "No WA", "Barang", "Total Hutang", "Sudah Terbayar", "Cicilan Per Bulan", "Tgl Jatuh Tempo", "Cicilan Ke", "Bulan Terakhir Bayar"]);
         sL.getRange("A1:J1").setFontWeight("bold").setBackground("#e0e7ff");
       }
-      sL.appendRow(["'" + cleanId(payload.idKontrak), payload.nama, "'" + payload.wa, payload.barang, payload.totalHutang, 0, payload.cicilanBulan, payload.jatuhTempo, 1, 0]);
+      var tz = ss.getSpreadsheetTimeZone();
+      var currentMonthAcc = parseInt(Utilities.formatDate(new Date(), tz, "MM"));
+      sL.appendRow(["'" + cleanId(payload.idKontrak), payload.nama, "'" + payload.wa, payload.barang, payload.totalHutang, 0, payload.cicilanBulan, payload.jatuhTempo, 1, currentMonthAcc]);
       return createJsonResponse({status: "success"});
     }
 
@@ -112,9 +129,6 @@ function doPost(e) {
       return createJsonResponse({status: "success"});
     }
 
-    // ==========================================
-    // FITUR BARU: TABAYYUN (RESTRUKTURISASI)
-    // ==========================================
     if (payload.tipe === "TABAYYUN_UPDATE") {
       var sL = ss.getSheetByName("Pelanggan");
       if (sL) {
@@ -124,7 +138,6 @@ function doPost(e) {
             if (payload.jatuhTempoBaru) sL.getRange(i+1, 8).setValue(payload.jatuhTempoBaru);
             if (payload.cicilanBaru) sL.getRange(i+1, 7).setValue(payload.cicilanBaru);
             
-            // Catat ke transaksi agar jejak audit aman
             var sT = getOrCreateSheet(ss, "Transaksi");
             var d = new Date();
             var idTrans = "TBY" + String(d.getFullYear()).slice(-2) + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0') + String(Math.floor(Math.random()*1000));
@@ -147,6 +160,16 @@ function doGet(e) {
     var action = e.parameter.action;
     if (action === "ping") return createJsonResponse({status: "online"});
 
+    // ==========================================
+    // BACA DRAFT CONFIG DARI CLOUD
+    // ==========================================
+    if (action === "getDraftConfig") {
+      var sC = ss.getSheetByName("DraftConfig");
+      if (!sC || sC.getLastRow() < 2) return createJsonResponse({status: "empty"});
+      var dC = sC.getRange("A2:E2").getValues()[0];
+      return createJsonResponse({status: "success", data: {nama: dC[0], logo: dC[1], teks: dC[2], api: dC[3], wa: dC[4]}});
+    }
+
     if (action === "getPending") {
       var s = ss.getSheetByName("Pengajuan");
       if (!s || s.getLastRow() < 2) return createJsonResponse({status: "success", data: []});
@@ -164,9 +187,6 @@ function doGet(e) {
       return createJsonResponse({status: "success", data: res});
     }
 
-    // ==========================================
-    // LOGIKA TANGGAL TERPUSAT (SINGLE SOURCE OF TRUTH)
-    // ==========================================
     var tz = ss.getSpreadsheetTimeZone();
     var dNow = new Date();
     var tglSekarang = parseInt(Utilities.formatDate(dNow, tz, "dd"));
@@ -178,8 +198,9 @@ function doGet(e) {
         if (bulanTerakhirDB !== 0) {
             targetBln = bulanTerakhirDB + 1;
         } else {
-            if (cicilanKeDB == 1 && tglSekarang > jatuhTempoDB) { targetBln = blnSekarang + 1; }
+            targetBln = blnSekarang + 1;
         }
+
         var targetThn = thnSekarang;
         if (targetBln > 12) { targetBln -= 12; targetThn++; }
 
