@@ -8,7 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="config.js"></script>
+    
+    <script src="config.js?v=2"></script>
+    
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; -webkit-tap-highlight-color: transparent; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -131,10 +133,23 @@
         const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
 
         function showToast(msg, type = 'error') {
+            const container = document.getElementById('toastContainer');
+            container.innerHTML = ''; 
+            
             const toast = document.createElement('div');
-            toast.className = `${type === 'success' ? 'bg-emerald-500' : 'bg-red-500'} text-white px-5 py-3.5 rounded-2xl shadow-xl fixed top-5 left-1/2 -translate-x-1/2 z-[1000] min-w-[250px] font-bold text-sm text-center`;
-            toast.innerText = msg; document.getElementById('toastContainer').appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            let bgColor = 'bg-red-500'; let icon = 'alert-circle';
+            
+            if (type === 'success') { bgColor = 'bg-emerald-500'; icon = 'check-circle'; }
+            else if (type === 'info') { bgColor = 'bg-amber-500'; icon = 'info'; }
+            
+            toast.className = `${bgColor} text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center justify-center gap-2 transform -translate-y-10 opacity-0 transition-all duration-300 w-full pointer-events-auto`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 shrink-0"></i><span class="text-sm font-bold text-center">${msg}</span>`;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => { toast.classList.remove('-translate-y-10', 'opacity-0'); }, 10);
+            setTimeout(() => { toast.classList.add('-translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
 
         [priceInput, dpInput].forEach(el => {
@@ -144,6 +159,7 @@
             });
         });
 
+        // FIX: BACA PESAN CUSTOM DARI CONFIG.JS
         function cekPromo() {
             const kode = document.getElementById('kodePromo').value.trim().toLowerCase();
             const jalurM = document.getElementById('jenisJalur').value;
@@ -155,7 +171,11 @@
                     return;
                 }
                 promoMargin = CONFIG.VOUCHERS[kode].margin;
-                showToast(`Promo Aktif! Margin turun menjadi ${promoMargin}%`, "success");
+                
+                // MENGAMBIL TEKS "PESAN" DARI CONFIG JIKA ADA
+                const pesanCustom = CONFIG.VOUCHERS[kode].pesan || `Promo Aktif! Margin turun menjadi ${promoMargin}%`;
+                showToast(pesanCustom, "success");
+                
                 hitungSimulasi();
             } else {
                 promoMargin = null;
@@ -188,25 +208,16 @@
             resCicilan.innerText = formatRupiah(Math.round(total / tenor));
         }
         
-        // INTEGRASI BAWA DATA KE FORM
         function lanjutKeForm() {
             const harga = parseRupiah(priceInput.value);
-            if(harga === 0) {
-                showToast("Silakan isi Harga Gadget terlebih dahulu.", "error");
-                priceInput.focus();
-                return;
-            }
+            if(harga === 0) { showToast("Silakan isi Harga Gadget terlebih dahulu.", "error"); priceInput.focus(); return; }
             const dp = parseRupiah(dpInput.value);
             const tenor = document.querySelector('input[name="tenor"]:checked').value;
             const jalur = document.getElementById('jenisJalur').value; 
             const voucher = document.getElementById('kodePromo').value.trim();
             
-            // Tambahkan data voucher di URL jika promo sukses diaktifkan
             let url = `form-pengajuan.html?harga=${harga}&dp=${dp}&tenor=${tenor}&jalur=${jalur}`;
-            if(voucher && promoMargin !== null) { 
-                url += `&voucher=${encodeURIComponent(voucher)}`;
-            }
-            
+            if(voucher && promoMargin !== null) { url += `&voucher=${encodeURIComponent(voucher)}`; }
             window.location.href = url;
         }
     </script>
