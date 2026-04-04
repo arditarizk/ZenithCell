@@ -8,9 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    
     <script src="config.js?v=2"></script>
-    
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; padding-bottom: 20px; -webkit-tap-highlight-color: transparent; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -23,7 +21,7 @@
 
     <div id="toastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 pointer-events-none w-full max-w-sm px-4"></div>
 
-    <main class="m-auto w-full max-w-md lg:max-w-5xl bg-white/50 lg:bg-white lg:glass-panel lg:rounded-[2.5rem] lg:p-8 lg:shadow-xl relative z-10 flex flex-col pb-24 lg:pb-0 pt-6 lg:pt-0">
+    <main class="m-auto w-full max-w-md lg:max-w-5xl bg-white/50 lg:bg-white lg:glass-panel lg:rounded-[2.5rem] lg:p-8 lg:shadow-xl relative z-10 flex flex-col pb-24 lg:pb-8 pt-6 lg:pt-8">
         <header class="mb-6 flex items-center gap-4 bg-white p-4 rounded-[2rem] lg:rounded-2xl shadow-sm border relative mx-4 lg:mx-0">
             <a href="index.html" class="p-2.5 bg-slate-50 border border-slate-100 rounded-full text-slate-500 active:scale-95 transition-all hover:bg-slate-200"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
             <div>
@@ -95,7 +93,7 @@
                         </div>
                     </section>
                     
-                    <div class="fixed lg:static bottom-4 left-1/2 lg:left-auto -translate-x-1/2 lg:translate-x-0 w-[92%] lg:w-full z-50 lg:z-auto lg:mt-6">
+                    <div class="fixed lg:static bottom-4 left-1/2 lg:left-auto -translate-x-1/2 lg:translate-x-0 w-[92%] lg:w-full z-50 lg:z-auto lg:mt-8">
                         <button type="submit" id="btnSubmitForm" class="w-full bg-slate-900 text-white font-extrabold py-4 px-6 rounded-2xl active:scale-95 transition-all flex justify-center items-center gap-2 shadow-2xl lg:shadow-md border border-slate-700">
                             <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i><span id="txtBtnSubmit">Ajukan Pembiayaan</span>
                         </button>
@@ -110,7 +108,8 @@
             <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="check-circle" class="w-8 h-8 text-emerald-500"></i></div>
             <h3 class="text-lg font-extrabold text-slate-900 mb-1">Berhasil Disimpan</h3>
             <p class="text-slate-500 text-xs mb-6">Pengajuan direkam sistem. Lanjut ke WA Admin.</p>
-            <button onclick="location.reload()" class="w-full bg-slate-100 hover:bg-slate-200 font-bold py-3 rounded-xl text-sm active:scale-95 transition-all">Selesai</button>
+            
+            <button onclick="window.location.href='index.html'" class="w-full bg-slate-100 hover:bg-slate-200 font-bold py-3 rounded-xl text-sm active:scale-95 transition-all">Selesai</button>
         </div>
     </div>
 
@@ -180,7 +179,6 @@
             } catch (ex) { console.log(ex); }
         }
 
-        // FIX: BACA PESAN CUSTOM DARI CONFIG.JS DI FORM PENGAJUAN
         function verifikasiVoucher() {
             const i = document.getElementById('inputVoucher'), m = document.getElementById('msgVoucher'), j = document.getElementById('pilihJalur').value;
             const k = i.value.trim().toLowerCase(), targetM = j === "VIP" ? 15 : 25;
@@ -189,8 +187,6 @@
             if(CONFIG.VOUCHERS && CONFIG.VOUCHERS[k]) {
                 if(CONFIG.VOUCHERS[k].margin >= targetM) return showToast(`Jalur ${j} sudah lebih murah.`, "info");
                 promoMarginAktif = CONFIG.VOUCHERS[k].margin; 
-                
-                // MENGAMBIL TEKS "PESAN" DARI CONFIG JIKA ADA
                 const pesanCustom = CONFIG.VOUCHERS[k].pesan || `Aktif (Margin ${promoMarginAktif}%)`;
                 
                 m.innerText = pesanCustom; 
