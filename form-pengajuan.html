@@ -8,7 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    
     <script src="config.js?v=2"></script>
+    
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; padding-bottom: 20px; -webkit-tap-highlight-color: transparent; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -108,7 +110,6 @@
             <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="check-circle" class="w-8 h-8 text-emerald-500"></i></div>
             <h3 class="text-lg font-extrabold text-slate-900 mb-1">Berhasil Disimpan</h3>
             <p class="text-slate-500 text-xs mb-6">Pengajuan direkam sistem. Lanjut ke WA Admin.</p>
-            
             <button onclick="window.location.href='index.html'" class="w-full bg-slate-100 hover:bg-slate-200 font-bold py-3 rounded-xl text-sm active:scale-95 transition-all">Selesai</button>
         </div>
     </div>
@@ -117,14 +118,17 @@
         lucide.createIcons(); 
         let promoMarginAktif = null;
         
+        // FIX ID KONTRAK: ZN + YY + MM + DD + 2 Digit WA Terakhir
         function buatIdKontrak(waStr) { 
             const d = new Date(); 
             const yy = String(d.getFullYear()).slice(-2);
             const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
             let waClean = (waStr || "").toString().replace(/[^0-9]/g, '');
             let waAkhir = "00";
             if(waClean.length >= 2) { waAkhir = waClean.slice(-2); }
-            return `ZN${yy}${mm}${waAkhir}`; 
+            
+            return `ZN${yy}${mm}${dd}${waAkhir}`; 
         }
 
         const fr = (n) => (n===0||isNaN(n))?"":new Intl.NumberFormat('id-ID').format(n);
