@@ -26,11 +26,11 @@ const CONFIG = {
             "margin": 20,
             "pesan": "Kode valid! Margin VVIP 20% 🎉"
         },
-        "TEMANVIVI": {
+        "temanvivi": {
             "margin": 20,
             "pesan": "Voucher Teman Vivi Aktif! Margin VVIP 20% + Vivi dapat Cashback! 🎁"
         },
-        "TEMANARDITA": {
+        "temanardita": {
             "margin": 20,
             "pesan": "Voucher Teman Ardita Aktif! Margin VVIP 20% + Cashback 50Rb! 🎁"
         }
