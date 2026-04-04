@@ -20,7 +20,7 @@ const CONFIG = {
     "VOUCHERS": {
         "dulurdewe22": {
             "margin": 22,
-            "pesan": "Kode valid! Margin layanan turun jadi 22% 🎉"
+            "pesan": "Kode valid! PSHT JAYA, JAYA, JAYA! 💗 🎉"
         },
         "nawakewed": {
             "margin": 20,
