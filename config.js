@@ -1,5 +1,5 @@
 const CONFIG = {
-    "API_URL": "https://script.google.com/macros/s/AKfycbzfRYwjsIz1IBBxvkRFceTXiA0MDuVmZVSRqF2Egm1mPpYmHPhDOHE3xZzqSwyiGl04pw/exec",
+    "API_URL": "https://script.google.com/macros/s/AKfycbybJ0Yq5hT8kLZDhRBEOyx9a2fZJ_AnhQCluR90TvKpibe202DYmcUz8rMtNxQs3RHg-g/exec",
     "WA_ADMIN": "62895410571547",
     "MARGIN_DEFAULT": 25,
     "VOUCHERS": {
