@@ -8,9 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <script src="config.js?v=2"></script>
-    
+    <script src="config.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; -webkit-tap-highlight-color: transparent; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -33,7 +31,6 @@
         </header>
 
         <div class="px-4 lg:px-0 flex-grow grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-8">
-            
             <div class="space-y-4">
                 <section class="glass-panel p-5 rounded-3xl">
                     <h2 class="text-sm font-extrabold mb-4 flex items-center gap-2 text-slate-800"><i data-lucide="calculator" class="w-4 h-4 text-emerald-500"></i> Nilai Barang</h2>
@@ -130,7 +127,8 @@
         const labelMarginAktif = document.getElementById('labelMarginAktif');
 
         const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num);
-        const parseRupiah = (str) => parseInt(str.toString().replace(/[^0-9]/g, '')) || 0;
+        // FIX BUG PARSING: Membuang desimal agar angka aman
+        const parseRupiah = (str) => parseInt(str.toString().split(',')[0].replace(/[^0-9]/g, '')) || 0;
 
         function showToast(msg, type = 'error') {
             const container = document.getElementById('toastContainer');
@@ -164,7 +162,7 @@
             const jalurM = document.getElementById('jenisJalur').value;
             if(!kode) return showToast("Masukkan kode promo.");
             
-            if(CONFIG.VOUCHERS && CONFIG.VOUCHERS[kode]) {
+            if(typeof CONFIG !== 'undefined' && CONFIG.VOUCHERS && CONFIG.VOUCHERS[kode]) {
                 if(CONFIG.VOUCHERS[kode].margin >= parseInt(jalurM)) {
                     showToast(`Jalur pilihan Anda (${jalurM}%) sudah lebih murah dari promo ini.`, "info");
                     return;
@@ -195,8 +193,10 @@
             }
 
             let pokok = price - dp; if (pokok < 0) pokok = 0; 
-            const nominalMargin = pokok * (finalMargin / 100);
-            const total = pokok + nominalMargin;
+            
+            // FIX BUG MATEMATIKA: Bulatkan hasil kali dan totalnya agar tidak koma
+            const nominalMargin = Math.round(pokok * (finalMargin / 100));
+            const total = Math.round(pokok + nominalMargin);
             
             resPokok.innerText = `Rp ${formatRupiah(pokok)}`; 
             resMargin.innerText = `Rp ${formatRupiah(nominalMargin)}`; 
