@@ -8,10 +8,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="config.js?v=3"></script>
+    <script src="config.js"></script>
     <script>
         const KASIR_AKTIF = localStorage.getItem('kasirZenithAktif');
-        if (!KASIR_AKTIF) { window.location.replace('index.html'); }
+        const SECRET_TOKEN = localStorage.getItem('zenithSecretToken');
+        if (!KASIR_AKTIF || !SECRET_TOKEN) { window.location.replace('index.html'); }
     </script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
@@ -34,7 +35,6 @@
                 <div class="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="layout-dashboard" class="w-6 h-6 text-amber-400"></i></div>
                 <div><h1 class="font-black text-lg lg:text-xl leading-none">Server Admin</h1><p class="text-[10px] font-bold text-amber-600 uppercase mt-1 tracking-wider" id="labelAdmin">Monitoring Panel</p></div>
             </div>
-            
             <div class="flex gap-2 shrink-0">
                 <button onclick="refreshData()" class="p-3 bg-amber-50 rounded-xl text-amber-700 hover:bg-amber-100 transition-colors" title="Muat Ulang Data"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
                 <button onclick="logoutKasir()" class="p-3 bg-red-50 rounded-xl text-red-600 hover:bg-red-100 transition-colors" title="Keluar"><i data-lucide="log-out" class="w-5 h-5"></i></button>
@@ -62,25 +62,20 @@
 
             <div id="viewPengaturan" class="hidden flex-col flex-grow w-full max-w-md lg:max-w-xl mx-auto lg:mx-0 pb-10">
                 <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-6 relative">
-                    
                     <div id="loadingCloud" class="hidden absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center rounded-3xl">
-                        <div class="spinner mb-3"></div>
-                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Menarik Data dari Cloud...</p>
+                        <div class="spinner mb-3"></div><p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Menarik Data dari Cloud...</p>
                     </div>
-
                     <h2 class="font-black text-slate-800 mb-5 flex items-center gap-2"><i data-lucide="paint-brush" class="w-5 h-5 text-indigo-500"></i> Identitas & Visual Web</h2>
                     <div class="space-y-4">
                         <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nama Toko Utama</label><input type="text" id="confNama" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm outline-none focus:border-indigo-400 transition-all shadow-inner"></div>
                         <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Link Gambar Logo Web</label><input type="url" id="confLogo" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-xs outline-none focus:border-indigo-400 transition-all shadow-inner"></div>
                         <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Teks Pengumuman Berjalan (Marquee)</label><textarea id="confTeks" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-xs outline-none resize-none focus:border-indigo-400 transition-all shadow-inner" rows="3"></textarea></div>
                     </div>
-                    
                     <h2 class="font-black text-slate-800 mb-5 mt-8 flex items-center gap-2"><i data-lucide="server" class="w-5 h-5 text-amber-500"></i> Pengaturan Backend</h2>
                     <div class="space-y-4">
                         <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">URL API Google Sheets</label><input type="url" id="confApi" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-[10px] outline-none focus:border-amber-400 transition-all shadow-inner text-amber-600"></div>
                         <div><label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nomor WhatsApp Admin Pusat</label><input type="number" id="confWa" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm outline-none focus:border-amber-400 transition-all shadow-inner"></div>
                     </div>
-
                     <div class="grid grid-cols-2 gap-3 mt-8">
                         <button id="btnSaveCloud" onclick="simpanKeCloud(event)" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-black tracking-widest uppercase py-4 rounded-xl shadow-sm active:scale-95 transition-all flex justify-center items-center gap-2 border border-slate-200 text-[11px]">
                             <i data-lucide="cloud-upload" class="w-4 h-4 text-slate-500"></i> SIMPAN CLOUD
@@ -120,15 +115,15 @@
     </div>
 
     <div id="accModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-center items-center px-4 opacity-0 transition-opacity"><div class="bg-white w-full max-w-md rounded-[2rem] p-6 shadow-2xl transform scale-95 transition-transform" id="accModalContent"><div class="flex justify-between items-center mb-5 pb-3 border-b"><h2 class="font-black text-base text-slate-900">Finalisasi Akad</h2><button onclick="closeModalAcc()" class="p-2 bg-slate-50 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button></div><div class="space-y-4"><div class="bg-slate-50 p-4 rounded-2xl border"><div class="flex justify-between mb-1"><p class="text-[9px] text-slate-400 font-black uppercase" id="accIdKontrak">...</p><span id="badgeMarginFinal" class="text-[8px] font-black px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">MARGIN: --%</span></div><p class="font-black text-slate-800 text-base" id="accNama">...</p><p class="text-[11px] font-semibold text-slate-500" id="accBarang">...</p></div><div class="grid grid-cols-2 gap-3"><div><label class="block text-[10px] font-extrabold text-slate-500 mb-1">Tgl Tempo</label><input type="number" id="accJatuhTempo" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div><div><label class="block text-[10px] font-extrabold text-slate-500 mb-1">Tenor (Bln)</label><input type="number" id="accTenor" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none" disabled></div></div><div><label class="block text-[10px] font-extrabold text-slate-500 mb-1">Total Harga Jual</label><input type="text" id="accTotalHutang" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div><div><label class="block text-[10px] font-extrabold text-slate-500 mb-1">Cicilan Per Bulan</label><input type="text" id="accCicilan" class="w-full p-3 bg-white border rounded-xl font-bold text-sm outline-none"></div></div><button id="btnKonfirmasiAcc" class="w-full mt-6 bg-emerald-500 text-white font-extrabold py-4 rounded-xl shadow-lg active:scale-95 transition-transform">ACC & NOTIFIKASI WA</button></div></div>
-
+    
     <div id="tolakModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300"><div class="bg-white rounded-[2rem] p-6 max-w-[320px] w-full text-center shadow-2xl transform scale-95 transition-transform" id="tolakCard"><div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="alert-triangle" class="w-8 h-8 text-red-500"></i></div><h3 class="text-lg font-extrabold text-slate-900 mb-1">Tolak Pengajuan?</h3><p class="text-slate-500 text-xs mb-6 leading-relaxed">Pengajuan atas nama <strong id="tolakNamaUser" class="text-slate-700"></strong> akan ditolak dan disembunyikan dari antrean.</p><div class="flex gap-3"><button onclick="closeTolakModal()" class="flex-1 bg-slate-100 font-bold py-3.5 rounded-xl text-slate-600 text-sm active:scale-95 transition-all">Batal</button><button id="btnConfirmTolak" class="flex-1 bg-red-500 text-white font-bold py-3.5 rounded-xl text-sm active:scale-95 transition-all">Ya, Tolak</button></div></div></div>
-
+    
     <div id="waModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex-col justify-center items-center px-4 opacity-0 transition-opacity"><div class="bg-white w-full max-w-md rounded-[2rem] p-6 shadow-2xl transform scale-95 transition-transform"><div class="flex justify-between items-center mb-4 pb-2 border-b"><h2 class="font-black text-base text-slate-900 flex items-center gap-2" id="waHeaderTitle"><i data-lucide="send" class="w-4 h-4 text-emerald-500"></i> Pesan Tagihan</h2><button onclick="closeWaModal()" class="p-2 bg-slate-50 rounded-full"><i data-lucide="x" class="w-4 h-4 text-slate-400"></i></button></div><textarea id="pesanWA" rows="8" class="w-full p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl text-xs font-medium outline-none resize-none"></textarea><button id="btnKirimWA" class="w-full mt-4 bg-[#25D366] text-white font-bold py-3 rounded-xl active:scale-95 flex justify-center gap-2 shadow-lg"><i data-lucide="message-circle" class="w-4 h-4"></i> Kirim ke WhatsApp</button></div></div>
 
     <script>
         lucide.createIcons();
         
-        function logoutKasir() { localStorage.removeItem('kasirZenithAktif'); window.location.replace('index.html'); }
+        function logoutKasir() { localStorage.removeItem('kasirZenithAktif'); localStorage.removeItem('zenithSecretToken'); window.location.replace('index.html'); }
         document.addEventListener('DOMContentLoaded', () => { document.getElementById('labelAdmin').innerText = `Admin: ${KASIR_AKTIF}`; });
 
         const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num);
@@ -170,7 +165,7 @@
             btn.disabled = true;
             lucide.createIcons();
             const draft = {
-                tipe: "SIMPAN_DRAFT_CONFIG",
+                tipe: "SIMPAN_DRAFT_CONFIG", pin: SECRET_TOKEN,
                 nama: document.getElementById('confNama').value, logo: document.getElementById('confLogo').value,
                 teks: document.getElementById('confTeks').value, api: document.getElementById('confApi').value,
                 wa: document.getElementById('confWa').value
@@ -185,7 +180,7 @@
         async function renderFormPengaturan() {
             document.getElementById('loadingCloud').classList.remove('hidden');
             try {
-                const res = await fetch(`${CONFIG.API_URL}?action=getDraftConfig&nocache=${Date.now()}`);
+                const res = await fetch(`${CONFIG.API_URL}?action=getDraftConfig&pin=${SECRET_TOKEN}&nocache=${Date.now()}`);
                 const result = await res.json();
                 if (result.status === "success") {
                     document.getElementById('confNama').value = result.data.nama || ""; document.getElementById('confLogo').value = result.data.logo || "";
@@ -209,6 +204,8 @@
             confObj.NAMA_TOKO = document.getElementById('confNama').value; confObj.LOGO_URL = document.getElementById('confLogo').value;
             confObj.TEKS_PENGUMUMAN = document.getElementById('confTeks').value; confObj.API_URL = document.getElementById('confApi').value;
             confObj.WA_ADMIN = document.getElementById('confWa').value;
+            // Dihapus PIN dari Config agar tidak dimaling
+            delete confObj.PIN_ADMIN; delete confObj.PIN_PELUNASAN; delete confObj.EMAIL_OWNER;
             let jsString = `const CONFIG = ${JSON.stringify(confObj, null, 4)};`;
             document.getElementById('outputConfig').value = jsString; document.getElementById('hasilConfig').classList.remove('hidden');
             document.getElementById('hasilConfig').scrollIntoView({behavior: "smooth"}); lucide.createIcons();
@@ -222,8 +219,10 @@
             const container = document.getElementById('pendingList');
             container.innerHTML = `<div class="col-span-full text-center py-10"><div class="spinner mx-auto mb-2"></div></div>`;
             try {
-                const res = await fetch(`${CONFIG.API_URL}?action=getPending&nocache=${Date.now()}`);
-                const data = (await res.json()).data || [];
+                const res = await fetch(`${CONFIG.API_URL}?action=getPending&pin=${SECRET_TOKEN}&nocache=${Date.now()}`);
+                const r = await res.json();
+                if(r.status === "error") { container.innerHTML = `<div class="col-span-full text-red-500 text-center py-10 text-xs font-bold">${r.message}</div>`; return; }
+                const data = r.data || [];
                 container.innerHTML = data.length === 0 ? `<div class="col-span-full text-center py-10 bg-white rounded-2xl border text-slate-400 font-bold text-xs">Antrean Kosong</div>` : '';
                 data.forEach((p) => {
                     let hClean = parseRupiah(p.harga) - parseRupiah(p.dp); let marginVal = parseInt(p.margin) || 25; 
@@ -238,8 +237,10 @@
             const container = document.getElementById('customerList');
             container.innerHTML = `<div class="col-span-full text-center py-10"><div class="spinner mx-auto mb-2"></div></div>`;
             try {
-                const res = await fetch(`${CONFIG.API_URL}?action=getAll&nocache=${Date.now()}`);
-                allTagihanData = (await res.json()).data.filter(c => (parseRupiah(c.hutang) - parseRupiah(c.terbayar)) > 0);
+                const res = await fetch(`${CONFIG.API_URL}?action=getAll&pin=${SECRET_TOKEN}&nocache=${Date.now()}`);
+                const r = await res.json();
+                if(r.status === "error") { container.innerHTML = `<div class="col-span-full text-red-500 text-center py-10 text-xs font-bold">${r.message}</div>`; return; }
+                allTagihanData = r.data.filter(c => (parseRupiah(c.hutang) - parseRupiah(c.terbayar)) > 0);
                 filterTagihan();
             } catch(e) { container.innerHTML = `<div class="col-span-full text-red-500 text-center py-10">Gagal Memuat Pelanggan</div>`; }
         }
@@ -253,17 +254,13 @@
             
             filtered.forEach(p => {
                 let targetBulan = p.targetBulan; let targetTahun = p.targetTahun; let statusBe = p.statusPembayaran; let isTelat = p.selisihHari > 0;
-                
-                // DETEKSI BULAN TERAKHIR (PELUNASAN)
                 let sisaHutangGlobal = p.hutang - p.terbayar; 
                 let sisaBulanIni = p.cicilanPerBulan > 0 ? p.cicilanPerBulan : Math.round(p.hutang / 6);
-                
                 let isBulanTerakhir = false;
                 if (sisaHutangGlobal <= sisaBulanIni) {
-                    sisaBulanIni = sisaHutangGlobal; // Jika sisa hutang lebih kecil dari cicilan per bulan, tagih sisanya saja.
+                    sisaBulanIni = sisaHutangGlobal; 
                     isBulanTerakhir = true;
                 }
-
                 container.innerHTML += renderTagihanCard(p, namaBulan, targetBulan, targetTahun, statusBe, isTelat, sisaBulanIni, sisaHutangGlobal, isBulanTerakhir);
             }); lucide.createIcons();
         }
@@ -273,8 +270,6 @@
             let tglLengkap = `${angkaTanggal} ${namaBulan[targetBulan]} ${targetTahun}`;
             
             let badgeHtml = isTelat ? `<span class="bg-red-100 text-red-600 px-1.5 py-0.5 rounded text-[8px] font-black animate-pulse border border-red-200 shrink-0">${statusBe}</span>` : `<span class="bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded text-[8px] font-black border border-emerald-200 shrink-0">LANCAR</span>`;
-            
-            // VISUAL KARTU JIKA BULAN TERAKHIR (Promo Pelunasan)
             let tagihanText = "Tagihan Bulan Ini";
             if (isBulanTerakhir) {
                 tagihanText = "Sisa Pelunasan!";
@@ -283,7 +278,7 @@
 
             let btnBg = "bg-amber-50 text-amber-700"; let btnIcon = "bell"; let btnText = "KIRIM PENGINGAT WA";
             if (isTelat) { btnBg = "bg-red-50 text-red-700"; btnIcon = "alert-circle"; btnText = "KIRIM TEGURAN WA"; }
-            else if (isBulanTerakhir) { btnBg = "bg-indigo-50 text-indigo-700"; btnIcon = "gift"; btnText = "KIRIM WA PELUNASAN"; } // Tombol WA Khusus
+            else if (isBulanTerakhir) { btnBg = "bg-indigo-50 text-indigo-700"; btnIcon = "gift"; btnText = "KIRIM WA PELUNASAN"; } 
 
             let btnTabayyun = `<button onclick="bukaModalTabayyun('${p.idKontrak}', '${p.nama}', '${p.wa}', ${sisaHutangGlobal}, ${angkaTanggal})" class="w-full mt-2 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-500 border border-slate-200 rounded-xl text-[10px] font-black flex items-center justify-center gap-1.5 active:scale-95 transition-all"><i data-lucide="handshake" class="w-3.5 h-3.5"></i> RESTRUKTURISASI (TABAYYUN)</button>`;
             
@@ -293,45 +288,32 @@
         window.bukaModalTabayyun = function(id, nama, wa, sisaHutang, tglTempo) { dataTabayyunAktif = { idKontrak: id, nama, wa, sisaHutang }; document.getElementById('tabayyunNama').innerText = nama; document.getElementById('tabSisaHutang').innerText = `Rp ${formatRupiah(sisaHutang)}`; document.getElementById('tabJatuhTempo').value = tglTempo; document.getElementById('tabTenor').value = ""; document.getElementById('tabCicilan').value = "Rp 0"; document.getElementById('tabayyunModal').classList.replace('hidden', 'flex'); setTimeout(() => { document.getElementById('tabayyunModal').classList.remove('opacity-0'); document.getElementById('tabayyunCard').classList.remove('scale-95'); }, 10); }
         window.closeModalTabayyun = function() { document.getElementById('tabayyunModal').classList.add('opacity-0'); document.getElementById('tabayyunCard').classList.add('scale-95'); setTimeout(() => document.getElementById('tabayyunModal').classList.replace('flex', 'hidden'), 300); }
         window.kalkulasiTabayyun = function() { let tenor = parseInt(document.getElementById('tabTenor').value); if (!tenor || tenor < 1 || !dataTabayyunAktif) { document.getElementById('tabCicilan').value = "Rp 0"; return; } let cicilanBaru = Math.round(dataTabayyunAktif.sisaHutang / tenor); document.getElementById('tabCicilan').value = `Rp ${formatRupiah(cicilanBaru)}`; }
-        document.getElementById('btnSimpanTabayyun').addEventListener('click', async () => { if (!dataTabayyunAktif) return; let tglBaru = parseInt(document.getElementById('tabJatuhTempo').value); let tenorBaru = parseInt(document.getElementById('tabTenor').value); if (!tglBaru || tglBaru < 1 || tglBaru > 31) return showToast("Tanggal tempo tidak valid", "error"); if (!tenorBaru || tenorBaru < 1) return showToast("Masukkan sisa tenor", "error"); let btn = document.getElementById('btnSimpanTabayyun'); btn.innerHTML = "MENYIMPAN..."; btn.disabled = true; let cicilanBaru = Math.round(dataTabayyunAktif.sisaHutang / tenorBaru); const payload = { tipe: "TABAYYUN_UPDATE", idKontrak: dataTabayyunAktif.idKontrak, nama: dataTabayyunAktif.nama, wa: dataTabayyunAktif.wa, jatuhTempoBaru: tglBaru, cicilanBaru: cicilanBaru }; try { await fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); const msg = `Assalamu'alaikum Kak ${payload.nama}.\n\nBerdasarkan pengajuan Tabayyun (Restrukturisasi), admin Zenith Cell telah menyetujui penyesuaian akad Kakak.\n\n*Detail Baru:*\nJatuh Tempo: Tanggal ${payload.jatuhTempoBaru} setiap bulannya\nAngsuran: Rp ${formatRupiah(payload.cicilanBaru)}\n\nSemoga dengan penyesuaian ini membawa keberkahan dan kelancaran rezeki bagi kita semua. Amin.`; window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent(msg)}`, '_blank'); closeModalTabayyun(); showToast("Data Tabayyun Disimpan!"); setTimeout(fetchTagihan, 1500); } catch (e) { showToast("Gagal menyimpan data", "error"); } btn.innerHTML = "SIMPAN KESEPAKATAN BARU"; btn.disabled = false; });
+        document.getElementById('btnSimpanTabayyun').addEventListener('click', async () => { if (!dataTabayyunAktif) return; let tglBaru = parseInt(document.getElementById('tabJatuhTempo').value); let tenorBaru = parseInt(document.getElementById('tabTenor').value); if (!tglBaru || tglBaru < 1 || tglBaru > 31) return showToast("Tanggal tempo tidak valid", "error"); if (!tenorBaru || tenorBaru < 1) return showToast("Masukkan sisa tenor", "error"); let btn = document.getElementById('btnSimpanTabayyun'); btn.innerHTML = "MENYIMPAN..."; btn.disabled = true; let cicilanBaru = Math.round(dataTabayyunAktif.sisaHutang / tenorBaru); const payload = { tipe: "TABAYYUN_UPDATE", pin: SECRET_TOKEN, idKontrak: dataTabayyunAktif.idKontrak, nama: dataTabayyunAktif.nama, wa: dataTabayyunAktif.wa, jatuhTempoBaru: tglBaru, cicilanBaru: cicilanBaru }; try { await fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); const msg = `Assalamu'alaikum Kak ${payload.nama}.\n\nBerdasarkan pengajuan Tabayyun (Restrukturisasi), admin Zenith Cell telah menyetujui penyesuaian akad Kakak.\n\n*Detail Baru:*\nJatuh Tempo: Tanggal ${payload.jatuhTempoBaru} setiap bulannya\nAngsuran: Rp ${formatRupiah(payload.cicilanBaru)}\n\nSemoga dengan penyesuaian ini membawa keberkahan dan kelancaran rezeki bagi kita semua. Amin.`; window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent(msg)}`, '_blank'); closeModalTabayyun(); showToast("Data Tabayyun Disimpan!"); setTimeout(fetchTagihan, 1500); } catch (e) { showToast("Gagal menyimpan data", "error"); } btn.innerHTML = "SIMPAN KESEPAKATAN BARU"; btn.disabled = false; });
         
         window.bukaModalAcc = function(encoded) { const data = JSON.parse(decodeURIComponent(encoded)); currentActiveData = data; document.getElementById('accIdKontrak').innerText = data.idKontrak; document.getElementById('accNama').innerText = data.nama; document.getElementById('accBarang').innerText = data.barang; document.getElementById('badgeMarginFinal').innerText = `MARGIN: ${data.marginAktif}%`; document.getElementById('accJatuhTempo').value = data.jatuhTempo || 25; document.getElementById('accTenor').value = data.tenor; document.getElementById('accTotalHutang').value = formatRupiah(data.rekTotal); document.getElementById('accCicilan').value = formatRupiah(data.rekBulan); document.getElementById('accModal').classList.replace('hidden', 'flex'); setTimeout(() => { document.getElementById('accModal').classList.remove('opacity-0'); document.getElementById('accModalContent').classList.remove('scale-95'); }, 10); };
         window.closeModalAcc = function() { document.getElementById('accModal').classList.add('opacity-0'); document.getElementById('accModalContent').classList.add('scale-95'); setTimeout(() => document.getElementById('accModal').classList.replace('flex', 'hidden'), 300); };
-        document.getElementById('btnKonfirmasiAcc').addEventListener('click', () => { const payload = { tipe: "ACC_PENGAJUAN", idKontrak: currentActiveData.idKontrak, wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: document.getElementById('accJatuhTempo').value, totalHutang: parseRupiah(document.getElementById('accTotalHutang').value), cicilanBulan: parseRupiah(document.getElementById('accCicilan').value) }; fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); const msg = `Assalamu'alaikum Kak ${payload.nama}.\n\nAlhamdulillah, pengajuan pembiayaan ${payload.barang} Kakak di Zenith Cell telah disetujui (ACC).\n\nUntuk memantau sisa tagihan dan jadwal pembayaran bulanan, silakan cek secara berkala melalui tautan berikut:\nhttps://zenith-cell.netlify.app/cek-tagihan-live.html\n\nTerima kasih atas kepercayaannya.`; window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent(msg)}`, '_blank'); closeModalAcc(); showToast("Berhasil di-ACC!"); setTimeout(fetchAntrean, 1500); });
+        document.getElementById('btnKonfirmasiAcc').addEventListener('click', () => { const payload = { tipe: "ACC_PENGAJUAN", pin: SECRET_TOKEN, idKontrak: currentActiveData.idKontrak, wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: document.getElementById('accJatuhTempo').value, totalHutang: parseRupiah(document.getElementById('accTotalHutang').value), cicilanBulan: parseRupiah(document.getElementById('accCicilan').value) }; fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); const msg = `Assalamu'alaikum Kak ${payload.nama}.\n\nAlhamdulillah, pengajuan pembiayaan ${payload.barang} Kakak di Zenith Cell telah disetujui (ACC).\n\nUntuk memantau sisa tagihan dan jadwal pembayaran bulanan, silakan cek secara berkala melalui tautan berikut:\nhttps://zenith-cell.netlify.app/cek-tagihan-live.html\n\nTerima kasih atas kepercayaannya.`; window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent(msg)}`, '_blank'); closeModalAcc(); showToast("Berhasil di-ACC!"); setTimeout(fetchAntrean, 1500); });
         
         window.bukaModalTolak = function(id, nama, wa, barang) { dataTolakSementara = { id, nama, wa, barang }; document.getElementById('tolakNamaUser').innerText = nama; const modal = document.getElementById('tolakModal'); modal.classList.replace('hidden', 'flex'); setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('tolakCard').classList.remove('scale-95'); }, 10); }
         window.closeTolakModal = function() { const modal = document.getElementById('tolakModal'); modal.classList.add('opacity-0'); document.getElementById('tolakCard').classList.add('scale-95'); setTimeout(() => modal.classList.replace('flex', 'hidden'), 300); }
-        document.getElementById('btnConfirmTolak').addEventListener('click', () => { if (!dataTolakSementara) return; const { id, nama, wa, barang } = dataTolakSementara; fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", idKontrak: id }) }); const msg = `Assalamu'alaikum Kak ${nama}.\n\nTerima kasih telah mempercayakan pengajuan ${barang} di Zenith Cell.\n\nMohon maaf, setelah melalui proses verifikasi, untuk saat ini pengajuan Kakak belum dapat kami proses lebih lanjut.\n\nTerima kasih atas pengertiannya, semoga sehat selalu.`; window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}&text=${encodeURIComponent(msg)}`, '_blank'); closeTolakModal(); showToast("Pengajuan ditolak", "error"); setTimeout(fetchAntrean, 1000); });
+        document.getElementById('btnConfirmTolak').addEventListener('click', () => { if (!dataTolakSementara) return; const { id, nama, wa, barang } = dataTolakSementara; fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", pin: SECRET_TOKEN, idKontrak: id }) }); const msg = `Assalamu'alaikum Kak ${nama}.\n\nTerima kasih telah mempercayakan pengajuan ${barang} di Zenith Cell.\n\nMohon maaf, setelah melalui proses verifikasi, untuk saat ini pengajuan Kakak belum dapat kami proses lebih lanjut.\n\nTerima kasih atas pengertiannya, semoga sehat selalu.`; window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}&text=${encodeURIComponent(msg)}`, '_blank'); closeTolakModal(); showToast("Pengajuan ditolak", "error"); setTimeout(fetchAntrean, 1000); });
         
-        // 3 SKENARIO PESAN WA OTOMATIS
         window.bukaPesanWA = function(nama, wa, ke, nominal, tglLengkap, bulanTagihan, isTelat, isBulanTerakhir, barang) { 
-            const rek = `BCA - 8161292087 (a.n. Ardita Rizki Fauzi)\nBRI - 638501004971500 (a.n. Vivi Nur Damayanti)\nSeaBank - 901556541299 (a.n. Ardita Rizki Fauzi)`; 
-            let m = ""; 
-            
+            const rek = `BCA - 8161292087 (a.n. Ardita Rizki Fauzi)\nBRI - 638501004971500 (a.n. Vivi Nur Damayanti)\nSeaBank - 901556541299 (a.n. Ardita Rizki Fauzi)`; let m = ""; 
             if (isTelat) { 
-                // SKENARIO 1: TELAT / NUNGGAK
                 m = `Assalamu'alaikum Kak ${nama}.\n\nAfwan Kak, dari Zenith Cell izin menginformasikan bahwa tagihan *${barang}* (Bulan Ke-${ke}) senilai *Rp ${formatRupiah(nominal)}* telah *MELEWATI JATUH TEMPO* (Tgl ${tglLengkap}).\n\nSesuai akad awal, mohon kerjasamanya untuk segera melakukan pembayaran ke:\n\n${rek}\n\nApabila Kakak sedang mengalami kendala/musibah yang mendesak, mohon segera membalas pesan ini agar kita bisa berdiskusi *(Tabayyun)* mencari solusi bersama yang meringankan. Jika sudah transfer, mohon abaikan pesan ini. Terima kasih.`; 
                 document.getElementById('waHeaderTitle').innerHTML = `<i data-lucide="alert-circle" class="w-5 h-5 text-red-500"></i> Surat Peringatan WA`; 
                 document.getElementById('pesanWA').className = "w-full p-3 bg-red-50/50 border border-red-100 rounded-xl text-xs font-medium outline-none resize-none text-red-900"; 
-            } 
-            else if (isBulanTerakhir) {
-                // SKENARIO 2: BULAN TERAKHIR (PELUNASAN & UPSELLING)
+            } else if (isBulanTerakhir) {
                 m = `Assalamu'alaikum Kak ${nama}.\n\nAlhamdulillah! Tidak terasa angsuran *${barang}* Kakak di Zenith Cell sudah memasuki *BULAN TERAKHIR (Pelunasan)* senilai *Rp ${formatRupiah(nominal)}* yang akan jatuh tempo tgl *${tglLengkap}*.\n\nPembayaran pelunasan dapat dikirim ke:\n\n${rek}\n\n*Terima kasih telah berbelanja Tanpa Riba bersama Zenith Cell!* ✨\nSebagai bentuk apresiasi, Kakak otomatis menjadi member *VVIP* kami. Kakak bisa request Jastip Gadget apa saja ke depannya dengan *Margin Spesial (Lebih Murah)*, atau dapatkan CASHBACK Rp50.000 cash jika merekomendasikan teman belanja di sini! 🎁`;
                 document.getElementById('waHeaderTitle').innerHTML = `<i data-lucide="gift" class="w-5 h-5 text-indigo-500"></i> Kirim Promosi WA`; 
                 document.getElementById('pesanWA').className = "w-full p-3 bg-indigo-50/50 border border-indigo-100 rounded-xl text-xs font-medium outline-none resize-none text-indigo-900"; 
-            }
-            else { 
-                // SKENARIO 3: LANCAR NORMAL
+            } else { 
                 m = `Assalamu'alaikum Kak ${nama}.\n\nPermisi Kak, dari Zenith Cell izin menginformasikan bahwa tagihan angsuran untuk *${barang}* (Bulan Ke-${ke}) senilai *Rp ${formatRupiah(nominal)}* untuk bulan ${bulanTagihan} akan jatuh tempo pada tanggal *${tglLengkap}*.\n\nPembayaran dapat dilakukan melalui salah satu rekening berikut:\n\n${rek}\n\nSemoga rezekinya lancar dan berkah selalu ya Kak. Terima kasih.`; 
                 document.getElementById('waHeaderTitle').innerHTML = `<i data-lucide="send" class="w-5 h-5 text-emerald-500"></i> Pesan Tagihan`; 
                 document.getElementById('pesanWA').className = "w-full p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl text-xs font-medium outline-none resize-none"; 
             } 
-            
-            document.getElementById('pesanWA').value = m; 
-            targetWaLink = `https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}`; 
-            document.getElementById('waModal').classList.replace('hidden', 'flex'); 
-            lucide.createIcons(); 
-            setTimeout(() => { document.getElementById('waModal').classList.remove('opacity-0'); document.querySelector('#waModal > div').classList.remove('scale-95'); }, 10); 
+            document.getElementById('pesanWA').value = m; targetWaLink = `https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}`; document.getElementById('waModal').classList.replace('hidden', 'flex'); lucide.createIcons(); setTimeout(() => { document.getElementById('waModal').classList.remove('opacity-0'); document.querySelector('#waModal > div').classList.remove('scale-95'); }, 10); 
         }
         
         window.closeWaModal = function() { document.getElementById('waModal').classList.add('opacity-0'); document.querySelector('#waModal > div').classList.add('scale-95'); setTimeout(() => document.getElementById('waModal').classList.replace('flex', 'hidden'), 300); };
