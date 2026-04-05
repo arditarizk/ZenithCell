@@ -1,8 +1,7 @@
 // ==========================================
-// MASTER API ZENITH CELL (V28 - ANTI FAKE MARGIN / BACKEND VALIDATION)
+// MASTER API ZENITH CELL (V29 - FIX PARSING HARGA & DELAY TOLAK)
 // ==========================================
 
-// --- BRANKAS KREDENSIAL & ATURAN (SANGAT RAHASIA) ---
 var MASTER_PIN = "Parawhore78";
 var PIN_PELUNASAN = "Parawhore78";
 var EMAIL_NOTIFIKASI = "znth.cell@gmail.com"; 
@@ -12,14 +11,12 @@ var ADMIN_USERS = {
     "ADMIN": { sandi: MASTER_PIN, nama: "Admin Pusat" }
 };
 
-// DATABASE VOUCHER SERVER (Hacker tidak bisa sentuh ini)
 var VOUCHERS_BACKEND = {
     "dulurdewe22": 22,
     "nawakewed": 20,
     "temanvivi": 20,
     "temanardita": 20
 };
-// -------------------------------------------
 
 function isTokenValid(pinInput) {
     if (pinInput === MASTER_PIN) return true;
@@ -63,39 +60,32 @@ function doPost(e) {
         s.getRange("A1:R1").setFontWeight("bold").setBackground("#fef3c7");
       }
 
-      // --- LOGIKA ANTI HACKER MARGIN 0% ---
-      // 1. Cek jalur jaminan dari teksnya
-      var baseMargin = 25; // Default Reguler
-      if (payload.jaminan && payload.jaminan !== "Tanpa Jaminan") {
-          baseMargin = 15; // Jika ada jaminan berarti VIP
-      }
-      
+      var baseMargin = 25;
+      if (payload.jaminan && payload.jaminan !== "Tanpa Jaminan") { baseMargin = 15; }
       var finalMargin = baseMargin;
       var kodeVoucher = String(payload.kodeVoucher || "").trim().toLowerCase();
       
-      // 2. Validasi voucher langsung di server
       if (kodeVoucher !== "" && VOUCHERS_BACKEND[kodeVoucher]) {
           var vMargin = VOUCHERS_BACKEND[kodeVoucher];
-          // Pastikan voucher tidak merugikan toko jika nasabah pakai jalur VIP (15%)
-          if (vMargin < finalMargin) {
-              finalMargin = vMargin;
-          }
+          if (vMargin < finalMargin) { finalMargin = vMargin; }
       }
-      // -------------------------------------
 
-      // Abaikan payload.margin kiriman hacker, kita pakai finalMargin dari server!
+      // FIX BUG ANGKA: Bersihkan semua titik/koma dari harga dan DP dari frontend
+      var hargaBersih = parseInt(String(payload.harga).replace(/[^0-9]/g, '')) || 0;
+      var dpBersih = parseInt(String(payload.dp).replace(/[^0-9]/g, '')) || 0;
+
       s.appendRow([
         "'" + cleanId(payload.idKontrak), payload.timestamp || new Date().toLocaleString('id-ID'), 
         sanitize(payload.nama), "'" + sanitize(payload.nik), "'" + sanitize(payload.wa), sanitize(payload.alamat), 
         sanitize(payload.pekerjaan), sanitize(payload.gaji), sanitize(payload.daruratNama), "'" + sanitize(payload.daruratWa), 
-        sanitize(payload.barang), parseInt(payload.harga)||0, parseInt(payload.dp)||0, parseInt(payload.tenor)||0, 
+        sanitize(payload.barang), hargaBersih, dpBersih, parseInt(payload.tenor)||0, 
         sanitize(payload.jaminan), parseInt(payload.jatuhTempo)||1, finalMargin, "PENDING"
       ]);
       return createJsonResponse({status: "success"});
     }
 
     // ===============================================
-    // GERBANG KEAMANAN API (Cegah Bypass Data Transaksi)
+    // GERBANG KEAMANAN API (Aksi Admin)
     // ===============================================
     if (!isTokenValid(payload.pin)) {
       return createJsonResponse({status: "error", message: "Akses Ilegal Ditolak! Kredensial Tidak Sah."});
@@ -119,7 +109,8 @@ function doPost(e) {
       if (sP) {
         var dP = sP.getDataRange().getValues();
         for (var i = 1; i < dP.length; i++) {
-          if (cleanId(dP[i][0]) === cleanId(payload.idKontrak)) { 
+          // Hanya ACC jika ID cocok DAN statusnya masih PENDING
+          if (cleanId(dP[i][0]) === cleanId(payload.idKontrak) && String(dP[i][17]).toUpperCase() === "PENDING") { 
             sP.getRange(i + 1, 18).setValue("ACC"); break;
           }
         }
@@ -141,7 +132,8 @@ function doPost(e) {
       if (sP) {
         var dP = sP.getDataRange().getValues();
         for (var i = 1; i < dP.length; i++) {
-          if (cleanId(dP[i][0]) === cleanId(payload.idKontrak)) { 
+          // Hanya TOLAK jika ID cocok DAN statusnya masih PENDING
+          if (cleanId(dP[i][0]) === cleanId(payload.idKontrak) && String(dP[i][17]).toUpperCase() === "PENDING") { 
             sP.getRange(i + 1, 18).setValue("DITOLAK"); break;
           }
         }
