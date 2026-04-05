@@ -127,8 +127,6 @@
         document.addEventListener('DOMContentLoaded', () => { document.getElementById('labelAdmin').innerText = `Admin: ${KASIR_AKTIF}`; });
 
         const formatRupiah = (num) => new Intl.NumberFormat('id-ID').format(num);
-        
-        // FIX BUG PARSING: Membuang angka di belakang koma (desimal Indonesia) sebelum dibersihkan
         const parseRupiah = (str) => parseInt(str.toString().split(',')[0].replace(/[^0-9]/g, '')) || 0;
         
         let currentTab = 'antrean', allTagihanData = [], currentActiveData = null, dataTolakSementara = null, targetWaLink = "";
@@ -173,8 +171,13 @@
                 wa: document.getElementById('confWa').value
             };
             try {
-                await fetch(typeof CONFIG !== 'undefined' ? CONFIG.API_URL : '', { method: 'POST', mode: 'no-cors', body: JSON.stringify(draft) });
-                showToast("Draft tersimpan di Cloud! Bisa dibuka di Laptop.", "success");
+                const res = await fetch(typeof CONFIG !== 'undefined' ? CONFIG.API_URL : '', { method: 'POST', body: JSON.stringify(draft) });
+                const result = await res.json();
+                if(result.status === 'success') {
+                    showToast("Draft tersimpan di Cloud! Bisa dibuka di Laptop.", "success");
+                } else {
+                    showToast(result.message, "error");
+                }
             } catch(e) { showToast("Gagal menyimpan ke Cloud.", "error"); }
             btn.innerHTML = originalText; btn.disabled = false;
         }
@@ -227,7 +230,6 @@
                 container.innerHTML = data.length === 0 ? `<div class="col-span-full text-center py-10 bg-white rounded-2xl border text-slate-400 font-bold text-xs">Antrean Kosong</div>` : '';
                 data.forEach((p) => {
                     let hClean = parseRupiah(p.harga) - parseRupiah(p.dp); let marginVal = parseInt(p.margin) || 25; 
-                    // FIX BULATKAN HARGA TOTAL SEJAK AWAL
                     let rekTotal = Math.round(hClean + (hClean * (marginVal / 100))); 
                     let rekBulan = Math.round(rekTotal / (parseInt(p.tenor) || 5));
                     let dataJson = encodeURIComponent(JSON.stringify({ ...p, rekTotal, rekBulan, marginAktif: marginVal }));
@@ -291,45 +293,108 @@
         window.bukaModalTabayyun = function(id, nama, wa, sisaHutang, tglTempo) { dataTabayyunAktif = { idKontrak: id, nama, wa, sisaHutang }; document.getElementById('tabayyunNama').innerText = nama; document.getElementById('tabSisaHutang').innerText = `Rp ${formatRupiah(sisaHutang)}`; document.getElementById('tabJatuhTempo').value = tglTempo; document.getElementById('tabTenor').value = ""; document.getElementById('tabCicilan').value = "Rp 0"; document.getElementById('tabayyunModal').classList.replace('hidden', 'flex'); setTimeout(() => { document.getElementById('tabayyunModal').classList.remove('opacity-0'); document.getElementById('tabayyunCard').classList.remove('scale-95'); }, 10); }
         window.closeModalTabayyun = function() { document.getElementById('tabayyunModal').classList.add('opacity-0'); document.getElementById('tabayyunCard').classList.add('scale-95'); setTimeout(() => document.getElementById('tabayyunModal').classList.replace('flex', 'hidden'), 300); }
         window.kalkulasiTabayyun = function() { let tenor = parseInt(document.getElementById('tabTenor').value); if (!tenor || tenor < 1 || !dataTabayyunAktif) { document.getElementById('tabCicilan').value = "Rp 0"; return; } let cicilanBaru = Math.round(dataTabayyunAktif.sisaHutang / tenor); document.getElementById('tabCicilan').value = `Rp ${formatRupiah(cicilanBaru)}`; }
-        document.getElementById('btnSimpanTabayyun').addEventListener('click', async () => { if (!dataTabayyunAktif) return; let tglBaru = parseInt(document.getElementById('tabJatuhTempo').value); let tenorBaru = parseInt(document.getElementById('tabTenor').value); if (!tglBaru || tglBaru < 1 || tglBaru > 31) return showToast("Tanggal tempo tidak valid", "error"); if (!tenorBaru || tenorBaru < 1) return showToast("Masukkan sisa tenor", "error"); let btn = document.getElementById('btnSimpanTabayyun'); btn.innerHTML = "MENYIMPAN..."; btn.disabled = true; let cicilanBaru = Math.round(dataTabayyunAktif.sisaHutang / tenorBaru); const payload = { tipe: "TABAYYUN_UPDATE", pin: SECRET_TOKEN, idKontrak: dataTabayyunAktif.idKontrak, nama: dataTabayyunAktif.nama, wa: dataTabayyunAktif.wa, jatuhTempoBaru: tglBaru, cicilanBaru: cicilanBaru }; try { await fetch(typeof CONFIG !== 'undefined' ? CONFIG.API_URL : '', { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); const msg = `Assalamu'alaikum Kak ${payload.nama}.\n\nBerdasarkan pengajuan Tabayyun (Restrukturisasi), admin Zenith Cell telah menyetujui penyesuaian akad Kakak.\n\n*Detail Baru:*\nJatuh Tempo: Tanggal ${payload.jatuhTempoBaru} setiap bulannya\nAngsuran: Rp ${formatRupiah(payload.cicilanBaru)}\n\nSemoga dengan penyesuaian ini membawa keberkahan dan kelancaran rezeki bagi kita semua. Amin.`; window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent(msg)}`, '_blank'); closeModalTabayyun(); showToast("Data Tabayyun Disimpan!"); setTimeout(fetchTagihan, 1500); } catch (e) { showToast("Gagal menyimpan data", "error"); } btn.innerHTML = "SIMPAN KESEPAKATAN BARU"; btn.disabled = false; });
+        
+        // FIX: TUNGGU JAWABAN SERVER SEBELUM BUKA WA DI TABAYYUN
+        document.getElementById('btnSimpanTabayyun').addEventListener('click', async () => { 
+            if (!dataTabayyunAktif) return; 
+            let tglBaru = parseInt(document.getElementById('tabJatuhTempo').value); 
+            let tenorBaru = parseInt(document.getElementById('tabTenor').value); 
+            if (!tglBaru || tglBaru < 1 || tglBaru > 31) return showToast("Tanggal tempo tidak valid", "error"); 
+            if (!tenorBaru || tenorBaru < 1) return showToast("Masukkan sisa tenor", "error"); 
+            let btn = document.getElementById('btnSimpanTabayyun'); btn.innerHTML = "MENYIMPAN..."; btn.disabled = true; 
+            let cicilanBaru = Math.round(dataTabayyunAktif.sisaHutang / tenorBaru); 
+            const payload = { tipe: "TABAYYUN_UPDATE", pin: SECRET_TOKEN, idKontrak: dataTabayyunAktif.idKontrak, nama: dataTabayyunAktif.nama, wa: dataTabayyunAktif.wa, jatuhTempoBaru: tglBaru, cicilanBaru: cicilanBaru }; 
+            
+            try { 
+                // Hilangkan mode no-cors agar kita bisa baca tulisan error dari server
+                const res = await fetch(typeof CONFIG !== 'undefined' ? CONFIG.API_URL : '', { method: 'POST', body: JSON.stringify(payload) }); 
+                const result = await res.json();
+                
+                if (result.status === 'error') {
+                    showToast(result.message, "error");
+                    btn.innerHTML = "SIMPAN KESEPAKATAN BARU"; btn.disabled = false;
+                    return; // BATALKAN BUKA WA KARENA ERROR!
+                }
+
+                const msg = `Assalamu'alaikum Kak ${payload.nama}.\n\nBerdasarkan pengajuan Tabayyun (Restrukturisasi), admin Zenith Cell telah menyetujui penyesuaian akad Kakak.\n\n*Detail Baru:*\nJatuh Tempo: Tanggal ${payload.jatuhTempoBaru} setiap bulannya\nAngsuran: Rp ${formatRupiah(payload.cicilanBaru)}\n\nSemoga dengan penyesuaian ini membawa keberkahan dan kelancaran rezeki bagi kita semua. Amin.`; 
+                window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent(msg)}`, '_blank'); 
+                closeModalTabayyun(); showToast("Data Tabayyun Disimpan!"); 
+                setTimeout(fetchTagihan, 1500); 
+            } catch (e) { 
+                showToast("Gagal terhubung ke Server", "error"); 
+            } 
+            btn.innerHTML = "SIMPAN KESEPAKATAN BARU"; btn.disabled = false; 
+        });
         
         window.bukaModalAcc = function(encoded) { const data = JSON.parse(decodeURIComponent(encoded)); currentActiveData = data; document.getElementById('accIdKontrak').innerText = data.idKontrak; document.getElementById('accNama').innerText = data.nama; document.getElementById('accBarang').innerText = data.barang; document.getElementById('badgeMarginFinal').innerText = `MARGIN: ${data.marginAktif}%`; document.getElementById('accJatuhTempo').value = data.jatuhTempo || 25; document.getElementById('accTenor').value = data.tenor; document.getElementById('accTotalHutang').value = formatRupiah(Math.round(data.rekTotal)); document.getElementById('accCicilan').value = formatRupiah(data.rekBulan); document.getElementById('accModal').classList.replace('hidden', 'flex'); setTimeout(() => { document.getElementById('accModal').classList.remove('opacity-0'); document.getElementById('accModalContent').classList.remove('scale-95'); }, 10); };
         window.closeModalAcc = function() { document.getElementById('accModal').classList.add('opacity-0'); document.getElementById('accModalContent').classList.add('scale-95'); setTimeout(() => document.getElementById('accModal').classList.replace('flex', 'hidden'), 300); };
         
-        // FIX BUG DELAY ACC
-        document.getElementById('btnKonfirmasiAcc').addEventListener('click', () => { 
+        // FIX BUG RACE CONDITION FRONTEND DI TOMBOL ACC
+        document.getElementById('btnKonfirmasiAcc').addEventListener('click', async () => { 
             const btn = document.getElementById('btnKonfirmasiAcc');
             btn.innerHTML = "MEMPROSES ACC..."; btn.disabled = true;
 
             const payload = { tipe: "ACC_PENGAJUAN", pin: SECRET_TOKEN, idKontrak: currentActiveData.idKontrak, wa: currentActiveData.wa, nama: currentActiveData.nama, barang: currentActiveData.barang, jatuhTempo: document.getElementById('accJatuhTempo').value, totalHutang: parseRupiah(document.getElementById('accTotalHutang').value), cicilanBulan: parseRupiah(document.getElementById('accCicilan').value) }; 
-            fetch(typeof CONFIG !== 'undefined' ? CONFIG.API_URL : '', { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); 
             
-            const msg = `Assalamu'alaikum Kak ${payload.nama}.\n\nAlhamdulillah, pengajuan pembiayaan ${payload.barang} Kakak di Zenith Cell telah disetujui (ACC).\n\nUntuk memantau sisa tagihan dan jadwal pembayaran bulanan, silakan cek secara berkala melalui tautan berikut:\nhttps://zenith-cell.netlify.app/cek-tagihan-live.html\n\nTerima kasih atas kepercayaannya.`; 
-            window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent(msg)}`, '_blank'); 
-            
-            closeModalAcc(); showToast("Berhasil di-ACC!"); 
-            setTimeout(fetchAntrean, 2500); 
-            setTimeout(() => { btn.innerHTML = "ACC & NOTIFIKASI WA"; btn.disabled = false; }, 3000);
+            try {
+                // Hilangkan mode no-cors
+                const res = await fetch(typeof CONFIG !== 'undefined' ? CONFIG.API_URL : '', { method: 'POST', body: JSON.stringify(payload) }); 
+                const result = await res.json();
+                
+                if (result.status === 'error') {
+                    showToast(result.message, "error"); // Menampilkan pesan "Ditolak sistem, sudah diproses..."
+                    closeModalAcc();
+                    setTimeout(fetchAntrean, 1000); // Otomatis refresh list untuk membersihkan data usang
+                    btn.innerHTML = "ACC & NOTIFIKASI WA"; btn.disabled = false;
+                    return; // BATALKAN BUKA WA
+                }
+
+                const msg = `Assalamu'alaikum Kak ${payload.nama}.\n\nAlhamdulillah, pengajuan pembiayaan ${payload.barang} Kakak di Zenith Cell telah disetujui (ACC).\n\nUntuk memantau sisa tagihan dan jadwal pembayaran bulanan, silakan cek secara berkala melalui tautan berikut:\nhttps://zenith-cell.netlify.app/cek-tagihan-live.html\n\nTerima kasih atas kepercayaannya.`; 
+                window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(payload.wa)}&text=${encodeURIComponent(msg)}`, '_blank'); 
+                
+                closeModalAcc(); showToast("Berhasil di-ACC!"); 
+                setTimeout(fetchAntrean, 2500); 
+                setTimeout(() => { btn.innerHTML = "ACC & NOTIFIKASI WA"; btn.disabled = false; }, 3000);
+            } catch (e) {
+                showToast("Gagal terhubung ke Server", "error");
+                btn.innerHTML = "ACC & NOTIFIKASI WA"; btn.disabled = false;
+            }
         });
         
         window.bukaModalTolak = function(id, nama, wa, barang) { dataTolakSementara = { id, nama, wa, barang }; document.getElementById('tolakNamaUser').innerText = nama; const modal = document.getElementById('tolakModal'); modal.classList.replace('hidden', 'flex'); setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('tolakCard').classList.remove('scale-95'); }, 10); }
         window.closeTolakModal = function() { const modal = document.getElementById('tolakModal'); modal.classList.add('opacity-0'); document.getElementById('tolakCard').classList.add('scale-95'); setTimeout(() => modal.classList.replace('flex', 'hidden'), 300); }
         
-        // FIX BUG DELAY TOLAK
-        document.getElementById('btnConfirmTolak').addEventListener('click', () => { 
+        // FIX BUG RACE CONDITION FRONTEND DI TOMBOL TOLAK
+        document.getElementById('btnConfirmTolak').addEventListener('click', async () => { 
             if (!dataTolakSementara) return; 
             const { id, nama, wa, barang } = dataTolakSementara; 
             
             const btn = document.getElementById('btnConfirmTolak');
             btn.innerHTML = "MEMPROSES..."; btn.disabled = true;
 
-            fetch(typeof CONFIG !== 'undefined' ? CONFIG.API_URL : '', { method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", pin: SECRET_TOKEN, idKontrak: id }) }); 
-            const msg = `Assalamu'alaikum Kak ${nama}.\n\nTerima kasih telah mempercayakan pengajuan ${barang} di Zenith Cell.\n\nMohon maaf, setelah melalui proses verifikasi, untuk saat ini pengajuan Kakak belum dapat kami proses lebih lanjut.\n\nTerima kasih atas pengertiannya, semoga sehat selalu.`; 
-            window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}&text=${encodeURIComponent(msg)}`, '_blank'); 
-            
-            closeTolakModal(); showToast("Pengajuan ditolak", "error"); 
-            setTimeout(fetchAntrean, 2500); 
-            setTimeout(() => { btn.innerHTML = "Ya, Tolak"; btn.disabled = false; }, 3000);
+            try {
+                // Hilangkan mode no-cors
+                const res = await fetch(typeof CONFIG !== 'undefined' ? CONFIG.API_URL : '', { method: 'POST', body: JSON.stringify({ tipe: "TOLAK_PENGAJUAN", pin: SECRET_TOKEN, idKontrak: id }) }); 
+                const result = await res.json();
+                
+                if (result.status === 'error') {
+                    showToast(result.message, "error");
+                    closeTolakModal();
+                    setTimeout(fetchAntrean, 1000);
+                    btn.innerHTML = "Ya, Tolak"; btn.disabled = false;
+                    return; // BATALKAN BUKA WA
+                }
+
+                const msg = `Assalamu'alaikum Kak ${nama}.\n\nTerima kasih telah mempercayakan pengajuan ${barang} di Zenith Cell.\n\nMohon maaf, setelah melalui proses verifikasi, untuk saat ini pengajuan Kakak belum dapat kami proses lebih lanjut.\n\nTerima kasih atas pengertiannya, semoga sehat selalu.`; 
+                window.open(`https://api.whatsapp.com/send?phone=${formatNomorWA(wa)}&text=${encodeURIComponent(msg)}`, '_blank'); 
+                
+                closeTolakModal(); showToast("Pengajuan ditolak", "success"); 
+                setTimeout(fetchAntrean, 2500); 
+                setTimeout(() => { btn.innerHTML = "Ya, Tolak"; btn.disabled = false; }, 3000);
+            } catch(e) {
+                showToast("Gagal terhubung ke Server", "error");
+                btn.innerHTML = "Ya, Tolak"; btn.disabled = false;
+            }
         });
         
         window.bukaPesanWA = function(nama, wa, ke, nominal, tglLengkap, bulanTagihan, isTelat, isBulanTerakhir, barang) { 
