@@ -1,10 +1,11 @@
 // ==========================================
-// MASTER API ZENITH CELL (V30 - FORMAT ID TABAYYUN & FIX RAWBT)
+// MASTER API ZENITH CELL (V32 - FIX EMAIL & ANTI DOUBLE INPUT)
 // ==========================================
 
-var MASTER_PIN = "Parawhore78";
-var PIN_PELUNASAN = "121221";
-var EMAIL_NOTIFIKASI = "znth.cell@gmail.com"; 
+var MASTER_PIN = "Parawhore78"; 
+var PIN_PELUNASAN = "121221"; 
+var EMAIL_NOTIFIKASI = "znthcell@gmail.com"; // FIX: Email sudah benar tanpa titik
+
 var ADMIN_USERS = {
     "ARDITA": { sandi: "123456", nama: "Ardita Rizki F." },
     "VIVI": { sandi: "654321", nama: "Vivi Nur D." },
@@ -133,31 +134,45 @@ function doPost(e) {
     }
 
     if (payload.tipe === "KAS_MASUK_CICILAN") {
+      var sL = ss.getSheetByName("Pelanggan");
+      if (!sL) return createJsonResponse({status: "error", message: "DB Error"});
+      
+      // FIX ANTI DOUBLE INPUT: Cek apakah data pelanggan masih ada & angsuran belum dibayar
+      var dL = sL.getDataRange().getValues();
+      var isFound = false;
+      var rowIndex = -1;
+      for (var i = 1; i < dL.length; i++) {
+        if (cleanId(dL[i][0]) === cleanId(payload.idKontrak)) {
+          isFound = true;
+          rowIndex = i + 1;
+          break;
+        }
+      }
+      if (!isFound) return createJsonResponse({status: "error", message: "Data tidak ditemukan atau sudah LUNAS di device lain."});
+      
+      // Cek jika cicilan ke-X ini sebenarnya sudah dibayar sebelumnya
+      if (parseInt(payload.cicilanKe) < parseInt(dL[rowIndex-2][8])) {
+         return createJsonResponse({status: "error", message: "Angsuran ini sudah pernah dibayar sebelumnya!"});
+      }
+
       var sT = getOrCreateSheet(ss, "Transaksi");
       if (sT.getLastRow() === 0) { 
         sT.appendRow(["ID Transaksi", "Waktu", "ID Kontrak", "Nama", "WA", "Pembayaran Ke", "Angsuran Pokok", "Dana Kebajikan (Denda)", "Catatan"]);
         sT.getRange("A1:I1").setFontWeight("bold").setBackground("#f3e8ff");
       }
       sT.appendRow(["'" + cleanId(payload.idTransaksi), payload.waktu, "'" + cleanId(payload.idKontrak), payload.nama, "'"+payload.whatsapp, payload.cicilanKe, payload.nominalMasuk, payload.dendaMasuk || 0, payload.catatan]);
-      var sL = ss.getSheetByName("Pelanggan");
-      if (sL) {
-        var dL = sL.getDataRange().getValues();
-        for (var i = 1; i < dL.length; i++) {
-          if (cleanId(dL[i][0]) === cleanId(payload.idKontrak)) {
-            sL.getRange(i+1, 6).setValue((parseInt(dL[i][5])||0) + parseInt(payload.nominalMasuk));
-            sL.getRange(i+1, 9).setValue((parseInt(dL[i][8])||0) + 1);
-            var cTarget = String(dL[i][9]);
-            var tz = ss.getSpreadsheetTimeZone();
-            var tThn = parseInt(Utilities.formatDate(new Date(), tz, "yyyy"));
-            var tBln;
-            if (cTarget.indexOf("-") > -1) { var p = cTarget.split("-"); tThn = parseInt(p[0]); tBln = parseInt(p[1]) + 1; } 
-            else { tBln = parseInt(Utilities.formatDate(new Date(), tz, "MM")) + 2; }
-            if (tBln > 12) { tBln -= 12; tThn++; }
-            sL.getRange(i+1, 10).setValue("'" + tThn + "-" + String(tBln).padStart(2, '0')); 
-            break;
-          }
-        }
-      }
+      
+      sL.getRange(rowIndex, 6).setValue((parseInt(dL[rowIndex-2][5])||0) + parseInt(payload.nominalMasuk));
+      sL.getRange(rowIndex, 9).setValue((parseInt(dL[rowIndex-2][8])||0) + 1);
+      var cTarget = String(dL[rowIndex-2][9]);
+      var tz = ss.getSpreadsheetTimeZone();
+      var tThn = parseInt(Utilities.formatDate(new Date(), tz, "yyyy"));
+      var tBln;
+      if (cTarget.indexOf("-") > -1) { var p = cTarget.split("-"); tThn = parseInt(p[0]); tBln = parseInt(p[1]) + 1; } 
+      else { tBln = parseInt(Utilities.formatDate(new Date(), tz, "MM")) + 2; }
+      if (tBln > 12) { tBln -= 12; tThn++; }
+      sL.getRange(rowIndex, 10).setValue("'" + tThn + "-" + String(tBln).padStart(2, '0')); 
+      
       return createJsonResponse({status: "success"});
     }
 
@@ -166,8 +181,23 @@ function doPost(e) {
          return createJsonResponse({status: "error", message: "Otorisasi Pelunasan Gagal! PIN Master Salah."});
       }
 
-      var sT = getOrCreateSheet(ss, "Transaksi");
       var sL = ss.getSheetByName("Pelanggan");
+      if (!sL) return createJsonResponse({status: "error", message: "DB Error"});
+      
+      // FIX ANTI DOUBLE INPUT: Cek apakah pelanggan masih ada di daftar (belum dilunasi device lain)
+      var dL = sL.getDataRange().getValues();
+      var isFound = false;
+      var rowIndex = -1;
+      for (var i = 1; i < dL.length; i++) {
+        if (cleanId(dL[i][0]) === cleanId(payload.idKontrak)) {
+          isFound = true;
+          rowIndex = i + 1;
+          break;
+        }
+      }
+      if (!isFound) return createJsonResponse({status: "error", message: "Transaksi Ditolak: Tagihan ini SUDAH DILUNASI sebelumnya!"});
+
+      var sT = getOrCreateSheet(ss, "Transaksi");
       var sR = getOrCreateSheet(ss, "Riwayat");
       if (sT.getLastRow() === 0) { 
         sT.appendRow(["ID Transaksi", "Waktu", "ID Kontrak", "Nama", "WA", "Pembayaran Ke", "Angsuran Pokok", "Dana Kebajikan (Denda)", "Catatan"]);
@@ -179,15 +209,9 @@ function doPost(e) {
         sR.appendRow(["ID Kontrak", "Nama Pelanggan", "No WA", "Barang", "Total Hutang Awal", "Tanggal Lunas"]);
         sR.getRange("A1:F1").setFontWeight("bold").setBackground("#dcfce7");
       }
-      if (sL) {
-        var dL = sL.getDataRange().getValues();
-        for (var i = 1; i < dL.length; i++) {
-          if (cleanId(dL[i][0]) === cleanId(payload.idKontrak)) {
-            sR.appendRow(["'" + cleanId(dL[i][0]), dL[i][1], "'" + dL[i][2], dL[i][3], dL[i][4], payload.waktu]);
-            sL.deleteRow(i + 1); break;
-          }
-        }
-      }
+      
+      sR.appendRow(["'" + cleanId(dL[rowIndex-2][0]), dL[rowIndex-2][1], "'" + dL[rowIndex-2][2], dL[rowIndex-2][3], dL[rowIndex-2][4], payload.waktu]);
+      sL.deleteRow(rowIndex);
 
       try {
           var emailTujuan = EMAIL_NOTIFIKASI || Session.getEffectiveUser().getEmail();
@@ -210,8 +234,6 @@ function doPost(e) {
             if (payload.cicilanBaru) sL.getRange(i+1, 7).setValue(payload.cicilanBaru);
             
             var sT = getOrCreateSheet(ss, "Transaksi");
-            
-            // FIX ID TABAYYUN (TBY+YYMMDD+HHmm)
             var dNowTby = new Date();
             var tzTby = ss.getSpreadsheetTimeZone();
             var idTransTby = "TBY" + Utilities.formatDate(dNowTby, tzTby, "yyMMddHHmm");
