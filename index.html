@@ -26,10 +26,6 @@
         .slider-track { display: flex; width: max-content; animation: scrollLoop 25s linear infinite; will-change: transform; }
         .slider-track:hover, .slider-track:active { animation-play-state: paused; }
         @keyframes scrollLoop { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
-        /* KELAS KHUSUS DRAG UNTUK ULASAN DI PC */
-        .drag-scroll { cursor: grab; user-select: none; }
-        .drag-scroll.active { cursor: grabbing; }
         
         body.dark-mode { background-color: #0f172a; color: #f8fafc; }
         body.dark-mode .clean-card, body.dark-mode main, body.dark-mode header, body.dark-mode nav { background-color: #1e293b !important; border-color: #334155 !important; }
@@ -123,42 +119,47 @@
             </div>
         </section>
 
-        <section class="mb-10 w-full max-w-4xl mx-auto px-2 lg:px-8">
+        <section class="mb-10 w-full max-w-4xl mx-auto px-2 lg:px-8 relative group">
             <h2 class="text-xs lg:text-sm font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2 px-2"><i data-lucide="heart-handshake" class="w-4 h-4 lg:w-5 lg:h-5 text-emerald-500"></i> Kisah Nyata Pelanggan</h2>
             
             <div class="relative w-full py-2">
-                <div id="testiContainer" class="flex overflow-x-auto gap-4 px-4 no-scrollbar snap-x scroll-smooth drag-scroll">
+                
+                <button id="btnPrevTesti" class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-20 w-12 h-12 bg-white rounded-full shadow-lg border border-slate-100 items-center justify-center text-emerald-600 hover:bg-emerald-50 active:scale-95 transition-all opacity-0 group-hover:opacity-100">
+                    <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                </button>
+
+                <div id="testiContainer" class="flex overflow-x-auto gap-4 px-4 no-scrollbar snap-x scroll-smooth relative z-10 pb-4">
                     
-                    <div class="min-w-[260px] max-w-[280px] shrink-0 clean-card bg-white rounded-3xl p-5 shadow-sm snap-center pointer-events-none">
+                    <div class="min-w-[260px] max-w-[280px] shrink-0 clean-card bg-white rounded-3xl p-5 shadow-sm snap-center">
                         <div class="flex items-center gap-1 mb-3 text-amber-400"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
-                        <p class="text-xs text-slate-600 font-medium italic mb-5 leading-relaxed pointer-events-auto">"Alhamdulillah kebantu banget bisa ganti HP buat kerjaan tanpa was-was dosa riba. Cicilannya beneran flat dari awal sampai lunas, nggak ada tuh biaya admin ghaib-ghaiban."</p>
+                        <p class="text-xs text-slate-600 font-medium italic mb-5 leading-relaxed">"Alhamdulillah kebantu banget bisa ganti HP buat kerjaan tanpa was-was dosa riba. Cicilannya beneran flat dari awal sampai lunas, nggak ada tuh biaya admin ghaib-ghaiban."</p>
                         <div class="flex items-center gap-3 border-t border-slate-100 pt-3">
                             <img src="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/9cba32ac-d1f9-4f16-895b-9b3a168ff225.jpg" alt="Diva Maulana" class="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200">
                             <div><p class="text-[10px] font-black text-slate-800">Diva Maulana</p><p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Infinix Hot 60 Pro+</p></div>
                         </div>
                     </div>
                     
-                    <div class="min-w-[260px] max-w-[280px] shrink-0 clean-card bg-white rounded-3xl p-5 shadow-sm snap-center pointer-events-none">
+                    <div class="min-w-[260px] max-w-[280px] shrink-0 clean-card bg-white rounded-3xl p-5 shadow-sm snap-center">
                         <div class="flex items-center gap-1 mb-3 text-amber-400"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
-                        <p class="text-xs text-slate-600 font-medium italic mb-5 leading-relaxed pointer-events-auto">"Pelayanannya juara! Adminnya ramah dan sabar banget diajak diskusi cari HP yang pas sama budget. Terus web cek tagihannya juga simpel dan jelas transparan."</p>
+                        <p class="text-xs text-slate-600 font-medium italic mb-5 leading-relaxed">"Pelayanannya juara! Adminnya ramah dan sabar banget diajak diskusi cari HP yang pas sama budget. Terus web cek tagihannya juga simpel dan jelas transparan."</p>
                         <div class="flex items-center gap-3 border-t border-slate-100 pt-3">
                             <img src="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/47eae32f-26e3-4f45-a72b-75f05e117833.png" alt="Firgy" class="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200">
                             <div><p class="text-[10px] font-black text-slate-800">Firgy</p><p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">POCO F7</p></div>
                         </div>
                     </div>
                     
-                    <div class="min-w-[260px] max-w-[280px] shrink-0 clean-card bg-white rounded-3xl p-5 shadow-sm snap-center pointer-events-none">
+                    <div class="min-w-[260px] max-w-[280px] shrink-0 clean-card bg-white rounded-3xl p-5 shadow-sm snap-center">
                         <div class="flex items-center gap-1 mb-3 text-amber-400"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
-                        <p class="text-xs text-slate-600 font-medium italic mb-5 leading-relaxed pointer-events-auto">"Beneran syariah! Kemarin pas ada musibah dan seret, malah dibantu restrukturisasi (Tabayyun) tanpa kena denda telat sepeser pun. Sangat meringankan pikiran."</p>
+                        <p class="text-xs text-slate-600 font-medium italic mb-5 leading-relaxed">"Beneran syariah! Kemarin pas ada musibah dan seret, malah dibantu restrukturisasi (Tabayyun) tanpa kena denda telat sepeser pun. Sangat meringankan pikiran."</p>
                         <div class="flex items-center gap-3 border-t border-slate-100 pt-3">
                             <img src="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/2d5554a2-5b91-4c0b-9efa-efd5dc811e00.png" alt="Samsul A." class="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200">
                             <div><p class="text-[10px] font-black text-slate-800">Samsul A.</p><p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Realme C75</p></div>
                         </div>
                     </div>
                     
-                    <div class="min-w-[260px] max-w-[280px] shrink-0 clean-card bg-white rounded-3xl p-5 shadow-sm snap-center pointer-events-none">
+                    <div class="min-w-[260px] max-w-[280px] shrink-0 clean-card bg-white rounded-3xl p-5 shadow-sm snap-center">
                         <div class="flex items-center gap-1 mb-3 text-amber-400"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
-                        <p class="text-xs text-slate-600 font-medium italic mb-5 leading-relaxed pointer-events-auto">"Proses pengajuannya gampang dan nggak berbelit. Akadnya bener-bener dijelasin di awal, barang langsung bisa dipakai. Solusi mantap buat yang males ribet urus BI Checking!"</p>
+                        <p class="text-xs text-slate-600 font-medium italic mb-5 leading-relaxed">"Proses pengajuannya gampang dan nggak berbelit. Akadnya bener-bener dijelasin di awal, barang langsung bisa dipakai. Solusi mantap buat yang males ribet urus BI Checking!"</p>
                         <div class="flex items-center gap-3 border-t border-slate-100 pt-3">
                             <img src="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/98e44306-ae0a-43ec-bc60-8611ea48419d.png" alt="Rafly M" class="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200">
                             <div><p class="text-[10px] font-black text-slate-800">Rafly M.</p><p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">IQOO Z10R</p></div>
@@ -166,6 +167,11 @@
                     </div>
 
                 </div>
+
+                <button id="btnNextTesti" class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-20 w-12 h-12 bg-white rounded-full shadow-lg border border-slate-100 items-center justify-center text-emerald-600 hover:bg-emerald-50 active:scale-95 transition-all opacity-0 group-hover:opacity-100">
+                    <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                </button>
+
             </div>
         </section>
 
@@ -289,34 +295,19 @@
             }
         });
 
-        // SCRIPT DRAG-TO-SCROLL KHUSUS UNTUK ULASAN DI PC
-        const testiContainer = document.getElementById('testiContainer');
-        let isDown = false; let startX; let scrollLeft;
+        // SCRIPT TOMBOL PANAH ULASAN (KHUSUS DESKTOP)
+        const tContainer = document.getElementById('testiContainer');
+        const btnPrev = document.getElementById('btnPrevTesti');
+        const btnNext = document.getElementById('btnNextTesti');
 
-        testiContainer.addEventListener('mousedown', (e) => {
-            isDown = true;
-            testiContainer.classList.add('active');
-            testiContainer.classList.remove('scroll-smooth'); // Matikan smooth saat digeser manual
-            startX = e.pageX - testiContainer.offsetLeft;
-            scrollLeft = testiContainer.scrollLeft;
-        });
-        testiContainer.addEventListener('mouseleave', () => {
-            isDown = false;
-            testiContainer.classList.remove('active');
-            testiContainer.classList.add('scroll-smooth');
-        });
-        testiContainer.addEventListener('mouseup', () => {
-            isDown = false;
-            testiContainer.classList.remove('active');
-            testiContainer.classList.add('scroll-smooth');
-        });
-        testiContainer.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - testiContainer.offsetLeft;
-            const walk = (x - startX) * 2; // Kecepatan geser
-            testiContainer.scrollLeft = scrollLeft - walk;
-        });
+        if(btnPrev && btnNext && tContainer) {
+            btnPrev.addEventListener('click', () => {
+                tContainer.scrollBy({ left: -300, behavior: 'smooth' });
+            });
+            btnNext.addEventListener('click', () => {
+                tContainer.scrollBy({ left: 300, behavior: 'smooth' });
+            });
+        }
 
         function showToast(msg, type = 'error') { const toast = document.createElement('div'); toast.className = `${type === 'success' ? 'bg-emerald-500' : 'bg-red-500'} text-white px-5 py-3.5 rounded-2xl shadow-xl fixed top-5 left-1/2 -translate-x-1/2 z-[1000] min-w-[250px] font-bold text-sm text-center transition-all`; toast.innerText = msg; document.getElementById('toastContainer').appendChild(toast); setTimeout(() => toast.remove(), 3500); }
         
