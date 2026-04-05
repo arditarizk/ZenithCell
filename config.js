@@ -1,21 +1,6 @@
 const CONFIG = {
     "API_URL": "https://script.google.com/macros/s/AKfycbzLQN2RPqjtE65wVlQk5BjvV_gYL98y8pn7no3_lhOYSNt_cHd5IC0Qkg6OX4rOEe5vKw/exec",
     "WA_ADMIN": "62895410571547",
-    "PIN_ADMIN": "zenith123",
-    "DAFTAR_ADMIN": {
-        "ARDITA": {
-            "sandi": "123456",
-            "namaLengkap": "Ardita Rizki F."
-        },
-        "VIVI": {
-            "sandi": "654321",
-            "namaLengkap": "Vivi Nur D."
-        },
-        "ADMIN": {
-            "sandi": "zenith123",
-            "namaLengkap": "Admin Pusat"
-        }
-    },
     "MARGIN_DEFAULT": 25,
     "VOUCHERS": {
         "dulurdewe22": {
