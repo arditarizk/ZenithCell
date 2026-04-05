@@ -8,10 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
-    <script src="config.js?v=2"></script>
+    <script src="config.js?v=4"></script>
     <script>
         const KASIR_AKTIF = localStorage.getItem('kasirZenithAktif');
         if (!KASIR_AKTIF) { window.location.replace('index.html'); }
@@ -22,6 +20,7 @@
         .no-scrollbar::-webkit-scrollbar { display: none; } 
         .spinner { border: 3px solid rgba(16, 185, 129, 0.3); border-top: 3px solid #10b981; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         /* TAMPILAN DI LAYAR HP/PC */
         .receipt-paper { background: #ffffff; color: #000000; font-family: 'Courier New', Courier, monospace; width: 100%; max-width: 340px; margin: 0 auto; padding: 30px 20px; position: relative; }
         .is-whatsapp .brand-color { color: #10b981 !important; }
@@ -35,34 +34,17 @@
         .solid-line { border-top: 3px solid #000000; margin: 15px 0; }
         .flex-between { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
         
-        /* ======================================================== */
-        /* FIX CETAK STRUK KHUSUS UKURAN 48MM (AREA CETAK 40MM)     */
-        /* ======================================================== */
+        /* FIX CETAK STRUK 48MM */
         @media print {
             @page { size: 48mm auto; margin: 0; }
             body { background: white; margin: 0; padding: 0; min-height: 0; width: 48mm; display: block !important; }
-            
             header, #leftSection, #actionButtons, #btnProsesContainer, #toastContainer { display: none !important; }
-            
             main { display: block !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; border: none !important; background: transparent !important; width: 48mm !important; }
             #previewPanel { display: block !important; width: 48mm !important; padding: 0 !important; margin: 0 !important; background: white !important; }
             #previewContainer { display: block !important; opacity: 1 !important; visibility: visible !important; transform: none !important; width: 100% !important; }
-            
             #strukWrapper { width: 48mm !important; max-width: 48mm !important; margin: 0 !important; padding: 0 !important; display: flex; justify-content: center; }
-            
-            .receipt-paper { 
-                width: 40mm !important; 
-                max-width: 40mm !important; 
-                padding: 0 !important; 
-                margin: 0 auto !important; 
-                border: none !important; 
-                box-shadow: none !important; 
-                border-radius: 0 !important; 
-                background: white !important;
-            }
-            
+            .receipt-paper { width: 40mm !important; max-width: 40mm !important; padding: 0 !important; margin: 0 auto !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; background: white !important; }
             .receipt-paper * { color: black !important; line-height: 1.2 !important; font-family: 'Courier New', Courier, monospace !important; }
-            
             .text-[32px] { font-size: 14px !important; letter-spacing: -0.5px !important; margin-bottom: 2px !important;} 
             .text-[26px] { font-size: 11px !important; } 
             .text-base { font-size: 8px !important; }
@@ -72,11 +54,9 @@
             .text-[10px] { font-size: 6.5px !important; }
             .text-[9px] { font-size: 6px !important; }
             .text-[8px] { font-size: 5.5px !important; }
-            
             .flex-between { display: flex; justify-content: space-between; align-items: flex-start; gap: 2px !important; width: 100% !important; margin-bottom: 2px !important; }
             .flex-between span:first-child { width: 40%; word-break: break-word; }
             .flex-between span:last-child { width: 60%; text-align: right; word-break: break-word; }
-            
             .dashed-line { border-top: 1px dashed #000 !important; margin: 3px 0 !important; }
             .solid-line { border-top: 1px solid #000 !important; margin: 3px 0 !important; }
             .brand-bg { background: transparent !important; border: 1px solid #000 !important; padding: 2px !important; margin: 3px 0 !important; }
@@ -219,7 +199,6 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-        // FIX: Tambahkan `this.blur()` agar tombol panah tidak mengubah pilihan Radio Box
         function renderCustomerGrid(dataList) {
             const grid = document.getElementById('customerGrid');
             grid.innerHTML = '';
@@ -262,7 +241,6 @@
             document.getElementById('btnProsesContainer').style.removeProperty('display');
             document.getElementById('btnProsesContainer').classList.remove('hidden');
             
-            // FIX: Tambahkan `this.blur()` untuk opsi pembayaran cicilan juga
             document.getElementById('cicilanGrid').innerHTML = `
                 <label class="flex-1"><input type="radio" name="cicilan" value="${c.cicilanKe}" class="peer sr-only" checked onchange="document.getElementById('nominal').value='${formatRp(c.cicilanPerBulan)}'; renderPreview(); this.blur();"><div class="px-5 py-3 rounded-xl bg-white border-2 border-slate-200 peer-checked:bg-slate-900 peer-checked:text-white text-slate-600 font-black text-xs text-center transition-all flex flex-col items-center"><span>Bulan Ke-${c.cicilanKe}</span><span class="text-[8px] font-bold opacity-70 mt-0.5">Bulanan</span></div></label>
                 <label class="flex-1"><input type="radio" name="cicilan" value="Pelunasan" class="peer sr-only" onchange="document.getElementById('nominal').value='${formatRp(sisaHutang - window.currentDiskon)}'; document.getElementById('denda').value=''; renderPreview(); this.blur();"><div class="px-5 py-3 rounded-xl bg-white border-2 border-slate-200 peer-checked:bg-slate-900 peer-checked:text-white text-slate-600 font-black text-xs text-center transition-all flex flex-col items-center"><span>Lunas Full</span><span class="text-[8px] font-bold text-amber-400 mt-0.5 uppercase tracking-widest">Diskon 10%</span></div></label>`;
@@ -357,6 +335,7 @@
 
         document.getElementById('btnProses').addEventListener('click', eksekusiSimpan);
 
+        // FITUR BARU: SHARE WA DENGAN PROMO SAAT LUNAS
         async function captureAndShare(mode) {
             if(!currentSavedData) return;
             const wrapper = document.getElementById('strukWrapper');
@@ -370,8 +349,15 @@
                         const fileName = `Zenith_${currentSavedData.data.nama.replace(/\s/g,'')}_${Date.now()}.png`;
                         const file = new File([blob], fileName, { type: "image/png" });
 
+                        // Logika Pesan WA (Normal vs Pelunasan)
+                        let waText = `Assalamu'alaikum Kak ${currentSavedData.data.nama}.\n\nBerikut dilampirkan kuitansi bukti pembayaran angsurannya. Dana telah kami terima dan dicatat di sistem.\n\nTerima kasih atas kepercayaannya kepada Zenith Cell.`;
+                        
+                        if (currentSavedData.isLunas) {
+                            waText = `Assalamu'alaikum Kak ${currentSavedData.data.nama}.\n\nAlhamdulillah! Berikut dilampirkan bukti pelunasan tagihannya. Terima kasih telah berbelanja Tanpa Riba bersama Zenith Cell! ✨\n\nSebagai bentuk apresiasi, Kakak otomatis menjadi member *VVIP* kami. Kakak bisa request Jastip Gadget apa saja ke depannya dengan *Margin Spesial (Lebih Murah)*, atau dapatkan CASHBACK Rp50.000 cash jika merekomendasikan teman belanja di sini! 🎁`;
+                        }
+
                         if (navigator.share && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], title: 'Kuitansi Zenith Cell', text: `Assalamu'alaikum Kak ${currentSavedData.data.nama}.\n\nBerikut dilampirkan kuitansi bukti pembayaran angsurannya. Dana telah kami terima dan dicatat di sistem.\n\nTerima kasih atas kepercayaannya kepada Zenith Cell.` });
+                            await navigator.share({ files: [file], title: 'Kuitansi Zenith Cell', text: waText });
                         } else {
                             const a = document.createElement('a'); a.download = fileName; a.href = URL.createObjectURL(blob); a.click();
                         }
