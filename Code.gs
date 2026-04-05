@@ -259,7 +259,7 @@ function doGet(e) {
     }
 
     // ==========================================
-    // LOGIKA BARU: AMBIL SEMUA DATA (MULTI-LOAN) UNTUK CEK TAGIHAN
+    // API KHUSUS WEB CEK TAGIHAN (AMBIL SEMUA LOAN)
     // ==========================================
     if (e.parameter.wa) {
       var sw = e.parameter.wa.replace(/[^0-9]/g, '');
@@ -321,14 +321,14 @@ function doGet(e) {
       if(activeLoans.length > 0 || historyLoans.length > 0 || pendingLoans.length > 0) {
           // 4. Kalkulasi Skor Kredit Cerdas
           var totalTelat = activeLoans.reduce((sum, loan) => sum + Math.max(0, loan.selisihHari), 0);
-          var skorData = { score: "A", badge: "🟢 Nasabah Lancar" };
+          var skorData = { score: "A", badge: "Nasabah Lancar" };
           
           if (historyLoans.length > 0 && totalTelat === 0) {
-              skorData = { score: "A+", badge: "🌟 VVIP Member" };
+              skorData = { score: "A+", badge: "VVIP Member" };
           } else if (totalTelat > 0 && totalTelat <= 5) {
-              skorData = { score: "B", badge: "⚠️ Telat Ringan" };
+              skorData = { score: "B", badge: "Telat Ringan" };
           } else if (totalTelat > 5) {
-              skorData = { score: "C", badge: "🔴 Telat Berat" };
+              skorData = { score: "C", badge: "Telat Berat" };
           }
 
           return createJsonResponse({
