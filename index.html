@@ -361,7 +361,24 @@
         function requestPin(url) { pendingUrl = url; document.getElementById('pinInput').value = ""; document.getElementById('usernameInput').value = ""; document.getElementById('pinModal').classList.replace('hidden', 'flex'); setTimeout(() => { document.getElementById('pinModal').classList.remove('opacity-0'); document.getElementById('pinCard').classList.remove('scale-95'); document.getElementById('usernameInput').focus(); }, 10); }
         function closePin() { document.getElementById('pinModal').classList.add('opacity-0'); document.getElementById('pinCard').classList.add('scale-95'); setTimeout(() => { document.getElementById('pinModal').classList.replace('flex', 'hidden'); }, 300); }
 
-        document.getElementById('pinForm').addEventListener('submit', (e) => { e.preventDefault(); const user = document.getElementById('usernameInput').value.trim().toUpperCase(); const pass = document.getElementById('pinInput').value; const adminData = typeof CONFIG !== 'undefined' && CONFIG.DAFTAR_ADMIN ? CONFIG.DAFTAR_ADMIN : {}; if ((adminData[user] && adminData[user].sandi === pass) || pass === CONFIG.PIN_ADMIN) { localStorage.setItem('kasirZenithAktif', adminData[user] ? adminData[user].namaLengkap : "Admin Pusat"); window.location.href = pendingUrl; } else { showToast("ID/Sandi tidak valid!", "error"); } });
+        document.getElementById('pinForm').addEventListener('submit', (e) => { e.preventDefault(); const user = document.getElementById('usernameInput').value.trim().toUpperCase(); const pass = document.getElementById('pinInput').value; const adminData = typeof CONFIG !== 'undefined' && CONFIG.DAFTAR_ADMIN ? CONFIG.DAFTAR_ADMIN : {}; if ((adminData[user] && adminData[user].sandi === pass) || passdocument.getElementById('pinForm').addEventListener('submit', (e) => { 
+    e.preventDefault(); 
+    const user = document.getElementById('usernameInput').value.trim().toUpperCase(); 
+    const pass = document.getElementById('pinInput').value; 
+    
+    const adminData = typeof CONFIG !== 'undefined' && CONFIG.DAFTAR_ADMIN ? CONFIG.DAFTAR_ADMIN : {}; 
+    
+    // Kita simpan PIN yang diketik ke localStorage untuk dikirim ke Backend sebagai Token API
+    localStorage.setItem('zenithSecretToken', pass);
+
+    if ((adminData[user] && adminData[user].sandi === pass) || pass === "zenith123") { 
+        localStorage.setItem('kasirZenithAktif', adminData[user] ? adminData[user].namaLengkap : "Admin Pusat"); 
+        window.location.href = pendingUrl; 
+    } else { 
+        // Jika beda dengan "zenith123" atau sandi di config
+        showToast("ID/Sandi tidak valid!", "error"); 
+    } 
+});
     </script>
 </body>
 </html>
