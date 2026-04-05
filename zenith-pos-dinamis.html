@@ -9,10 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="config.js?v=4"></script>
+    <script src="config.js"></script>
     <script>
         const KASIR_AKTIF = localStorage.getItem('kasirZenithAktif');
-        if (!KASIR_AKTIF) { window.location.replace('index.html'); }
+        const SECRET_TOKEN = localStorage.getItem('zenithSecretToken');
+        if (!KASIR_AKTIF || !SECRET_TOKEN) { window.location.replace('index.html'); }
     </script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
@@ -21,7 +22,6 @@
         .spinner { border: 3px solid rgba(16, 185, 129, 0.3); border-top: 3px solid #10b981; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* TAMPILAN DI LAYAR HP/PC */
         .receipt-paper { background: #ffffff; color: #000000; font-family: 'Courier New', Courier, monospace; width: 100%; max-width: 340px; margin: 0 auto; padding: 30px 20px; position: relative; }
         .is-whatsapp .brand-color { color: #10b981 !important; }
         .is-whatsapp .brand-bg { background-color: #f0fdf4 !important; border: 1px solid #dcfce7 !important; border-radius: 8px; }
@@ -34,7 +34,6 @@
         .solid-line { border-top: 3px solid #000000; margin: 15px 0; }
         .flex-between { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
         
-        /* FIX CETAK STRUK 48MM */
         @media print {
             @page { size: 48mm auto; margin: 0; }
             body { background: white; margin: 0; padding: 0; min-height: 0; width: 48mm; display: block !important; }
@@ -119,6 +118,15 @@
                         </div>
                         <p class="text-[8px] font-bold text-red-500/80 leading-tight">*Catatan: Uang denda ini disalurkan untuk kepentingan sosial.</p>
                     </div>
+
+                    <div id="authPelunasanArea" class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-2xl hidden shadow-inner">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-[10px] font-black text-amber-800 uppercase">PIN Master Pelunasan</label>
+                            <i data-lucide="lock" class="w-4 h-4 text-amber-600"></i>
+                        </div>
+                        <input type="password" id="pinPelunasan" placeholder="Masukkan PIN khusus..." class="w-full px-4 py-3 bg-white border border-amber-300 rounded-xl text-slate-800 font-bold text-sm outline-none focus:border-amber-500 transition-all text-center tracking-widest shadow-sm">
+                        <p class="text-[8px] font-bold text-amber-600/80 leading-tight mt-2 text-center">*Otorisasi keamanan. Melunasi tanpa izin akan dilaporkan via Email ke Owner.</p>
+                    </div>
                 </div>
 
                 <div id="btnProsesContainer" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] z-50 lg:static lg:transform-none lg:w-full lg:mt-6">
@@ -171,6 +179,7 @@
         
         function logoutKasir() {
             localStorage.removeItem('kasirZenithAktif');
+            localStorage.removeItem('zenithSecretToken');
             window.location.replace('index.html');
         }
 
@@ -221,8 +230,13 @@
             const grid = document.getElementById('customerGrid');
             grid.innerHTML = `<div class="col-span-full text-center py-6"><div class="spinner mx-auto mb-2"></div><p class="text-[10px] text-slate-400 font-bold mt-2">Menyinkronkan Data...</p></div>`;
             try {
-                const res = await fetch(CONFIG.API_URL + "?action=getAll&nocache=" + Date.now());
+                // BAWA PIN SECRET SAAT FETCH
+                const res = await fetch(`${CONFIG.API_URL}?action=getAll&pin=${SECRET_TOKEN}&nocache=${Date.now()}`);
                 const result = await res.json();
+                if(result.status === "error") {
+                    grid.innerHTML = `<div class="col-span-full text-red-500 text-xs font-bold py-4 text-center">${result.message}</div>`;
+                    return;
+                }
                 dbCustomers = (result.data || []).filter(c => c.nama && (c.hutang - c.terbayar) > 0);
                 renderCustomerGrid(dbCustomers);
             } catch(e) { grid.innerHTML = `<div class="col-span-full text-red-500 text-xs font-bold py-4 text-center">Gagal Terhubung Jaringan</div>`; }
@@ -256,6 +270,14 @@
             
             const data = dbCustomers.find(c => c.idKontrak === custRadio.value);
             let isLunas = cicilanEl.value === 'Pelunasan';
+
+            if (isLunas) {
+                document.getElementById('authPelunasanArea').classList.remove('hidden');
+            } else {
+                document.getElementById('authPelunasanArea').classList.add('hidden');
+                document.getElementById('pinPelunasan').value = '';
+            }
+
             if (!window.tempIdTransaksi || window.isLunasTemp !== isLunas) { window.tempIdTransaksi = buatIdTransaksi(); window.isLunasTemp = isLunas; }
             
             let sisaHutangAsli = data.hutang - data.terbayar;
@@ -291,39 +313,45 @@
 
         ['nominal', 'denda'].forEach(id => document.getElementById(id).addEventListener('input', (e) => { if(isSaved) return; e.target.value = formatRp(parseRp(e.target.value)); renderPreview(); }));
 
-        const eksekusiSimpan = (e) => {
+        const eksekusiSimpan = async (e) => {
             if(e) e.preventDefault();
             
             try {
                 const p = renderPreview(); 
                 if (!p) return showToast("Lengkapi data nominal!", "error");
-                
+
                 const btnP = document.getElementById('btnProses');
                 btnP.disabled = true; 
                 document.getElementById('btnProsesIcon').outerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i>`;
                 document.getElementById('txtBtnProses').innerText = "Memproses...";
                 lucide.createIcons();
                 
+                // TAMBAH PIN KEAMANAN SAAT PROSES POST
                 let payload = { 
                     tipe: p.isLunas ? "PELUNASAN_AWAL" : "KAS_MASUK_CICILAN", 
+                    pin: SECRET_TOKEN,
+                    pinLunas: p.isLunas ? document.getElementById('pinPelunasan').value : "",
                     idTransaksi: p.idTransaksi, idKontrak: p.data.idKontrak, waktu: new Date().toLocaleString('id-ID'), 
                     bulanIni: new Date().getMonth() + 1, nama: p.data.nama, whatsapp: p.data.wa, 
                     cicilanKe: p.cicilan, nominalMasuk: p.nominalVal, dendaMasuk: p.dendaVal, 
-                    catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru) 
+                    catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru),
+                    emailOwner: (typeof CONFIG !== 'undefined' && CONFIG.EMAIL_OWNER) ? CONFIG.EMAIL_OWNER : ""
                 };
                 
-                fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }).catch(e=>{});
+                const response = await fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                // Karena no-cors, kita tidak bisa baca response detail, kita asumsikan sukses kecuali PIN di frontend salah.
                 
                 setTimeout(() => {
                     isSaved = true; currentSavedData = p;
                     document.getElementById('nominal').disabled = true; document.getElementById('denda').disabled = true;
+                    if(document.getElementById('pinPelunasan')) document.getElementById('pinPelunasan').disabled = true;
                     document.getElementById('posForm').style.opacity = '0.3';
                     
                     document.getElementById('btnProsesContainer').style.setProperty('display', 'none', 'important');
                     const actionBtns = document.getElementById('actionButtons');
                     actionBtns.classList.remove('hidden'); actionBtns.classList.add('flex');
                     
-                    showToast(p.isLunas ? "LUNAS! Riwayat dicatat." : "Berhasil Disimpan!", "success");
+                    showToast(p.isLunas ? "LUNAS! Owner telah diberitahu via Email." : "Berhasil Disimpan!", "success");
                     if(window.innerWidth < 1024) document.getElementById('previewPanel').scrollIntoView({behavior: 'smooth'});
                 }, 300); 
             } catch (err) {
@@ -335,7 +363,6 @@
 
         document.getElementById('btnProses').addEventListener('click', eksekusiSimpan);
 
-        // FITUR BARU: SHARE WA DENGAN PROMO SAAT LUNAS
         async function captureAndShare(mode) {
             if(!currentSavedData) return;
             const wrapper = document.getElementById('strukWrapper');
@@ -349,9 +376,7 @@
                         const fileName = `Zenith_${currentSavedData.data.nama.replace(/\s/g,'')}_${Date.now()}.png`;
                         const file = new File([blob], fileName, { type: "image/png" });
 
-                        // Logika Pesan WA (Normal vs Pelunasan)
                         let waText = `Assalamu'alaikum Kak ${currentSavedData.data.nama}.\n\nBerikut dilampirkan kuitansi bukti pembayaran angsurannya. Dana telah kami terima dan dicatat di sistem.\n\nTerima kasih atas kepercayaannya kepada Zenith Cell.`;
-                        
                         if (currentSavedData.isLunas) {
                             waText = `Assalamu'alaikum Kak ${currentSavedData.data.nama}.\n\nAlhamdulillah! Berikut dilampirkan bukti pelunasan tagihannya. Terima kasih telah berbelanja Tanpa Riba bersama Zenith Cell! ✨\n\nSebagai bentuk apresiasi, Kakak otomatis menjadi member *VVIP* kami. Kakak bisa request Jastip Gadget apa saja ke depannya dengan *Margin Spesial (Lebih Murah)*, atau dapatkan CASHBACK Rp50.000 cash jika merekomendasikan teman belanja di sini! 🎁`;
                         }
