@@ -198,7 +198,9 @@
         }
         
         const formatRp = (n) => new Intl.NumberFormat('id-ID').format(n);
-        const parseRp = (s) => parseInt(s.toString().replace(/[^0-9]/g, '')) || 0;
+        
+        // FIX BUG PARSING: Membuang desimal agar angka aman
+        const parseRp = (str) => parseInt(str.toString().split(',')[0].replace(/[^0-9]/g, '')) || 0;
 
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
@@ -230,7 +232,7 @@
             const grid = document.getElementById('customerGrid');
             grid.innerHTML = `<div class="col-span-full text-center py-6"><div class="spinner mx-auto mb-2"></div><p class="text-[10px] text-slate-400 font-bold mt-2">Menyinkronkan Data...</p></div>`;
             try {
-                const res = await fetch(`${CONFIG.API_URL}?action=getAll&pin=${SECRET_TOKEN}&nocache=${Date.now()}`);
+                const res = await fetch(`${typeof CONFIG !== 'undefined' ? CONFIG.API_URL : ''}?action=getAll&pin=${SECRET_TOKEN}&nocache=${Date.now()}`);
                 const result = await res.json();
                 if(result.status === "error") {
                     grid.innerHTML = `<div class="col-span-full text-red-500 text-xs font-bold py-4 text-center">${result.message}</div>`;
@@ -335,7 +337,7 @@
                     catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru)
                 };
                 
-                const response = await fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                const response = await fetch(typeof CONFIG !== 'undefined' ? CONFIG.API_URL : '', { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                 
                 setTimeout(() => {
                     isSaved = true; currentSavedData = p;
