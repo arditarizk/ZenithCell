@@ -70,7 +70,7 @@ function doPost(e) {
           if (vMargin < finalMargin) { finalMargin = vMargin; }
       }
 
-      // FIX BUG ANGKA: Bersihkan semua titik/koma dari harga dan DP dari frontend
+      // FIX BUG ANGKA: Bersihkan semua titik/koma dari harga dan DP
       var hargaBersih = parseInt(String(payload.harga).replace(/[^0-9]/g, '')) || 0;
       var dpBersih = parseInt(String(payload.dp).replace(/[^0-9]/g, '')) || 0;
 
@@ -109,7 +109,7 @@ function doPost(e) {
       if (sP) {
         var dP = sP.getDataRange().getValues();
         for (var i = 1; i < dP.length; i++) {
-          // Hanya ACC jika ID cocok DAN statusnya masih PENDING
+          // Hanya ACC jika status masih PENDING (mencegah bug nyangkut)
           if (cleanId(dP[i][0]) === cleanId(payload.idKontrak) && String(dP[i][17]).toUpperCase() === "PENDING") { 
             sP.getRange(i + 1, 18).setValue("ACC"); break;
           }
@@ -132,7 +132,7 @@ function doPost(e) {
       if (sP) {
         var dP = sP.getDataRange().getValues();
         for (var i = 1; i < dP.length; i++) {
-          // Hanya TOLAK jika ID cocok DAN statusnya masih PENDING
+          // Hanya Tolak jika status masih PENDING
           if (cleanId(dP[i][0]) === cleanId(payload.idKontrak) && String(dP[i][17]).toUpperCase() === "PENDING") { 
             sP.getRange(i + 1, 18).setValue("DITOLAK"); break;
           }
@@ -272,7 +272,6 @@ function doGet(e) {
         return { targetBln: targetBln, targetThn: targetThn, selisihHari: selisihHari, statusSkor: statusSkor };
     }
 
-    // API PUBLIK CEK TAGIHAN
     if (e.parameter.wa) {
       var sw = e.parameter.wa.replace(/[^0-9]/g, '');
       var sL = ss.getSheetByName("Pelanggan"); var sR = ss.getSheetByName("Riwayat"); var sP = ss.getSheetByName("Pengajuan");
@@ -318,7 +317,6 @@ function doGet(e) {
       } else { return createJsonResponse({status: "error", message: "Nomor tidak ditemukan."}); }
     }
 
-    // GERBANG KEAMANAN API (UNTUK METODE GET ADMIN)
     if (!isTokenValid(e.parameter.pin)) {
         return createJsonResponse({status: "error", message: "Akses Ditolak! API Token tidak valid."});
     }
