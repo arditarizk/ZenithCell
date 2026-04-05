@@ -46,11 +46,9 @@
             #previewContainer { display: block !important; opacity: 1 !important; visibility: visible !important; transform: none !important; width: 100% !important; }
             #strukWrapper { width: 48mm !important; max-width: 48mm !important; margin: 0 !important; padding: 0 !important; display: flex; justify-content: center; }
             
-            /* Area Cetak 40mm di dalam kertas 48mm */
             .receipt-paper { width: 40mm !important; max-width: 40mm !important; padding: 0 !important; margin: 0 auto !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; background: white !important; }
             .receipt-paper * { color: black !important; line-height: 1.2 !important; font-family: 'Courier New', Courier, monospace !important; }
             
-            /* Penyesuaian Font lebih kecil agar tajam dan muat di 40mm */
             .text-[32px] { font-size: 14px !important; letter-spacing: -0.5px !important; margin-bottom: 2px !important;} 
             .text-[26px] { font-size: 11px !important; } 
             .text-base { font-size: 8px !important; }
@@ -132,8 +130,8 @@
                             <label class="block text-[10px] font-black text-amber-800 uppercase">PIN Master Pelunasan</label>
                             <i data-lucide="lock" class="w-4 h-4 text-amber-600"></i>
                         </div>
-                        <input type="password" id="pinPelunasan" autocomplete="new-password" placeholder="Masukkan PIN khusus..." class="w-full px-4 py-3 bg-white border border-amber-300 rounded-xl text-slate-800 font-bold text-sm outline-none focus:border-amber-500 transition-all text-center tracking-widest shadow-sm">
-                        <p class="text-[8px] font-bold text-amber-600/80 leading-tight mt-2 text-center">*Otorisasi keamanan. Melunasi tanpa izin akan dilaporkan via Email ke Owner.</p>
+                        <input type="password" id="pinPelunasan" inputmode="numeric" autocomplete="new-password" placeholder="••••••" maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);" class="w-full px-4 py-3 bg-white border border-amber-300 rounded-xl text-slate-800 font-black text-2xl outline-none focus:border-amber-500 transition-all text-center tracking-[0.5em] shadow-sm">
+                        <p class="text-[8px] font-bold text-amber-600/80 leading-tight mt-2 text-center">*Masukkan 6 digit angka PIN Otorisasi.</p>
                     </div>
                 </div>
 
@@ -395,14 +393,11 @@
             }, 200);
         }
 
-        // ========================================================
-        // FIX PRINTER: Pemisahan Logic Cetak Mobile (RawBT) dan PC (CSS 48mm)
-        // ========================================================
-        
         window.onafterprint = function() {
             document.getElementById('strukWrapper').className = "is-whatsapp mx-auto";
         };
 
+        // FUNGSI CETAK RAWBT - DIBUAT MANUAL TEKS STRUK KHUSUS JIKA PAKAI APLIKASI
         function cetakStrukTajam() {
             if (!currentSavedData) return showToast("Data transaksi belum ada!", "error");
             const p = currentSavedData;
@@ -410,36 +405,20 @@
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
             if (isMobile) {
-                // LOGIKA RAWBT UNTUK HP ANDROID (Anti Huruf Alien)
                 const tgl = new Date().toLocaleString('id-ID');
                 const ketCicilan = p.isLunas ? 'Pelunasan Full' : 'Angsuran Ke-' + p.cicilan;
                 const barang = p.data.barang ? p.data.barang : '-';
 
-                let struk = "[C]<b>ZENITH CELL</b>\n";
-                struk += "[C]Gadget Syariah Malang\n";
-                struk += "[C]--------------------------------\n";
-                struk += "[L]Tgl   : " + tgl + "\n";
-                struk += "[L]Trans : " + p.idTransaksi + "\n";
-                struk += "[L]Kasir : " + KASIR_AKTIF + "\n";
-                struk += "[C]--------------------------------\n";
-                struk += "[L]Kntrk : " + p.data.idKontrak + "\n";
-                struk += "[L]Nama  : " + p.data.nama.toUpperCase() + "\n";
-                struk += "[L]Unit  : " + barang.toUpperCase() + "\n";
-                struk += "[L]Ket   : " + ketCicilan + "\n";
-                struk += "[C]--------------------------------\n";
-                struk += "[L]Angsuran[R]Rp " + formatRp(p.nominalVal) + "\n";
-                if(p.dendaVal > 0) struk += "[L]Denda[R]Rp " + formatRp(p.dendaVal) + "\n";
-                if(p.isLunas) struk += "[L]Diskon Ibra'[R]-Rp " + formatRp(window.currentDiskon) + "\n";
-                struk += "[C]--------------------------------\n";
-                struk += "[L]<b>TOTAL KAS</b>[R]<b>Rp " + formatRp(p.totalBayarPlusDenda) + "</b>\n";
-                struk += "[L]Sisa Utang[R]Rp " + formatRp(p.sisaBaru) + "\n";
-                struk += "[C]--------------------------------\n";
-                struk += "[C]Alhamdulillah Sah!\n";
-                struk += "[C]Terima kasih, berkah!\n\n\n";
+                let struk = "      ZENITH CELL       \n  Gadget Syariah Malang \n------------------------\n";
+                struk += "Tgl  : " + tgl + "\nTrans: " + p.idTransaksi + "\nKasir: " + KASIR_AKTIF + "\n------------------------\n";
+                struk += "Kntrk: " + p.data.idKontrak + "\nNama : " + p.data.nama.toUpperCase() + "\nUnit : " + barang.toUpperCase() + "\nKet  : " + ketCicilan + "\n------------------------\n";
+                struk += "Angsr: Rp " + formatRp(p.nominalVal) + "\n";
+                if(p.dendaVal > 0) struk += "Denda: Rp " + formatRp(p.dendaVal) + "\n";
+                if(p.isLunas) struk += "Diskn: Rp " + formatRp(window.currentDiskon) + "\n";
+                struk += "------------------------\nTOTAL: Rp " + formatRp(p.totalBayarPlusDenda) + "\nSisa : Rp " + formatRp(p.sisaBaru) + "\n------------------------\n   Alhamdulillah Sah!   \n Terima kasih, berkah! \n\n\n\n"; 
 
                 window.location.href = "intent:" + encodeURIComponent(struk) + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
             } else {
-                // LOGIKA WINDOW.PRINT UNTUK PC/LAPTOP (Emulator 48mm / Area 40mm)
                 document.getElementById('strukWrapper').className = "is-printer mx-auto";
                 setTimeout(() => { window.print(); }, 200);
             }
