@@ -1,10 +1,10 @@
 // ==========================================
-// MASTER API ZENITH CELL (V32 - FIX EMAIL & ANTI DOUBLE INPUT)
+// MASTER API ZENITH CELL (V33 - GERBANG BESI ANTI DOUBLE ACC/TOLAK)
 // ==========================================
 
 var MASTER_PIN = "Parawhore78"; 
 var PIN_PELUNASAN = "121221"; 
-var EMAIL_NOTIFIKASI = "znthcell@gmail.com"; // FIX: Email sudah benar tanpa titik
+var EMAIL_NOTIFIKASI = "znthcell@gmail.com"; 
 
 var ADMIN_USERS = {
     "ARDITA": { sandi: "123456", nama: "Ardita Rizki F." },
@@ -97,17 +97,34 @@ function doPost(e) {
       return createJsonResponse({status: "success"});
     }
 
+    // ==========================================
+    // FIX BUG RACE CONDITION: ACC PENGAJUAN
+    // ==========================================
     if (payload.tipe === "ACC_PENGAJUAN") {
       var sP = ss.getSheetByName("Pengajuan");
       var sL = getOrCreateSheet(ss, "Pelanggan");
+      var isPending = false;
+      var rowIndexP = -1;
+
       if (sP) {
         var dP = sP.getDataRange().getValues();
         for (var i = 1; i < dP.length; i++) {
           if (cleanId(dP[i][0]) === cleanId(payload.idKontrak) && String(dP[i][17]).toUpperCase() === "PENDING") { 
-            sP.getRange(i + 1, 18).setValue("ACC"); break;
+            isPending = true;
+            rowIndexP = i + 1;
+            break;
           }
         }
       }
+
+      // GERBANG BESI: Jika status bukan PENDING (berarti sudah di-Tolak/ACC di HP), STOP DI SINI!
+      if (!isPending) {
+        return createJsonResponse({status: "error", message: "Ditolak sistem: Pengajuan ini sudah diproses di perangkat lain."});
+      }
+
+      // Jika aman, lanjut ACC dan tulis ke Database Pelanggan
+      sP.getRange(rowIndexP, 18).setValue("ACC");
+
       if (sL.getLastRow() === 0) {
         sL.appendRow(["ID Kontrak", "Nama Pelanggan", "No WA", "Barang", "Total Hutang", "Sudah Terbayar", "Cicilan Per Bulan", "Tgl Jatuh Tempo", "Cicilan Ke", "Bulan Terakhir Bayar"]);
         sL.getRange("A1:J1").setFontWeight("bold").setBackground("#e0e7ff");
@@ -117,19 +134,35 @@ function doPost(e) {
       var targetTahun = parseInt(Utilities.formatDate(new Date(), tz, "yyyy"));
       if (targetBulan > 12) { targetBulan -= 12; targetTahun++; }
       sL.appendRow(["'" + cleanId(payload.idKontrak), payload.nama, "'" + payload.wa, payload.barang, payload.totalHutang, 0, payload.cicilanBulan, payload.jatuhTempo, 1, "'" + targetTahun + "-" + String(targetBulan).padStart(2, '0')]);
+      
       return createJsonResponse({status: "success"});
     }
 
+    // ==========================================
+    // FIX BUG RACE CONDITION: TOLAK PENGAJUAN
+    // ==========================================
     if (payload.tipe === "TOLAK_PENGAJUAN") {
       var sP = ss.getSheetByName("Pengajuan");
+      var isPending = false;
+      var rowIndexP = -1;
+
       if (sP) {
         var dP = sP.getDataRange().getValues();
         for (var i = 1; i < dP.length; i++) {
           if (cleanId(dP[i][0]) === cleanId(payload.idKontrak) && String(dP[i][17]).toUpperCase() === "PENDING") { 
-            sP.getRange(i + 1, 18).setValue("DITOLAK"); break;
+            isPending = true;
+            rowIndexP = i + 1;
+            break;
           }
         }
       }
+
+      // GERBANG BESI
+      if (!isPending) {
+        return createJsonResponse({status: "error", message: "Ditolak sistem: Pengajuan ini sudah diproses di perangkat lain."});
+      }
+
+      sP.getRange(rowIndexP, 18).setValue("DITOLAK");
       return createJsonResponse({status: "success"});
     }
 
@@ -137,7 +170,6 @@ function doPost(e) {
       var sL = ss.getSheetByName("Pelanggan");
       if (!sL) return createJsonResponse({status: "error", message: "DB Error"});
       
-      // FIX ANTI DOUBLE INPUT: Cek apakah data pelanggan masih ada & angsuran belum dibayar
       var dL = sL.getDataRange().getValues();
       var isFound = false;
       var rowIndex = -1;
@@ -150,7 +182,6 @@ function doPost(e) {
       }
       if (!isFound) return createJsonResponse({status: "error", message: "Data tidak ditemukan atau sudah LUNAS di device lain."});
       
-      // Cek jika cicilan ke-X ini sebenarnya sudah dibayar sebelumnya
       if (parseInt(payload.cicilanKe) < parseInt(dL[rowIndex-2][8])) {
          return createJsonResponse({status: "error", message: "Angsuran ini sudah pernah dibayar sebelumnya!"});
       }
@@ -184,7 +215,6 @@ function doPost(e) {
       var sL = ss.getSheetByName("Pelanggan");
       if (!sL) return createJsonResponse({status: "error", message: "DB Error"});
       
-      // FIX ANTI DOUBLE INPUT: Cek apakah pelanggan masih ada di daftar (belum dilunasi device lain)
       var dL = sL.getDataRange().getValues();
       var isFound = false;
       var rowIndex = -1;
