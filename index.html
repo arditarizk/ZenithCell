@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="config.js?v=5"></script>
+    <script src="config.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; overflow-x: hidden; transition: background-color 0.3s, color 0.3s; }
         .clean-card { background: #ffffff; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px -5px rgba(0,0,0,0.03); transition: all 0.3s; }
@@ -21,10 +21,6 @@
         .marquee-wrapper { display: block; width: 100%; overflow: hidden; white-space: nowrap; box-sizing: border-box; }
         .scrolling-text { display: inline-block; padding-left: 100%; animation: scrollText 35s linear infinite; will-change: transform; }
         @keyframes scrollText { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
-        
-        .gallery-track { display: flex; width: max-content; animation: scrollGallery 25s linear infinite; }
-        .gallery-track:hover { animation-play-state: paused; }
-        @keyframes scrollGallery { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         
         body.dark-mode { background-color: #0f172a; color: #f8fafc; }
         body.dark-mode .clean-card, body.dark-mode main, body.dark-mode header, body.dark-mode nav { background-color: #1e293b !important; border-color: #334155 !important; }
@@ -105,7 +101,7 @@
             <div class="flex justify-between items-end mb-4 px-2"><div><h2 class="text-xs lg:text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><i data-lucide="camera" class="w-4 h-4 lg:w-5 lg:h-5 text-emerald-500"></i> Penyerahan Unit</h2><p class="text-[10px] lg:text-xs text-slate-500 font-medium mt-1">Bukti nyata #TanpaRiba bersama Zenith Cell.</p></div></div>
             
             <div class="relative w-full overflow-hidden rounded-3xl bg-slate-50 border border-slate-100 shadow-inner py-4 group">
-                <div id="gallerySlider" class="flex overflow-x-auto gap-4 px-4 no-scrollbar snap-x scroll-smooth">
+                <div class="flex overflow-x-auto gap-4 px-4 no-scrollbar snap-x scroll-smooth">
                     <div class="w-40 lg:w-48 h-56 lg:h-64 shrink-0 rounded-2xl overflow-hidden relative shadow-md snap-center"><img src="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/5994ea94-eefb-4fef-9aec-e41f98f2d00f.jpg" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700"><div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/50 to-transparent p-3 pt-8"><p class="text-white text-[10px] font-bold drop-shadow-md">Diva - Infinix Hot 60 Pro+</p></div></div>
                     <div class="w-40 lg:w-48 h-56 lg:h-64 shrink-0 rounded-2xl overflow-hidden relative shadow-md snap-center"><img src="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/3d2316d5-a90d-4d51-89e1-6fb1c65f9f5d.png" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700"><div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/50 to-transparent p-3 pt-8"><p class="text-white text-[10px] font-bold drop-shadow-md">Firgy - Poco F7</p></div></div>
                     <div class="w-40 lg:w-48 h-56 lg:h-64 shrink-0 rounded-2xl overflow-hidden relative shadow-md snap-center"><img src="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/e375eec9-e13a-43fe-9c32-a8db09783f73.png" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700"><div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/50 to-transparent p-3 pt-8"><p class="text-white text-[10px] font-bold drop-shadow-md">Samsul - Realme C75</p></div></div>
@@ -118,7 +114,7 @@
             <h2 class="text-xs lg:text-sm font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2 px-2"><i data-lucide="heart-handshake" class="w-4 h-4 lg:w-5 lg:h-5 text-emerald-500"></i> Kisah Nyata Pelanggan</h2>
             
             <div class="relative w-full overflow-hidden py-2 group">
-                <div id="testiSlider" class="flex overflow-x-auto gap-4 px-4 no-scrollbar snap-x scroll-smooth">
+                <div class="flex overflow-x-auto gap-4 px-4 no-scrollbar snap-x scroll-smooth">
                     
                     <div class="min-w-[260px] max-w-[280px] clean-card bg-white rounded-3xl p-5 shadow-sm snap-center">
                         <div class="flex items-center gap-1 mb-3 text-amber-400"><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i><i data-lucide="star" class="w-4 h-4 fill-current"></i></div>
@@ -278,54 +274,7 @@
                     document.getElementById('teksPengumuman').innerText = CONFIG.TEKS_PENGUMUMAN;
                 }
             }
-
-            initInfiniteSlider('gallerySlider');
-            initInfiniteSlider('testiSlider');
         });
-
-        // FUNGSI AJAIB: MANUAL SWIPE + INFINITE LOOP
-        function initInfiniteSlider(id) {
-            const slider = document.getElementById(id);
-            if (!slider) return;
-
-            const items = Array.from(slider.children);
-            items.forEach(item => {
-                const clone = item.cloneNode(true);
-                slider.appendChild(clone);
-            });
-
-            let isDown = false;
-            const setDown = () => isDown = true;
-            const setUp = () => setTimeout(() => isDown = false, 2500); 
-            
-            slider.addEventListener('touchstart', setDown, {passive: true});
-            slider.addEventListener('touchend', setUp, {passive: true});
-            slider.addEventListener('mousedown', setDown);
-            slider.addEventListener('mouseup', setUp);
-            slider.addEventListener('mouseleave', setUp);
-
-            slider.addEventListener('scroll', () => {
-                const halfWidth = slider.scrollWidth / 2;
-                if (slider.scrollLeft >= halfWidth) {
-                    slider.classList.remove('scroll-smooth');
-                    slider.scrollLeft -= halfWidth;
-                    void slider.offsetWidth; 
-                    slider.classList.add('scroll-smooth');
-                } else if (slider.scrollLeft <= 0) {
-                    slider.classList.remove('scroll-smooth');
-                    slider.scrollLeft += halfWidth;
-                    void slider.offsetWidth;
-                    slider.classList.add('scroll-smooth');
-                }
-            }, {passive: true});
-
-            setInterval(() => {
-                if (!isDown) {
-                    const card = slider.firstElementChild;
-                    if(card) slider.scrollBy({ left: card.offsetWidth + 16, behavior: 'smooth' }); 
-                }
-            }, 3500); 
-        }
 
         function showToast(msg, type = 'error') { const toast = document.createElement('div'); toast.className = `${type === 'success' ? 'bg-emerald-500' : 'bg-red-500'} text-white px-5 py-3.5 rounded-2xl shadow-xl fixed top-5 left-1/2 -translate-x-1/2 z-[1000] min-w-[250px] font-bold text-sm text-center transition-all`; toast.innerText = msg; document.getElementById('toastContainer').appendChild(toast); setTimeout(() => toast.remove(), 3500); }
         
@@ -405,9 +354,7 @@
         function requestPin(url) { pendingUrl = url; document.getElementById('pinInput').value = ""; document.getElementById('usernameInput').value = ""; document.getElementById('pinModal').classList.replace('hidden', 'flex'); setTimeout(() => { document.getElementById('pinModal').classList.remove('opacity-0'); document.getElementById('pinCard').classList.remove('scale-95'); document.getElementById('usernameInput').focus(); }, 10); }
         function closePin() { document.getElementById('pinModal').classList.add('opacity-0'); document.getElementById('pinCard').classList.add('scale-95'); setTimeout(() => { document.getElementById('pinModal').classList.replace('flex', 'hidden'); }, 300); }
 
-        // ==========================================
-        // LOGIKA LOGIN BARU (SIMPAN TOKEN KEAMANAN)
-        // ==========================================
+        // LOGIKA KEAMANAN LOGIN BARU
         document.getElementById('pinForm').addEventListener('submit', async (e) => { 
             e.preventDefault(); 
             const user = document.getElementById('usernameInput').value.trim().toUpperCase(); 
@@ -420,12 +367,11 @@
             lucide.createIcons();
 
             try {
-                // Mengirim permintaan validasi ke Database langsung (Lebih Aman)
-                const response = await fetch(`${CONFIG.API_URL}?action=login&user=${encodeURIComponent(user)}&pass=${encodeURIComponent(pass)}&nocache=${Date.now()}`);
+                const response = await fetch(`${typeof CONFIG !== 'undefined' ? CONFIG.API_URL : ''}?action=login&user=${encodeURIComponent(user)}&pass=${encodeURIComponent(pass)}&nocache=${Date.now()}`);
                 const result = await response.json();
 
                 if (result.status === 'success') { 
-                    localStorage.setItem('zenithSecretToken', pass); // Simpan Kunci Token
+                    localStorage.setItem('zenithSecretToken', pass);
                     localStorage.setItem('kasirZenithAktif', result.nama); 
                     window.location.href = pendingUrl; 
                 } else { 
