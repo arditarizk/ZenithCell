@@ -222,8 +222,11 @@
             btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Menyimpan...`; 
             lucide.createIcons();
             
+            // KITA TAMBAHKAN KODE VOUCHER KE DALAM PAYLOAD DI BAWAH INI
             const data = { 
-                nama:document.getElementById('nama').value, nik:n, wa:document.getElementById('wa').value, alamat:document.getElementById('alamat').value, pekerjaan:document.getElementById('pekerjaan').value, gaji:document.getElementById('gaji').value, daruratNama:document.getElementById('daruratNama').value, daruratWa:document.getElementById('daruratWa').value, barang:document.getElementById('barang').value, harga:document.getElementById('hargaBarang').value, dp:document.getElementById('dpBarang').value||"0", tenor:document.getElementById('tenorSelect').value, jaminan:document.getElementById('pilihJalur').value==="VIP"?document.getElementById('jenisJaminan').value:"Tanpa Jaminan", jatuhTempo:document.getElementById('jatuhTempo').value, margin: promoMarginAktif || (document.getElementById('pilihJalur').value==="VIP"?15:25) 
+                nama:document.getElementById('nama').value, nik:n, wa:document.getElementById('wa').value, alamat:document.getElementById('alamat').value, pekerjaan:document.getElementById('pekerjaan').value, gaji:document.getElementById('gaji').value, daruratNama:document.getElementById('daruratNama').value, daruratWa:document.getElementById('daruratWa').value, barang:document.getElementById('barang').value, harga:document.getElementById('hargaBarang').value, dp:document.getElementById('dpBarang').value||"0", tenor:document.getElementById('tenorSelect').value, jaminan:document.getElementById('pilihJalur').value==="VIP"?document.getElementById('jenisJaminan').value:"Tanpa Jaminan", jatuhTempo:document.getElementById('jatuhTempo').value, 
+                kodeVoucher: document.getElementById('inputVoucher').value, // <--- Ini untuk di cek server
+                margin: promoMarginAktif || (document.getElementById('pilihJalur').value==="VIP"?15:25) // Ini untuk tampilan teks WA saja
             };
             
             const id = buatIdKontrak(data.wa);
