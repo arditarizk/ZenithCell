@@ -1,5 +1,5 @@
 // ==========================================
-// MASTER API ZENITH CELL (V33 - GERBANG BESI ANTI DOUBLE ACC/TOLAK)
+// MASTER API ZENITH CELL (V34 - ENTERPRISE LOCK & SERVER TIME)
 // ==========================================
 
 var MASTER_PIN = "Parawhore78"; 
@@ -46,11 +46,31 @@ function sanitize(input) {
   return String(input).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
 }
 
+// FUNGSI UNTUK MENDAPATKAN JAM SERVER GOOGLE (ANTI HACK JAM HP)
+function getServerTime(ss) {
+    var tz = ss.getSpreadsheetTimeZone();
+    return Utilities.formatDate(new Date(), tz, "dd/MM/yyyy, HH:mm:ss");
+}
+
 function doPost(e) {
+  // MEMASANG GEMBOK (LOCK SERVICE) ANTI TABRAKAN DATA
+  var lock = LockService.getScriptLock();
+  
+  // Jika server sedang dipakai orang lain, tunggu maksimal 10 detik.
+  // Jika lebih dari 10 detik, tolak.
+  try {
+    lock.waitLock(10000); 
+  } catch (e) {
+    return createJsonResponse({status: "error", message: "Sistem sedang sibuk memproses transaksi lain. Coba 5 detik lagi."});
+  }
+
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var payload = JSON.parse(e.postData.contents);
     
+    // WAKTU MUTLAK DARI SERVER GOOGLE
+    var WAKTU_SAH = getServerTime(ss);
+
     if (payload.tipe === "PENGAJUAN_BARU") {
       var s = getOrCreateSheet(ss, "Pengajuan");
       if (s.getLastRow() === 0) {
@@ -72,7 +92,7 @@ function doPost(e) {
       var dpBersih = parseInt(String(payload.dp).replace(/[^0-9]/g, '')) || 0;
 
       s.appendRow([
-        "'" + cleanId(payload.idKontrak), payload.timestamp || new Date().toLocaleString('id-ID'), 
+        "'" + cleanId(payload.idKontrak), WAKTU_SAH, 
         sanitize(payload.nama), "'" + sanitize(payload.nik), "'" + sanitize(payload.wa), sanitize(payload.alamat), 
         sanitize(payload.pekerjaan), sanitize(payload.gaji), sanitize(payload.daruratNama), "'" + sanitize(payload.daruratWa), 
         sanitize(payload.barang), hargaBersih, dpBersih, parseInt(payload.tenor)||0, 
@@ -85,21 +105,6 @@ function doPost(e) {
       return createJsonResponse({status: "error", message: "Akses Ilegal Ditolak! Kredensial Tidak Sah."});
     }
 
-    if (payload.tipe === "SIMPAN_DRAFT_CONFIG") {
-      var sC = getOrCreateSheet(ss, "DraftConfig");
-      if (sC.getLastRow() === 0) {
-        sC.appendRow(["Nama Toko", "Logo URL", "Teks Pengumuman", "API URL", "WA Admin"]);
-        sC.getRange("A1:E1").setFontWeight("bold").setBackground("#fef3c7");
-        sC.appendRow([payload.nama, payload.logo, payload.teks, payload.api, payload.wa]);
-      } else {
-        sC.getRange("A2:E2").setValues([[payload.nama, payload.logo, payload.teks, payload.api, payload.wa]]);
-      }
-      return createJsonResponse({status: "success"});
-    }
-
-    // ==========================================
-    // FIX BUG RACE CONDITION: ACC PENGAJUAN
-    // ==========================================
     if (payload.tipe === "ACC_PENGAJUAN") {
       var sP = ss.getSheetByName("Pengajuan");
       var sL = getOrCreateSheet(ss, "Pelanggan");
@@ -110,19 +115,13 @@ function doPost(e) {
         var dP = sP.getDataRange().getValues();
         for (var i = 1; i < dP.length; i++) {
           if (cleanId(dP[i][0]) === cleanId(payload.idKontrak) && String(dP[i][17]).toUpperCase() === "PENDING") { 
-            isPending = true;
-            rowIndexP = i + 1;
-            break;
+            isPending = true; rowIndexP = i + 1; break;
           }
         }
       }
 
-      // GERBANG BESI: Jika status bukan PENDING (berarti sudah di-Tolak/ACC di HP), STOP DI SINI!
-      if (!isPending) {
-        return createJsonResponse({status: "error", message: "Ditolak sistem: Pengajuan ini sudah diproses di perangkat lain."});
-      }
+      if (!isPending) return createJsonResponse({status: "error", message: "Ditolak sistem: Pengajuan ini sudah diproses di perangkat lain."});
 
-      // Jika aman, lanjut ACC dan tulis ke Database Pelanggan
       sP.getRange(rowIndexP, 18).setValue("ACC");
 
       if (sL.getLastRow() === 0) {
@@ -138,9 +137,6 @@ function doPost(e) {
       return createJsonResponse({status: "success"});
     }
 
-    // ==========================================
-    // FIX BUG RACE CONDITION: TOLAK PENGAJUAN
-    // ==========================================
     if (payload.tipe === "TOLAK_PENGAJUAN") {
       var sP = ss.getSheetByName("Pengajuan");
       var isPending = false;
@@ -150,17 +146,12 @@ function doPost(e) {
         var dP = sP.getDataRange().getValues();
         for (var i = 1; i < dP.length; i++) {
           if (cleanId(dP[i][0]) === cleanId(payload.idKontrak) && String(dP[i][17]).toUpperCase() === "PENDING") { 
-            isPending = true;
-            rowIndexP = i + 1;
-            break;
+            isPending = true; rowIndexP = i + 1; break;
           }
         }
       }
 
-      // GERBANG BESI
-      if (!isPending) {
-        return createJsonResponse({status: "error", message: "Ditolak sistem: Pengajuan ini sudah diproses di perangkat lain."});
-      }
+      if (!isPending) return createJsonResponse({status: "error", message: "Ditolak sistem: Pengajuan ini sudah diproses di perangkat lain."});
 
       sP.getRange(rowIndexP, 18).setValue("DITOLAK");
       return createJsonResponse({status: "success"});
@@ -175,9 +166,7 @@ function doPost(e) {
       var rowIndex = -1;
       for (var i = 1; i < dL.length; i++) {
         if (cleanId(dL[i][0]) === cleanId(payload.idKontrak)) {
-          isFound = true;
-          rowIndex = i + 1;
-          break;
+          isFound = true; rowIndex = i + 1; break;
         }
       }
       if (!isFound) return createJsonResponse({status: "error", message: "Data tidak ditemukan atau sudah LUNAS di device lain."});
@@ -191,7 +180,8 @@ function doPost(e) {
         sT.appendRow(["ID Transaksi", "Waktu", "ID Kontrak", "Nama", "WA", "Pembayaran Ke", "Angsuran Pokok", "Dana Kebajikan (Denda)", "Catatan"]);
         sT.getRange("A1:I1").setFontWeight("bold").setBackground("#f3e8ff");
       }
-      sT.appendRow(["'" + cleanId(payload.idTransaksi), payload.waktu, "'" + cleanId(payload.idKontrak), payload.nama, "'"+payload.whatsapp, payload.cicilanKe, payload.nominalMasuk, payload.dendaMasuk || 0, payload.catatan]);
+      // GANTI WAKTU DARI HP MENJADI WAKTU SERVER
+      sT.appendRow(["'" + cleanId(payload.idTransaksi), WAKTU_SAH, "'" + cleanId(payload.idKontrak), payload.nama, "'"+payload.whatsapp, payload.cicilanKe, payload.nominalMasuk, payload.dendaMasuk || 0, payload.catatan]);
       
       sL.getRange(rowIndex, 6).setValue((parseInt(dL[rowIndex-2][5])||0) + parseInt(payload.nominalMasuk));
       sL.getRange(rowIndex, 9).setValue((parseInt(dL[rowIndex-2][8])||0) + 1);
@@ -220,9 +210,7 @@ function doPost(e) {
       var rowIndex = -1;
       for (var i = 1; i < dL.length; i++) {
         if (cleanId(dL[i][0]) === cleanId(payload.idKontrak)) {
-          isFound = true;
-          rowIndex = i + 1;
-          break;
+          isFound = true; rowIndex = i + 1; break;
         }
       }
       if (!isFound) return createJsonResponse({status: "error", message: "Transaksi Ditolak: Tagihan ini SUDAH DILUNASI sebelumnya!"});
@@ -233,21 +221,23 @@ function doPost(e) {
         sT.appendRow(["ID Transaksi", "Waktu", "ID Kontrak", "Nama", "WA", "Pembayaran Ke", "Angsuran Pokok", "Dana Kebajikan (Denda)", "Catatan"]);
         sT.getRange("A1:I1").setFontWeight("bold").setBackground("#f3e8ff");
       }
-      sT.appendRow(["'" + cleanId(payload.idTransaksi), payload.waktu, "'" + cleanId(payload.idKontrak), payload.nama, "'"+payload.whatsapp, "LUNAS FULL", payload.nominalMasuk, payload.dendaMasuk || 0, payload.catatan]);
+      sT.appendRow(["'" + cleanId(payload.idTransaksi), WAKTU_SAH, "'" + cleanId(payload.idKontrak), payload.nama, "'"+payload.whatsapp, "LUNAS FULL", payload.nominalMasuk, payload.dendaMasuk || 0, payload.catatan]);
       
       if (sR.getLastRow() === 0) {
         sR.appendRow(["ID Kontrak", "Nama Pelanggan", "No WA", "Barang", "Total Hutang Awal", "Tanggal Lunas"]);
         sR.getRange("A1:F1").setFontWeight("bold").setBackground("#dcfce7");
       }
       
-      sR.appendRow(["'" + cleanId(dL[rowIndex-2][0]), dL[rowIndex-2][1], "'" + dL[rowIndex-2][2], dL[rowIndex-2][3], dL[rowIndex-2][4], payload.waktu]);
+      sR.appendRow(["'" + cleanId(dL[rowIndex-2][0]), dL[rowIndex-2][1], "'" + dL[rowIndex-2][2], dL[rowIndex-2][3], dL[rowIndex-2][4], WAKTU_SAH]);
+      
+      // HAPUS BARIS AMAN (Karena Google Sheets sudah di-Lock, baris tidak akan bergeser saat dihapus)
       sL.deleteRow(rowIndex);
 
       try {
           var emailTujuan = EMAIL_NOTIFIKASI || Session.getEffectiveUser().getEmail();
           if (emailTujuan && emailTujuan.indexOf('@') > -1) {
               MailApp.sendEmail(emailTujuan, "✅ VALIDASI PELUNASAN: " + payload.nama, 
-                "Sistem Zenith Cell mencatat transaksi PELUNASAN FULL sah.\n\nNama: " + payload.nama + "\nNominal: Rp " + payload.nominalMasuk + "\nWaktu: " + payload.waktu + "\n\nHarap pastikan dana telah masuk mutasi rekening.");
+                "Sistem Zenith Cell mencatat transaksi PELUNASAN FULL sah.\n\nNama: " + payload.nama + "\nNominal: Rp " + payload.nominalMasuk + "\nWaktu: " + WAKTU_SAH + "\n\nHarap pastikan dana telah masuk mutasi rekening.");
           }
       } catch(e) {}
 
@@ -266,9 +256,9 @@ function doPost(e) {
             var sT = getOrCreateSheet(ss, "Transaksi");
             var dNowTby = new Date();
             var tzTby = ss.getSpreadsheetTimeZone();
-            var idTransTby = "TBY" + Utilities.formatDate(dNowTby, tzTby, "yyMMddHHmm");
+            var idTransTby = "TBY" + Utilities.formatDate(dNowTby, tzTby, "yyMMddHHmmss");
             
-            sT.appendRow(["'" + idTransTby, new Date().toLocaleString('id-ID'), "'" + cleanId(payload.idKontrak), payload.nama, "'" + payload.wa, "TABAYYUN", 0, 0, "Tempo Baru: Tgl " + payload.jatuhTempoBaru + " | Angsuran: Rp " + payload.cicilanBaru]);
+            sT.appendRow(["'" + idTransTby, WAKTU_SAH, "'" + cleanId(payload.idKontrak), payload.nama, "'" + payload.wa, "TABAYYUN", 0, 0, "Tempo Baru: Tgl " + payload.jatuhTempoBaru + " | Angsuran: Rp " + payload.cicilanBaru]);
             return createJsonResponse({status: "success"});
           }
         }
@@ -277,7 +267,12 @@ function doPost(e) {
     }
 
     return createJsonResponse({status: "error", message: "Tipe POST tidak valid"});
-  } catch (e) { return createJsonResponse({status: "error", msg: "Server Error: " + e.toString()}); }
+  } catch (e) { 
+    return createJsonResponse({status: "error", msg: "Server Error: " + e.toString()}); 
+  } finally {
+    // WAJIB MELEPAS GEMBOK AGAR BISA DIPAKAI KASIR LAIN
+    lock.releaseLock();
+  }
 }
 
 function doGet(e) {
@@ -404,5 +399,7 @@ function doGet(e) {
       return createJsonResponse({status: "success", data: res});
     }
 
-  } catch (e) { return createJsonResponse({status: "error", msg: e.toString()}); }
+  } catch (e) { 
+    return createJsonResponse({status: "error", msg: e.toString()}); 
+  }
 }
