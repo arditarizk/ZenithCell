@@ -97,25 +97,80 @@ function doPost(e) {
       sP.getRange(rowIndexP, 18).setValue("DITOLAK"); return createJsonResponse({status: "success"});
     }
 
-    if (payload.tipe === "KAS_MASUK_CICILAN") {
-      var sL = ss.getSheetByName("Pelanggan"); if (!sL) return createJsonResponse({status: "error", message: "DB Error"});
-      var dL = sL.getDataRange().getValues(); var isFound = false; var rowIndex = -1; var targetRowData = null;
-      for (var i = 1; i < dL.length; i++) { if (cleanId(dL[i][0]) === cleanId(payload.idKontrak)) { isFound = true; rowIndex = i + 1; targetRowData = dL[i]; break; } }
+   if (payload.tipe === "KAS_MASUK_CICILAN") {
+      var sL = ss.getSheetByName("Pelanggan");
+      if (!sL) return createJsonResponse({status: "error", message: "DB Error"});
       
-      if (!isFound) return createJsonResponse({status: "error", message: "Transaksi Ditolak: Tagihan ini SUDAH LUNAS di perangkat lain!"});
+      var dL = sL.getDataRange().getValues();
+      var isFound = false;
+      var rowIndex = -1;
+      var targetRowData = null; 
+
+      for (var i = 1; i < dL.length; i++) {
+        if (cleanId(dL[i][0]) === cleanId(payload.idKontrak)) {
+          isFound = true; 
+          rowIndex = i + 1; 
+          targetRowData = dL[i]; 
+          break;
+        }
+      }
+      
+      if (!isFound) return createJsonResponse({status: "error", message: "Data pelanggan tidak ditemukan atau sudah LUNAS di device lain."});
+      
       var cicilanDatabaseTerakhir = parseInt(targetRowData[8]) || 1;
-      if (parseInt(payload.cicilanKe) < cicilanDatabaseTerakhir) return createJsonResponse({status: "error", message: "Ditolak: Angsuran Ke-" + payload.cicilanKe + " sudah dibayar!"});
+      if (parseInt(payload.cicilanKe) < cicilanDatabaseTerakhir) {
+         return createJsonResponse({status: "error", message: "Angsuran Ke-" + payload.cicilanKe + " ini sudah pernah dibayar sebelumnya!"});
+      }
 
       var sT = getOrCreateSheet(ss, "Transaksi");
-      if (sT.getLastRow() === 0) { sT.appendRow(["ID Transaksi", "Waktu", "ID Kontrak", "Nama", "WA", "Pembayaran Ke", "Angsuran Pokok", "Dana Kebajikan (Denda)", "Catatan"]); sT.getRange("A1:I1").setFontWeight("bold").setBackground("#f3e8ff"); }
-      sT.appendRow(["'" + cleanId(payload.idTransaksi), WAKTU_SAH, "'" + cleanId(payload.idKontrak), payload.nama, "'"+payload.whatsapp, payload.cicilanKe, payload.nominalMasuk, payload.dendaMasuk || 0, payload.catatan]);
+      if (sT.getLastRow() === 0) { 
+        sT.appendRow(["ID Transaksi", "Waktu", "ID Kontrak", "Nama", "WA", "Pembayaran Ke", "Angsuran Pokok", "Dana Kebajikan (Denda)", "Catatan"]);
+        sT.getRange("A1:I1").setFontWeight("bold").setBackground("#f3e8ff");
+      }
       
       var sisaTerbayarLama = parseInt(targetRowData[5]) || 0;
-      sL.getRange(rowIndex, 6).setValue(sisaTerbayarLama + parseInt(payload.nominalMasuk));
+      var totalHutang = parseInt(targetRowData[4]) || 0;
+      var uangMasuk = parseInt(payload.nominalMasuk) || 0;
+      var sisaTerbayarBaru = sisaTerbayarLama + uangMasuk;
+
+      // ==========================================
+      // FIX AUTO-LUNAS TRIGGER: Jika Kasir Bayar Angsuran Tapi Nominalnya Nutup Hutang
+      // ==========================================
+      if (sisaTerbayarBaru >= totalHutang) {
+          // Jadikan Lunas Paksa
+          sT.appendRow(["'" + cleanId(payload.idTransaksi), WAKTU_SAH, "'" + cleanId(payload.idKontrak), payload.nama, "'"+payload.whatsapp, "AUTO LUNAS", payload.nominalMasuk, payload.dendaMasuk || 0, "Pelunasan Otomatis (Uang Cukup)"]);
+          
+          var sR = getOrCreateSheet(ss, "Riwayat");
+          if (sR.getLastRow() === 0) {
+            sR.appendRow(["ID Kontrak", "Nama Pelanggan", "No WA", "Barang", "Total Hutang Awal", "Tanggal Lunas"]);
+            sR.getRange("A1:F1").setFontWeight("bold").setBackground("#dcfce7");
+          }
+          sR.appendRow(["'" + cleanId(targetRowData[0]), targetRowData[1], "'" + targetRowData[2], targetRowData[3], targetRowData[4], WAKTU_SAH]);
+          sL.deleteRow(rowIndex); // Hapus dari tagihan aktif
+
+          try {
+              MailApp.sendEmail({
+                to: EMAIL_NOTIFIKASI,
+                subject: "✅ AUTO-LUNAS: " + payload.nama,
+                body: "Sistem mendeteksi pembayaran angsuran menutupi sisa hutang.\nPelanggan otomatis dipindahkan ke Riwayat Lunas.\n\nNama: " + payload.nama + "\nNominal Masuk: " + formatIDR(payload.nominalMasuk) + "\nWaktu: " + WAKTU_SAH
+              });
+          } catch(e) {}
+
+          return createJsonResponse({status: "success"});
+      }
+
+      // Jika uangnya belum cukup lunas, proses angsuran seperti biasa
+      sT.appendRow(["'" + cleanId(payload.idTransaksi), WAKTU_SAH, "'" + cleanId(payload.idKontrak), payload.nama, "'"+payload.whatsapp, payload.cicilanKe, payload.nominalMasuk, payload.dendaMasuk || 0, payload.catatan]);
+      
+      sL.getRange(rowIndex, 6).setValue(sisaTerbayarBaru);
       sL.getRange(rowIndex, 9).setValue(cicilanDatabaseTerakhir + 1);
       
-      var cTarget = String(targetRowData[9]); var tz = ss.getSpreadsheetTimeZone(); var tThn = parseInt(Utilities.formatDate(new Date(), tz, "yyyy")); var tBln;
-      if (cTarget.indexOf("-") > -1) { var p = cTarget.split("-"); tThn = parseInt(p[0]); tBln = parseInt(p[1]) + 1; } else { tBln = parseInt(Utilities.formatDate(new Date(), tz, "MM")) + 2; }
+      var cTarget = String(targetRowData[9]);
+      var tz = ss.getSpreadsheetTimeZone();
+      var tThn = parseInt(Utilities.formatDate(new Date(), tz, "yyyy"));
+      var tBln;
+      if (cTarget.indexOf("-") > -1) { var p = cTarget.split("-"); tThn = parseInt(p[0]); tBln = parseInt(p[1]) + 1; } 
+      else { tBln = parseInt(Utilities.formatDate(new Date(), tz, "MM")) + 2; }
       if (tBln > 12) { tBln -= 12; tThn++; }
       sL.getRange(rowIndex, 10).setValue("'" + tThn + "-" + String(tBln).padStart(2, '0')); 
       
@@ -126,6 +181,7 @@ function doPost(e) {
             body: "Laporan Kas Masuk Zenith Cell\n\nNama: " + payload.nama + "\nAngsuran Ke: " + payload.cicilanKe + "\nNominal: " + formatIDR(payload.nominalMasuk) + "\nDenda: " + formatIDR(payload.dendaMasuk) + "\nWaktu: " + WAKTU_SAH + "\nCatatan: " + payload.catatan
           });
       } catch(e) {}
+
       return createJsonResponse({status: "success"});
     }
 
