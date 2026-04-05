@@ -1,10 +1,11 @@
 // ==========================================
-// MASTER API ZENITH CELL (V26 - TRUE BACKEND AUTHENTICATION)
+// MASTER API ZENITH CELL (V27 - EMAIL NOTIF & AUTOFILL FIX)
 // ==========================================
 
 // --- BRANKAS KREDENSIAL (SANGAT RAHASIA) ---
-var MASTER_PIN = "zenith123";
-var PIN_PELUNASAN = "superlunas99";
+var MASTER_PIN = "Parawhore78";
+var PIN_PELUNASAN = "Parawhore78";
+var EMAIL_NOTIFIKASI = "znth.cell@gmail.com"; // <--- UBAH EMAIL KAMU DI SINI
 var ADMIN_USERS = {
     "ARDITA": { sandi: "123456", nama: "Ardita Rizki F." },
     "VIVI": { sandi: "654321", nama: "Vivi Nur D." },
@@ -62,9 +63,7 @@ function doPost(e) {
       return createJsonResponse({status: "success"});
     }
 
-    // ===============================================
-    // GERBANG KEAMANAN API (Cegah Hacker Postman/F12)
-    // ===============================================
+    // GERBANG KEAMANAN API
     if (!isTokenValid(payload.pin)) {
       return createJsonResponse({status: "error", message: "Akses Ilegal Ditolak! Kredensial Tidak Sah."});
     }
@@ -175,9 +174,9 @@ function doPost(e) {
         }
       }
 
-      // KIRIM EMAIL KEAMANAN
+      // KIRIM EMAIL KEAMANAN MENGGUNAKAN VARIABEL DI ATAS
       try {
-          var emailTujuan = payload.emailOwner || Session.getEffectiveUser().getEmail();
+          var emailTujuan = EMAIL_NOTIFIKASI || Session.getEffectiveUser().getEmail();
           if (emailTujuan && emailTujuan.indexOf('@') > -1) {
               MailApp.sendEmail(emailTujuan, "✅ VALIDASI PELUNASAN: " + payload.nama, 
                 "Sistem Zenith Cell mencatat transaksi PELUNASAN FULL sah.\n\nNama: " + payload.nama + "\nNominal: Rp " + payload.nominalMasuk + "\nWaktu: " + payload.waktu + "\n\nHarap pastikan dana telah masuk mutasi rekening.");
@@ -196,7 +195,8 @@ function doPost(e) {
             if (payload.jatuhTempoBaru) sL.getRange(i+1, 8).setValue(payload.jatuhTempoBaru);
             if (payload.cicilanBaru) sL.getRange(i+1, 7).setValue(payload.cicilanBaru);
             var sT = getOrCreateSheet(ss, "Transaksi");
-            sT.appendRow(["'TBY" + Math.floor(Math.random()*100000), new Date().toLocaleString('id-ID'), "'" + cleanId(payload.idKontrak), payload.nama, "'" + payload.wa, "TABAYYUN", 0, 0, "Tempo Baru: Tgl " + payload.jatuhTempoBaru + " | Angsuran: Rp " + payload.cicilanBaru]);
+            var idTrans = "TBY" + String(new Date().getFullYear()).slice(-2) + String(Math.floor(Math.random()*1000));
+            sT.appendRow(["'" + idTrans, new Date().toLocaleString('id-ID'), "'" + cleanId(payload.idKontrak), payload.nama, "'" + payload.wa, "TABAYYUN", 0, 0, "Tempo Baru: Tgl " + payload.jatuhTempoBaru + " | Angsuran: Rp " + payload.cicilanBaru]);
             return createJsonResponse({status: "success"});
           }
         }
@@ -216,9 +216,7 @@ function doGet(e) {
     // API PUBLIK
     if (action === "ping") return createJsonResponse({status: "online"});
 
-    // ===============================================
-    // FITUR BARU: API LOGIN VERIFIKASI (BACKEND AUTH)
-    // ===============================================
+    // LOGIN VERIFIKASI
     if (action === "login") {
         var reqUser = String(e.parameter.user).trim().toUpperCase();
         var reqPass = String(e.parameter.pass);
@@ -299,9 +297,7 @@ function doGet(e) {
       } else { return createJsonResponse({status: "error", message: "Nomor tidak ditemukan."}); }
     }
 
-    // ===============================================
     // GERBANG KEAMANAN API (UNTUK METODE GET ADMIN)
-    // ===============================================
     if (!isTokenValid(e.parameter.pin)) {
         return createJsonResponse({status: "error", message: "Akses Ditolak! API Token tidak valid."});
     }
