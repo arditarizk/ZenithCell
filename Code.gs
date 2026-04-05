@@ -1,5 +1,5 @@
 // ==========================================
-// MASTER API ZENITH CELL (V22 - FIX TARGET BULAN ABSOLUT YYYY-MM)
+// MASTER API ZENITH CELL (V23 - MULTIPLE LOANS & CREDIT SCORE)
 // ==========================================
 
 function getOrCreateSheet(ss, sheetName) {
@@ -60,7 +60,6 @@ function doPost(e) {
         sL.getRange("A1:J1").setFontWeight("bold").setBackground("#e0e7ff");
       }
       
-      // LOGIKA BARU: Tentukan Target Bayar Pertama (Bulan Depan) berformat YYYY-MM
       var tz = ss.getSpreadsheetTimeZone();
       var dNow = new Date();
       var targetBulan = parseInt(Utilities.formatDate(dNow, tz, "MM")) + 1;
@@ -101,7 +100,6 @@ function doPost(e) {
             sL.getRange(i+1, 6).setValue((parseInt(dL[i][5])||0) + parseInt(payload.nominalMasuk));
             sL.getRange(i+1, 9).setValue((parseInt(dL[i][8])||0) + 1);
             
-            // MAJUKAN TARGET JATUH TEMPO (Solusi Bayar 2x dalam sebulan)
             var cTarget = String(dL[i][9]);
             var tz = ss.getSpreadsheetTimeZone();
             var dNow = new Date();
@@ -111,9 +109,8 @@ function doPost(e) {
             if (cTarget.indexOf("-") > -1) {
                 var p = cTarget.split("-");
                 tThn = parseInt(p[0]); tBln = parseInt(p[1]);
-                tBln++; // Bergeser maju 1 bulan ke depan secara absolut
+                tBln++;
             } else {
-                // Fallback sistem lama jika datanya belum di-update
                 var oldBln = parseInt(cTarget) || 0;
                 if (oldBln !== 0) { tBln = oldBln + 2; } else { tBln = parseInt(Utilities.formatDate(dNow, tz, "MM")) + 2; }
             }
@@ -138,14 +135,14 @@ function doPost(e) {
       }
       sT.appendRow(["'" + cleanId(payload.idTransaksi), payload.waktu, "'" + cleanId(payload.idKontrak), payload.nama, "'"+payload.whatsapp, "LUNAS FULL", payload.nominalMasuk, payload.dendaMasuk || 0, payload.catatan]);
       if (sR.getLastRow() === 0) {
-        sR.appendRow(["ID Kontrak", "Nama Pelanggan", "No WA", "Barang", "Total Hutang Awal", "Status Kredit"]);
+        sR.appendRow(["ID Kontrak", "Nama Pelanggan", "No WA", "Barang", "Total Hutang Awal", "Tanggal Lunas"]);
         sR.getRange("A1:F1").setFontWeight("bold").setBackground("#dcfce7");
       }
       if (sL) {
         var dL = sL.getDataRange().getValues();
         for (var i = 1; i < dL.length; i++) {
           if (cleanId(dL[i][0]) === cleanId(payload.idKontrak)) {
-            sR.appendRow(["'" + cleanId(dL[i][0]), dL[i][1], "'" + dL[i][2], dL[i][3], dL[i][4], "LUNAS EXCELLENT (Muroqoshoh)"]);
+            sR.appendRow(["'" + cleanId(dL[i][0]), dL[i][1], "'" + dL[i][2], dL[i][3], dL[i][4], payload.waktu]);
             sL.deleteRow(i + 1); break;
           }
         }
@@ -261,38 +258,90 @@ function doGet(e) {
       return createJsonResponse({status: "success", data: res});
     }
 
+    // ==========================================
+    // LOGIKA BARU: AMBIL SEMUA DATA (MULTI-LOAN) UNTUK CEK TAGIHAN
+    // ==========================================
     if (e.parameter.wa) {
       var sw = e.parameter.wa.replace(/[^0-9]/g, '');
-      var s = ss.getSheetByName("Pelanggan");
-      if (s && s.getLastRow() >= 2) {
-        var d = s.getDataRange().getValues();
-        for (var i = 1; i < d.length; i++) {
-          if (String(d[i][2]).replace(/[^0-9]/g, '') === sw) {
-            var jatuhTempoDB = parseInt(d[i][7]) || 1;
-            var cTargetStr = String(d[i][9]);
-            var cicilanKeDB = parseInt(d[i][8]) || 1;
+      var sL = ss.getSheetByName("Pelanggan");
+      var sR = ss.getSheetByName("Riwayat");
+      var sP = ss.getSheetByName("Pengajuan");
+      
+      var activeLoans = [];
+      var historyLoans = [];
+      var pendingLoans = [];
+      var namaPelanggan = "";
+      
+      // 1. Ambil Semua Cicilan Aktif
+      if (sL && sL.getLastRow() >= 2) {
+        var dL = sL.getDataRange().getValues();
+        for (var i = 1; i < dL.length; i++) {
+          if (String(dL[i][2]).replace(/[^0-9]/g, '') === sw) {
+            namaPelanggan = dL[i][1];
+            var jatuhTempoDB = parseInt(dL[i][7]) || 1;
+            var cTargetStr = String(dL[i][9]);
+            var cicilanKeDB = parseInt(dL[i][8]) || 1;
             var kalkulasi = hitungStatusJatuhTempo(jatuhTempoDB, cTargetStr);
 
-            return createJsonResponse({status: "success", data: { 
-              nama: d[i][1], wa: sw, barang: d[i][3], totalHutang: parseInt(d[i][4])||0, terbayar: parseInt(d[i][5])||0, 
-              cicilanPerBulan: parseInt(d[i][6])||0, jatuhTempo: jatuhTempoDB, cicilanKe: cicilanKeDB, 
-              bulanTerakhirBayar: d[i][9], statusPembayaran: kalkulasi.statusSkor, selisihHari: kalkulasi.selisihHari,
+            activeLoans.push({ 
+              idKontrak: cleanId(dL[i][0]), barang: dL[i][3], totalHutang: parseInt(dL[i][4])||0, terbayar: parseInt(dL[i][5])||0, 
+              cicilanPerBulan: parseInt(dL[i][6])||0, jatuhTempo: jatuhTempoDB, cicilanKe: cicilanKeDB, 
+              statusPembayaran: kalkulasi.statusSkor, selisihHari: kalkulasi.selisihHari,
               targetBulan: kalkulasi.targetBln, targetTahun: kalkulasi.targetThn
-            }});
+            });
           }
         }
       }
-      var sP = ss.getSheetByName("Pengajuan");
-      if(sP && sP.getLastRow() >= 2) {
+      
+      // 2. Ambil Riwayat Lunas
+      if (sR && sR.getLastRow() >= 2) {
+        var dR = sR.getDataRange().getValues();
+        for (var k = 1; k < dR.length; k++) {
+          if (String(dR[k][2]).replace(/[^0-9]/g, '') === sw) {
+            if(!namaPelanggan) namaPelanggan = dR[k][1];
+            historyLoans.push({
+              idKontrak: cleanId(dR[k][0]), barang: dR[k][3], tanggalLunas: dR[k][5] || "Telah Lunas"
+            });
+          }
+        }
+      }
+      
+      // 3. Ambil Antrean Pending
+      if (sP && sP.getLastRow() >= 2) {
           var dP = sP.getDataRange().getValues();
           for (var j = 1; j < dP.length; j++) {
             var statusP = (dP[j][17] || "").toString().toUpperCase();
-            if (String(dP[j][4]).replace(/[^0-9]/g, '') === sw && statusP !== "DITOLAK") {
-              return createJsonResponse({status: "pending", data: {nama: dP[j][2], barang: dP[j][10]}});
+            if (String(dP[j][4]).replace(/[^0-9]/g, '') === sw && statusP !== "DITOLAK" && statusP !== "ACC") {
+              if(!namaPelanggan) namaPelanggan = dP[j][2];
+              pendingLoans.push({ barang: dP[j][10], status: statusP });
             }
           }
       }
-      return createJsonResponse({status: "error", message: "Nomor tidak ditemukan."});
+
+      if(activeLoans.length > 0 || historyLoans.length > 0 || pendingLoans.length > 0) {
+          // 4. Kalkulasi Skor Kredit Cerdas
+          var totalTelat = activeLoans.reduce((sum, loan) => sum + Math.max(0, loan.selisihHari), 0);
+          var skorData = { score: "A", badge: "🟢 Nasabah Lancar" };
+          
+          if (historyLoans.length > 0 && totalTelat === 0) {
+              skorData = { score: "A+", badge: "🌟 VVIP Member" };
+          } else if (totalTelat > 0 && totalTelat <= 5) {
+              skorData = { score: "B", badge: "⚠️ Telat Ringan" };
+          } else if (totalTelat > 5) {
+              skorData = { score: "C", badge: "🔴 Telat Berat" };
+          }
+
+          return createJsonResponse({
+              status: "success", 
+              data: {
+                  nama: namaPelanggan, wa: sw, 
+                  skor: skorData, 
+                  aktif: activeLoans, riwayat: historyLoans, pending: pendingLoans
+              }
+          });
+      } else {
+          return createJsonResponse({status: "error", message: "Nomor tidak ditemukan."});
+      }
     }
   } catch (e) { return createJsonResponse({status: "error", msg: e.toString()}); }
 }
