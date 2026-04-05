@@ -221,7 +221,6 @@
         function tampilkanHasil(data) {                        
             document.getElementById('resNama').innerText = data.nama;                        
             
-            // SKOR KREDIT BADGE
             const badge = document.getElementById('badgeRapor');
             let skorAbjad = data.skor ? data.skor.score : "A";
             let badgeTeks = data.skor ? data.skor.badge : "VVIP Lancar";
@@ -243,7 +242,6 @@
             let adaTelat = false;
             let maxPersen = 0;
 
-            // RENDER MULTIPLE LOANS (CICILAN AKTIF)
             if (data.aktif && data.aktif.length > 0) {
                 data.aktif.forEach(p => {
                     let totalHutang = parseInt(p.totalHutang) || 0;
@@ -253,10 +251,9 @@
                     let totalTenor = Math.round(totalHutang / cicilanPerBln);
                     if(totalTenor < 1 || totalTenor === Infinity) totalTenor = 1;
                     
-                    // FIX FITUR PENTING: Kalkulasi Tagihan Wajib Bulan Ini
                     let tagihanBulanIni = cicilanPerBln;
                     if (sisaHutang < cicilanPerBln) {
-                        tagihanBulanIni = sisaHutang; // Jika sisa hutang lebih kecil dari cicilan normal, bayar sisa recehannya saja
+                        tagihanBulanIni = sisaHutang; 
                     }
 
                     let persen = (terbayar / totalHutang) * 100;
@@ -338,16 +335,29 @@
             }
             document.getElementById('dynamicLoans').innerHTML = htmlAktif;
 
-            // RENDER RIWAYAT LUNAS
+            // RENDER RIWAYAT LUNAS DENGAN FIX TANGGAL
             let htmlRiwayat = '';
             if (data.riwayat && data.riwayat.length > 0) {
                 htmlRiwayat = `<div class="mt-4 mb-4"><h3 class="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 mb-3 px-1"><i data-lucide="check-circle-2" class="w-4 h-4"></i> Riwayat Lunas</h3><div class="space-y-2">`;
                 data.riwayat.forEach(h => {
+                    let tglSelesai = String(h.tanggalLunas || "-");
+                    
+                    // FIX FORMAT TANGGAL ROBOT (ISO) vs TANGGAL TEKS KOMA
+                    if (tglSelesai.includes('T')) {
+                        let d = new Date(tglSelesai);
+                        if (!isNaN(d.getTime())) {
+                            tglSelesai = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+                        }
+                    } else {
+                        // Hilangkan koma dan jam jika ada
+                        tglSelesai = tglSelesai.split(',')[0].split(' ')[0];
+                    }
+
                     htmlRiwayat += `
                     <div class="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 flex justify-between items-center">
                         <div>
                             <p class="text-xs font-black text-slate-800 uppercase line-through opacity-70">${h.barang}</p>
-                            <p class="text-[9px] font-bold text-emerald-600 mt-0.5">Selesai: ${h.tanggalLunas.split(' ')[0]}</p>
+                            <p class="text-[9px] font-bold text-emerald-600 mt-0.5">Selesai: ${tglSelesai}</p>
                         </div>
                         <span class="bg-emerald-500 text-white px-2 py-1 rounded-lg text-[9px] font-black uppercase shadow-sm">LUNAS</span>
                     </div>`;
@@ -356,7 +366,6 @@
             }
             document.getElementById('dynamicHistory').innerHTML = htmlRiwayat;
 
-            // RENDER PENDING PENGJUAN BARU
             let htmlPending = '';
             if (data.pending && data.pending.length > 0) {
                 htmlPending = `<div class="mt-4 mb-4"><h3 class="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 mb-3 px-1"><i data-lucide="clock" class="w-4 h-4"></i> Antrean Pengajuan</h3><div class="space-y-2">`;
@@ -374,7 +383,6 @@
             }
             document.getElementById('dynamicPending').innerHTML = htmlPending;
 
-            // MOTIVATIONAL TEXT LOGIC
             const motTeks = document.getElementById('motivationalText');
             if (data.aktif.length === 0 && data.riwayat.length > 0) {
                 motTeks.innerText = "✨ Alhamdulillah! Semua gadget impian resmi jadi milik Kakak 100%. Semoga berkah dan ditunggu pesanan selanjutnya! ✨";
@@ -392,7 +400,6 @@
             document.getElementById('hasilCard').classList.replace('hidden', 'flex');
             lucide.createIcons();
 
-            // TRIGGER ANIMASI PROGRESS BAR
             setTimeout(() => {
                 document.querySelectorAll('.progress-bar-animated').forEach(el => {
                     el.style.width = el.getAttribute('data-width');
