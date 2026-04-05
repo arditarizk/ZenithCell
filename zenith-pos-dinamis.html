@@ -88,7 +88,7 @@
                     <div class="relative mb-3 flex gap-2">
                         <div class="relative flex-grow">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-lucide="search" class="w-4 h-4 text-slate-400"></i></div>
-                            <input type="text" id="searchCustomer" oninput="filterCustomer()" placeholder="Cari nama pelanggan..." class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all shadow-sm">
+                            <input type="text" id="searchCustomer" oninput="filterCustomer()" placeholder="Cari nama pelanggan..." autocomplete="new-password" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all shadow-sm">
                         </div>
                         <button type="button" onclick="fetchCustomersFromCloud()" class="p-3 bg-emerald-100 rounded-xl text-emerald-700 active:rotate-180 transition-all shadow-sm shrink-0" title="Sinkron Ulang Data"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
                     </div>
@@ -124,7 +124,7 @@
                             <label class="block text-[10px] font-black text-amber-800 uppercase">PIN Master Pelunasan</label>
                             <i data-lucide="lock" class="w-4 h-4 text-amber-600"></i>
                         </div>
-                        <input type="password" id="pinPelunasan" placeholder="Masukkan PIN khusus..." class="w-full px-4 py-3 bg-white border border-amber-300 rounded-xl text-slate-800 font-bold text-sm outline-none focus:border-amber-500 transition-all text-center tracking-widest shadow-sm">
+                        <input type="password" id="pinPelunasan" autocomplete="new-password" placeholder="Masukkan PIN khusus..." class="w-full px-4 py-3 bg-white border border-amber-300 rounded-xl text-slate-800 font-bold text-sm outline-none focus:border-amber-500 transition-all text-center tracking-widest shadow-sm">
                         <p class="text-[8px] font-bold text-amber-600/80 leading-tight mt-2 text-center">*Otorisasi keamanan. Melunasi tanpa izin akan dilaporkan via Email ke Owner.</p>
                     </div>
                 </div>
@@ -230,7 +230,6 @@
             const grid = document.getElementById('customerGrid');
             grid.innerHTML = `<div class="col-span-full text-center py-6"><div class="spinner mx-auto mb-2"></div><p class="text-[10px] text-slate-400 font-bold mt-2">Menyinkronkan Data...</p></div>`;
             try {
-                // BAWA PIN SECRET SAAT FETCH
                 const res = await fetch(`${CONFIG.API_URL}?action=getAll&pin=${SECRET_TOKEN}&nocache=${Date.now()}`);
                 const result = await res.json();
                 if(result.status === "error") {
@@ -326,7 +325,6 @@
                 document.getElementById('txtBtnProses').innerText = "Memproses...";
                 lucide.createIcons();
                 
-                // TAMBAH PIN KEAMANAN SAAT PROSES POST
                 let payload = { 
                     tipe: p.isLunas ? "PELUNASAN_AWAL" : "KAS_MASUK_CICILAN", 
                     pin: SECRET_TOKEN,
@@ -334,12 +332,10 @@
                     idTransaksi: p.idTransaksi, idKontrak: p.data.idKontrak, waktu: new Date().toLocaleString('id-ID'), 
                     bulanIni: new Date().getMonth() + 1, nama: p.data.nama, whatsapp: p.data.wa, 
                     cicilanKe: p.cicilan, nominalMasuk: p.nominalVal, dendaMasuk: p.dendaVal, 
-                    catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru),
-                    emailOwner: (typeof CONFIG !== 'undefined' && CONFIG.EMAIL_OWNER) ? CONFIG.EMAIL_OWNER : ""
+                    catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru)
                 };
                 
                 const response = await fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                // Karena no-cors, kita tidak bisa baca response detail, kita asumsikan sukses kecuali PIN di frontend salah.
                 
                 setTimeout(() => {
                     isSaved = true; currentSavedData = p;
