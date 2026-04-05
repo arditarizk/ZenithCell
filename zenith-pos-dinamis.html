@@ -112,14 +112,14 @@
                     
                     <div id="dendaArea" class="mt-4 p-4 bg-red-50 border border-red-100 rounded-2xl hidden">
                         <div class="flex justify-between items-center mb-2">
-                            <label class="block text-[10px] font-black text-red-600 uppercase">Denda Syariah / Dana Kebajikan</label>
+                            <label class="block text-[10px] font-black text-red-600 uppercase">Infaq / Dana Sosial / Denda</label>
                             <i data-lucide="alert-circle" class="w-4 h-4 text-red-400"></i>
                         </div>
                         <div class="relative flex items-center mb-1">
                             <span class="absolute left-3 text-red-500 font-bold text-sm">Rp</span>
                             <input type="text" id="denda" inputmode="numeric" placeholder="0" class="w-full pl-9 pr-3 py-3 bg-white border border-red-200 rounded-xl text-red-700 font-bold text-sm outline-none focus:border-red-500 transition-all">
                         </div>
-                        <p class="text-[8px] font-bold text-red-500/80 leading-tight">*Catatan: Uang denda ini disalurkan untuk kepentingan sosial.</p>
+                        <p class="text-[8px] font-bold text-red-500/80 leading-tight">*Isi untuk sisa kembalian pelanggan / denda keterlambatan.</p>
                     </div>
 
                     <div id="authPelunasanArea" class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-2xl hidden shadow-inner">
@@ -197,7 +197,7 @@
             const d = new Date(); const yy = String(d.getFullYear()).slice(-2);
             const mm = String(d.getMonth() + 1).padStart(2, '0'); const dd = String(d.getDate()).padStart(2, '0');
             const hh = String(d.getHours()).padStart(2, '0'); const mins = String(d.getMinutes()).padStart(2, '0');
-            const secs = String(d.getSeconds()).padStart(2, '0'); // Tambahan Detik
+            const secs = String(d.getSeconds()).padStart(2, '0');
             return `INV${yy}${mm}${dd}${hh}${mins}${secs}`;
         }
         
@@ -247,7 +247,10 @@
 
         window.selectCustomer = function(id) {
             const c = dbCustomers.find(i => i.idKontrak === id);
-            const sisaHutang = c.hutang - c.terbayar; window.currentDiskon = Math.round(sisaHutang * 0.1); 
+            const sisaHutang = c.hutang - c.terbayar;
+            
+            // HITUNG OTOMATIS DISKON 10%
+            window.currentDiskon = Math.round(sisaHutang * 0.1); 
             
             document.getElementById('cicilanArea').classList.remove('hidden');
             document.getElementById('nominalArea').classList.remove('hidden');
@@ -258,9 +261,10 @@
             document.getElementById('btnProsesContainer').style.removeProperty('display');
             document.getElementById('btnProsesContainer').classList.remove('hidden');
             
+            // Masukkan nominal auto-potong 10% ke tombol Lunas, tapi user BISA MENGEDIT kotak nominal!
             document.getElementById('cicilanGrid').innerHTML = `
                 <label class="flex-1"><input type="radio" name="cicilan" value="${c.cicilanKe}" class="peer sr-only" checked onchange="document.getElementById('nominal').value='${formatRp(c.cicilanPerBulan)}'; renderPreview(); this.blur();"><div class="px-5 py-3 rounded-xl bg-white border-2 border-slate-200 peer-checked:bg-slate-900 peer-checked:text-white text-slate-600 font-black text-xs text-center transition-all flex flex-col items-center"><span>Bulan Ke-${c.cicilanKe}</span><span class="text-[8px] font-bold opacity-70 mt-0.5">Bulanan</span></div></label>
-                <label class="flex-1"><input type="radio" name="cicilan" value="Pelunasan" class="peer sr-only" onchange="document.getElementById('nominal').value='${formatRp(sisaHutang - window.currentDiskon)}'; document.getElementById('denda').value=''; renderPreview(); this.blur();"><div class="px-5 py-3 rounded-xl bg-white border-2 border-slate-200 peer-checked:bg-slate-900 peer-checked:text-white text-slate-600 font-black text-xs text-center transition-all flex flex-col items-center"><span>Lunas Full</span><span class="text-[8px] font-bold text-amber-400 mt-0.5 uppercase tracking-widest">Diskon 10%</span></div></label>`;
+                <label class="flex-1"><input type="radio" name="cicilan" value="Pelunasan" class="peer sr-only" onchange="document.getElementById('nominal').value='${formatRp(sisaHutang - window.currentDiskon)}'; document.getElementById('denda').value=''; renderPreview(); this.blur();"><div class="px-5 py-3 rounded-xl bg-white border-2 border-slate-200 peer-checked:bg-slate-900 peer-checked:text-white text-slate-600 font-black text-xs text-center transition-all flex flex-col items-center"><span>Lunas Full</span><span class="text-[8px] font-bold text-amber-400 mt-0.5 uppercase tracking-widest">Diskon Muroqoshoh</span></div></label>`;
             renderPreview();
         }
 
@@ -283,12 +287,18 @@
 
             if (!window.tempIdTransaksi || window.isLunasTemp !== isLunas) { window.tempIdTransaksi = buatIdTransaksi(); window.isLunasTemp = isLunas; }
             
+            // KALKULASI DINAMIS: Menghitung selisih berapapun yang diedit kasir sebagai "Muroqoshoh"
             let sisaHutangAsli = data.hutang - data.terbayar;
+            let diskonIbra = 0;
+            if (isLunas && nominalVal < sisaHutangAsli) {
+                diskonIbra = sisaHutangAsli - nominalVal;
+            }
+
             let sisaBaru = Math.max(0, isLunas ? 0 : sisaHutangAsli - nominalVal);
             const tBayar = nominalVal + dendaVal;
 
-            let strukDiskonHtml = isLunas ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-emerald-600">Diskon Ibra':</span><span class="text-[10px] font-black text-emerald-600">- Rp ${formatRp(window.currentDiskon)}</span></div>` : '';
-            let strukDendaHtml = dendaVal > 0 ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-red-600">Denda Syariah:</span><span class="text-[10px] font-black text-red-600">+ Rp ${formatRp(dendaVal)}</span></div>` : '';
+            let strukDiskonHtml = diskonIbra > 0 ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-emerald-600">Diskon Muroqoshoh:</span><span class="text-[10px] font-black text-emerald-600">- Rp ${formatRp(diskonIbra)}</span></div>` : '';
+            let strukDendaHtml = dendaVal > 0 ? `<div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold text-slate-800">Infaq/Dana Sosial:</span><span class="text-[10px] font-black text-slate-800">+ Rp ${formatRp(dendaVal)}</span></div>` : '';
 
             document.getElementById('isiStruk').innerHTML = `
                 <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold">Tgl/Waktu:</span><span class="text-[10px] font-bold">${new Date().toLocaleString('id-ID')}</span></div>
@@ -301,7 +311,7 @@
                 <div class="flex-between mb-1"><span class="text-[10px] uppercase font-bold">Keterangan:</span><span class="text-[10px] font-black uppercase">${isLunas ? 'Pelunasan Full' : 'Angsuran Ke-' + cicilanEl.value}</span></div>
                 
                 <div class="solid-line"></div>
-                <div class="flex-between mb-1 items-center"><span class="text-[11px] font-black uppercase">Angsuran:</span><span class="text-sm font-black">Rp ${formatRp(nominalVal)}</span></div>
+                <div class="flex-between mb-1 items-center"><span class="text-[11px] font-black uppercase">${isLunas ? 'Sisa Tagihan:' : 'Angsuran:'}</span><span class="text-sm font-black">Rp ${formatRp(isLunas ? sisaHutangAsli : nominalVal)}</span></div>
                 ${strukDiskonHtml}
                 ${strukDendaHtml}
                 <div class="dashed-line"></div>
@@ -311,12 +321,11 @@
                 
                 <div class="flex-between mt-3"><span class="text-[10px] uppercase font-bold">Sisa Utang:</span><span class="text-sm font-black uppercase">Rp ${formatRp(sisaBaru)}</span></div>`;
 
-            return { data, cicilan: cicilanEl.value, nominalVal, dendaVal, totalBayarPlusDenda: tBayar, sisaBaru, isLunas, idTransaksi: window.tempIdTransaksi };
+            return { data, cicilan: cicilanEl.value, nominalVal, dendaVal, totalBayarPlusDenda: tBayar, sisaBaru, isLunas, idTransaksi: window.tempIdTransaksi, diskonIbra, sisaHutangAsli };
         };
 
         ['nominal', 'denda'].forEach(id => document.getElementById(id).addEventListener('input', (e) => { if(isSaved) return; e.target.value = formatRp(parseRp(e.target.value)); renderPreview(); }));
 
-     // FIX BUG: AUTO REFRESH JIKA DATA DITOLAK SERVER KARENA SUDAH LUNAS DI HP LAIN
         const eksekusiSimpan = async (e) => {
             if(e) e.preventDefault();
             
@@ -330,6 +339,10 @@
                 document.getElementById('txtBtnProses').innerText = "Memproses...";
                 lucide.createIcons();
                 
+                // Tambahkan keterangan diskon agar jelas di Google Sheets
+                let catatanText = p.isLunas ? "Pelunasan Full." : "Sisa Pokok: Rp " + formatRp(p.sisaBaru);
+                if (p.isLunas && p.diskonIbra > 0) catatanText += ` (Muroqoshoh: -Rp ${formatRp(p.diskonIbra)})`;
+
                 let payload = { 
                     tipe: p.isLunas ? "PELUNASAN_AWAL" : "KAS_MASUK_CICILAN", 
                     pin: SECRET_TOKEN,
@@ -337,7 +350,7 @@
                     idTransaksi: p.idTransaksi, idKontrak: p.data.idKontrak, waktu: new Date().toLocaleString('id-ID'), 
                     bulanIni: new Date().getMonth() + 1, nama: p.data.nama, whatsapp: p.data.wa, 
                     cicilanKe: p.cicilan, nominalMasuk: p.nominalVal, dendaMasuk: p.dendaVal, 
-                    catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru)
+                    catatan: catatanText
                 };
                 
                 const response = await fetch(typeof CONFIG !== 'undefined' ? CONFIG.API_URL : '', { method: 'POST', body: JSON.stringify(payload) });
@@ -345,10 +358,8 @@
                 
                 if (result.status === 'error') {
                     showToast(result.message, "error");
-                    // HENTIKAN PROSES, UBAH TOMBOL JADI REFRESH
                     document.getElementById('btnProses').innerHTML = `<i data-lucide="refresh-cw" class="w-5 h-5 text-red-400"></i> Memperbarui Data Layar...`;
                     lucide.createIcons();
-                    // AUTO REFRESH DALAM 2 DETIK
                     setTimeout(() => { window.location.reload(); }, 2000);
                     return; 
                 }
@@ -422,9 +433,9 @@
                 let struk = "      ZENITH CELL       \n  Gadget Syariah Malang \n------------------------\n";
                 struk += "Tgl  : " + tgl + "\nTrans: " + p.idTransaksi + "\nKasir: " + KASIR_AKTIF + "\n------------------------\n";
                 struk += "Kntrk: " + p.data.idKontrak + "\nNama : " + p.data.nama.toUpperCase() + "\nUnit : " + barang.toUpperCase() + "\nKet  : " + ketCicilan + "\n------------------------\n";
-                struk += "Angsr: Rp " + formatRp(p.nominalVal) + "\n";
-                if(p.dendaVal > 0) struk += "Denda: Rp " + formatRp(p.dendaVal) + "\n";
-                if(p.isLunas) struk += "Diskn: Rp " + formatRp(window.currentDiskon) + "\n";
+                struk += (p.isLunas ? "Tghan: Rp " : "Angsr: Rp ") + formatRp(p.isLunas ? p.sisaHutangAsli : p.nominalVal) + "\n";
+                if(p.dendaVal > 0) struk += "Infaq: Rp " + formatRp(p.dendaVal) + "\n";
+                if(p.isLunas && p.diskonIbra > 0) struk += "Mroqs:-Rp " + formatRp(p.diskonIbra) + "\n";
                 struk += "------------------------\nTOTAL: Rp " + formatRp(p.totalBayarPlusDenda) + "\nSisa : Rp " + formatRp(p.sisaBaru) + "\n------------------------\n   Alhamdulillah Sah!   \n Terima kasih, berkah! \n\n\n\n"; 
 
                 window.location.href = "intent:" + encodeURIComponent(struk) + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
