@@ -212,7 +212,7 @@
         document.getElementById('nik').addEventListener('input', function() { this.value = this.value.replace(/[^0-9]/g, '').substring(0, 16); });
         document.getElementById('wa').addEventListener('input', function() { let v = this.value.replace(/[^0-9]/g, ''); if(v.startsWith('62')) v='0'+v.substring(2); this.value=v.substring(0,15); });
 
-        document.getElementById('pengajuanForm').addEventListener('submit', (e) => {
+       document.getElementById('pengajuanForm').addEventListener('submit', (e) => {
             e.preventDefault(); 
             const n = document.getElementById('nik').value; 
             if(n.length!==16) return showToast("NIK harus 16 digit.");
@@ -222,11 +222,27 @@
             btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Menyimpan...`; 
             lucide.createIcons();
             
-            // KITA TAMBAHKAN KODE VOUCHER KE DALAM PAYLOAD DI BAWAH INI
+            // FIX HARGA: Hilangkan titik sebelum dikirim ke API
+            let hargaClean = document.getElementById('hargaBarang').value.replace(/[^0-9]/g, '');
+            let dpClean = document.getElementById('dpBarang').value.replace(/[^0-9]/g, '') || "0";
+
             const data = { 
-                nama:document.getElementById('nama').value, nik:n, wa:document.getElementById('wa').value, alamat:document.getElementById('alamat').value, pekerjaan:document.getElementById('pekerjaan').value, gaji:document.getElementById('gaji').value, daruratNama:document.getElementById('daruratNama').value, daruratWa:document.getElementById('daruratWa').value, barang:document.getElementById('barang').value, harga:document.getElementById('hargaBarang').value, dp:document.getElementById('dpBarang').value||"0", tenor:document.getElementById('tenorSelect').value, jaminan:document.getElementById('pilihJalur').value==="VIP"?document.getElementById('jenisJaminan').value:"Tanpa Jaminan", jatuhTempo:document.getElementById('jatuhTempo').value, 
-                kodeVoucher: document.getElementById('inputVoucher').value, // <--- Ini untuk di cek server
-                margin: promoMarginAktif || (document.getElementById('pilihJalur').value==="VIP"?15:25) // Ini untuk tampilan teks WA saja
+                nama:document.getElementById('nama').value, 
+                nik:n, 
+                wa:document.getElementById('wa').value, 
+                alamat:document.getElementById('alamat').value, 
+                pekerjaan:document.getElementById('pekerjaan').value, 
+                gaji:document.getElementById('gaji').value, 
+                daruratNama:document.getElementById('daruratNama').value, 
+                daruratWa:document.getElementById('daruratWa').value, 
+                barang:document.getElementById('barang').value, 
+                harga: hargaClean, 
+                dp: dpClean, 
+                tenor:document.getElementById('tenorSelect').value, 
+                jaminan:document.getElementById('pilihJalur').value==="VIP"?document.getElementById('jenisJaminan').value:"Tanpa Jaminan", 
+                jatuhTempo:document.getElementById('jatuhTempo').value, 
+                kodeVoucher: document.getElementById('inputVoucher').value, 
+                margin: promoMarginAktif || (document.getElementById('pilihJalur').value==="VIP"?15:25) 
             };
             
             const id = buatIdKontrak(data.wa);
@@ -235,7 +251,11 @@
                 method: 'POST', mode: 'no-cors', body: JSON.stringify({ tipe: "PENGAJUAN_BARU", idKontrak: id, timestamp: new Date().toLocaleString('id-ID'), ...data }) 
             }).catch(err => console.log("Silent error"));
 
-            const waMsg = `Assalamu'alaikum Admin Zenith Cell.\n\nPermisi, saya bermaksud mengajukan pembiayaan dengan rincian sebagai berikut:\n\nID Pengajuan: ${id}\nNama: ${data.nama}\nBarang: ${data.barang}\nHarga Pokok: Rp ${data.harga}\nDP: Rp ${data.dp}\nTenor: ${data.tenor} Bulan\nJatuh Tempo: Tgl ${data.jatuhTempo}\nSkema: ${data.margin}% (${data.jaminan})\n\nBerikut saya lampirkan foto KTP dan jaminan fisik (jika ada).\nMohon arahannya untuk proses verifikasi lebih lanjut. Terima kasih.`;
+            // Format ulang khusus untuk pesan WA
+            const hargaFormat = fr(parseInt(hargaClean));
+            const dpFormat = fr(parseInt(dpClean));
+
+            const waMsg = `Assalamu'alaikum Admin Zenith Cell.\n\nPermisi, saya bermaksud mengajukan pembiayaan dengan rincian sebagai berikut:\n\nID Pengajuan: ${id}\nNama: ${data.nama}\nBarang: ${data.barang}\nHarga Pokok: Rp ${hargaFormat}\nDP: Rp ${dpFormat}\nTenor: ${data.tenor} Bulan\nJatuh Tempo: Tgl ${data.jatuhTempo}\nSkema: ${data.margin}% (${data.jaminan})\n\nBerikut saya lampirkan foto KTP dan jaminan fisik (jika ada).\nMohon arahannya untuk proses verifikasi lebih lanjut. Terima kasih.`;
             window.open(`https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=${encodeURIComponent(waMsg)}`, '_blank');
             
             document.getElementById('instruksiModal').classList.replace('hidden', 'flex'); 
