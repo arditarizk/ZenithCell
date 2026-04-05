@@ -1,9 +1,9 @@
 // ==========================================
-// MASTER API ZENITH CELL (V29 - FIX PARSING HARGA & DELAY TOLAK)
+// MASTER API ZENITH CELL (V30 - FORMAT ID TABAYYUN & FIX RAWBT)
 // ==========================================
 
 var MASTER_PIN = "Parawhore78";
-var PIN_PELUNASAN = "Parawhore78";
+var PIN_PELUNASAN = "121221";
 var EMAIL_NOTIFIKASI = "znth.cell@gmail.com"; 
 var ADMIN_USERS = {
     "ARDITA": { sandi: "123456", nama: "Ardita Rizki F." },
@@ -50,9 +50,6 @@ function doPost(e) {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var payload = JSON.parse(e.postData.contents);
     
-    // ===============================================
-    // JALUR PUBLIK (Form Pengajuan Baru)
-    // ===============================================
     if (payload.tipe === "PENGAJUAN_BARU") {
       var s = getOrCreateSheet(ss, "Pengajuan");
       if (s.getLastRow() === 0) {
@@ -70,7 +67,6 @@ function doPost(e) {
           if (vMargin < finalMargin) { finalMargin = vMargin; }
       }
 
-      // FIX BUG ANGKA: Bersihkan semua titik/koma dari harga dan DP
       var hargaBersih = parseInt(String(payload.harga).replace(/[^0-9]/g, '')) || 0;
       var dpBersih = parseInt(String(payload.dp).replace(/[^0-9]/g, '')) || 0;
 
@@ -84,9 +80,6 @@ function doPost(e) {
       return createJsonResponse({status: "success"});
     }
 
-    // ===============================================
-    // GERBANG KEAMANAN API (Aksi Admin)
-    // ===============================================
     if (!isTokenValid(payload.pin)) {
       return createJsonResponse({status: "error", message: "Akses Ilegal Ditolak! Kredensial Tidak Sah."});
     }
@@ -109,7 +102,6 @@ function doPost(e) {
       if (sP) {
         var dP = sP.getDataRange().getValues();
         for (var i = 1; i < dP.length; i++) {
-          // Hanya ACC jika status masih PENDING (mencegah bug nyangkut)
           if (cleanId(dP[i][0]) === cleanId(payload.idKontrak) && String(dP[i][17]).toUpperCase() === "PENDING") { 
             sP.getRange(i + 1, 18).setValue("ACC"); break;
           }
@@ -132,7 +124,6 @@ function doPost(e) {
       if (sP) {
         var dP = sP.getDataRange().getValues();
         for (var i = 1; i < dP.length; i++) {
-          // Hanya Tolak jika status masih PENDING
           if (cleanId(dP[i][0]) === cleanId(payload.idKontrak) && String(dP[i][17]).toUpperCase() === "PENDING") { 
             sP.getRange(i + 1, 18).setValue("DITOLAK"); break;
           }
@@ -217,9 +208,15 @@ function doPost(e) {
           if (cleanId(dL[i][0]) === cleanId(payload.idKontrak)) {
             if (payload.jatuhTempoBaru) sL.getRange(i+1, 8).setValue(payload.jatuhTempoBaru);
             if (payload.cicilanBaru) sL.getRange(i+1, 7).setValue(payload.cicilanBaru);
+            
             var sT = getOrCreateSheet(ss, "Transaksi");
-            var idTrans = "TBY" + String(new Date().getFullYear()).slice(-2) + String(Math.floor(Math.random()*1000));
-            sT.appendRow(["'" + idTrans, new Date().toLocaleString('id-ID'), "'" + cleanId(payload.idKontrak), payload.nama, "'" + payload.wa, "TABAYYUN", 0, 0, "Tempo Baru: Tgl " + payload.jatuhTempoBaru + " | Angsuran: Rp " + payload.cicilanBaru]);
+            
+            // FIX ID TABAYYUN (TBY+YYMMDD+HHmm)
+            var dNowTby = new Date();
+            var tzTby = ss.getSpreadsheetTimeZone();
+            var idTransTby = "TBY" + Utilities.formatDate(dNowTby, tzTby, "yyMMddHHmm");
+            
+            sT.appendRow(["'" + idTransTby, new Date().toLocaleString('id-ID'), "'" + cleanId(payload.idKontrak), payload.nama, "'" + payload.wa, "TABAYYUN", 0, 0, "Tempo Baru: Tgl " + payload.jatuhTempoBaru + " | Angsuran: Rp " + payload.cicilanBaru]);
             return createJsonResponse({status: "success"});
           }
         }
@@ -236,7 +233,6 @@ function doGet(e) {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var action = e.parameter.action;
     
-    // API PUBLIK
     if (action === "ping") return createJsonResponse({status: "online"});
 
     if (action === "login") {
