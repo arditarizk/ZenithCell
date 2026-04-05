@@ -34,6 +34,9 @@
         .solid-line { border-top: 3px solid #000000; margin: 15px 0; }
         .flex-between { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
         
+        /* ======================================================= */
+        /* FIX CSS PRINTER: STANDAR KERTAS 48mm (Area Cetak 40mm)  */
+        /* ======================================================= */
         @media print {
             @page { size: 48mm auto; margin: 0; }
             body { background: white; margin: 0; padding: 0; min-height: 0; width: 48mm; display: block !important; }
@@ -42,8 +45,12 @@
             #previewPanel { display: block !important; width: 48mm !important; padding: 0 !important; margin: 0 !important; background: white !important; }
             #previewContainer { display: block !important; opacity: 1 !important; visibility: visible !important; transform: none !important; width: 100% !important; }
             #strukWrapper { width: 48mm !important; max-width: 48mm !important; margin: 0 !important; padding: 0 !important; display: flex; justify-content: center; }
+            
+            /* Area Cetak 40mm di dalam kertas 48mm */
             .receipt-paper { width: 40mm !important; max-width: 40mm !important; padding: 0 !important; margin: 0 auto !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; background: white !important; }
             .receipt-paper * { color: black !important; line-height: 1.2 !important; font-family: 'Courier New', Courier, monospace !important; }
+            
+            /* Penyesuaian Font lebih kecil agar tajam dan muat di 40mm */
             .text-[32px] { font-size: 14px !important; letter-spacing: -0.5px !important; margin-bottom: 2px !important;} 
             .text-[26px] { font-size: 11px !important; } 
             .text-base { font-size: 8px !important; }
@@ -53,6 +60,7 @@
             .text-[10px] { font-size: 6.5px !important; }
             .text-[9px] { font-size: 6px !important; }
             .text-[8px] { font-size: 5.5px !important; }
+            
             .flex-between { display: flex; justify-content: space-between; align-items: flex-start; gap: 2px !important; width: 100% !important; margin-bottom: 2px !important; }
             .flex-between span:first-child { width: 40%; word-break: break-word; }
             .flex-between span:last-child { width: 60%; text-align: right; word-break: break-word; }
@@ -198,8 +206,6 @@
         }
         
         const formatRp = (n) => new Intl.NumberFormat('id-ID').format(n);
-        
-        // FIX BUG PARSING: Membuang desimal agar angka aman
         const parseRp = (str) => parseInt(str.toString().split(',')[0].replace(/[^0-9]/g, '')) || 0;
 
         function showToast(message, type = 'success') {
@@ -389,26 +395,51 @@
             }, 200);
         }
 
+        // ========================================================
+        // FIX PRINTER: Pemisahan Logic Cetak Mobile (RawBT) dan PC (CSS 48mm)
+        // ========================================================
+        
+        window.onafterprint = function() {
+            document.getElementById('strukWrapper').className = "is-whatsapp mx-auto";
+        };
+
         function cetakStrukTajam() {
             if (!currentSavedData) return showToast("Data transaksi belum ada!", "error");
             const p = currentSavedData;
             
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
             if (isMobile) {
+                // LOGIKA RAWBT UNTUK HP ANDROID (Anti Huruf Alien)
                 const tgl = new Date().toLocaleString('id-ID');
                 const ketCicilan = p.isLunas ? 'Pelunasan Full' : 'Angsuran Ke-' + p.cicilan;
                 const barang = p.data.barang ? p.data.barang : '-';
 
-                let struk = "      ZENITH CELL       \n  Gadget Syariah Malang \n------------------------\n";
-                struk += "Tgl  : " + tgl + "\nTrans: " + p.idTransaksi + "\nKasir: " + KASIR_AKTIF + "\n------------------------\n";
-                struk += "Kntrk: " + p.data.idKontrak + "\nNama : " + p.data.nama.toUpperCase() + "\nUnit : " + barang.toUpperCase() + "\nKet  : " + ketCicilan + "\n------------------------\n";
-                struk += "Angsr: Rp " + formatRp(p.nominalVal) + "\n";
-                if(p.dendaVal > 0) struk += "Denda: Rp " + formatRp(p.dendaVal) + "\n";
-                if(p.isLunas) struk += "Diskn: Rp " + formatRp(window.currentDiskon) + "\n";
-                struk += "------------------------\nTOTAL: Rp " + formatRp(p.totalBayarPlusDenda) + "\nSisa : Rp " + formatRp(p.sisaBaru) + "\n------------------------\n   Alhamdulillah Sah!   \n Terima kasih, berkah! \n\n\n\n"; 
+                let struk = "[C]<b>ZENITH CELL</b>\n";
+                struk += "[C]Gadget Syariah Malang\n";
+                struk += "[C]--------------------------------\n";
+                struk += "[L]Tgl   : " + tgl + "\n";
+                struk += "[L]Trans : " + p.idTransaksi + "\n";
+                struk += "[L]Kasir : " + KASIR_AKTIF + "\n";
+                struk += "[C]--------------------------------\n";
+                struk += "[L]Kntrk : " + p.data.idKontrak + "\n";
+                struk += "[L]Nama  : " + p.data.nama.toUpperCase() + "\n";
+                struk += "[L]Unit  : " + barang.toUpperCase() + "\n";
+                struk += "[L]Ket   : " + ketCicilan + "\n";
+                struk += "[C]--------------------------------\n";
+                struk += "[L]Angsuran[R]Rp " + formatRp(p.nominalVal) + "\n";
+                if(p.dendaVal > 0) struk += "[L]Denda[R]Rp " + formatRp(p.dendaVal) + "\n";
+                if(p.isLunas) struk += "[L]Diskon Ibra'[R]-Rp " + formatRp(window.currentDiskon) + "\n";
+                struk += "[C]--------------------------------\n";
+                struk += "[L]<b>TOTAL KAS</b>[R]<b>Rp " + formatRp(p.totalBayarPlusDenda) + "</b>\n";
+                struk += "[L]Sisa Utang[R]Rp " + formatRp(p.sisaBaru) + "\n";
+                struk += "[C]--------------------------------\n";
+                struk += "[C]Alhamdulillah Sah!\n";
+                struk += "[C]Terima kasih, berkah!\n\n\n";
 
                 window.location.href = "intent:" + encodeURIComponent(struk) + "#Intent;scheme=rawbt;package=ru.a402d.rawbtprinter;end;";
             } else {
+                // LOGIKA WINDOW.PRINT UNTUK PC/LAPTOP (Emulator 48mm / Area 40mm)
                 document.getElementById('strukWrapper').className = "is-printer mx-auto";
                 setTimeout(() => { window.print(); }, 200);
             }
