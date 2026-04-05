@@ -1,18 +1,26 @@
 // ==========================================
-// MASTER API ZENITH CELL (V27 - EMAIL NOTIF & AUTOFILL FIX)
+// MASTER API ZENITH CELL (V28 - ANTI FAKE MARGIN / BACKEND VALIDATION)
 // ==========================================
 
-// --- BRANKAS KREDENSIAL (SANGAT RAHASIA) ---
+// --- BRANKAS KREDENSIAL & ATURAN (SANGAT RAHASIA) ---
 var MASTER_PIN = "Parawhore78";
 var PIN_PELUNASAN = "Parawhore78";
-var EMAIL_NOTIFIKASI = "znth.cell@gmail.com"; // <--- UBAH EMAIL KAMU DI SINI
+var EMAIL_NOTIFIKASI = "znth.cell@gmail.com"; 
 var ADMIN_USERS = {
     "ARDITA": { sandi: "123456", nama: "Ardita Rizki F." },
     "VIVI": { sandi: "654321", nama: "Vivi Nur D." },
     "ADMIN": { sandi: MASTER_PIN, nama: "Admin Pusat" }
 };
 
-// Fungsi validasi token keamanan
+// DATABASE VOUCHER SERVER (Hacker tidak bisa sentuh ini)
+var VOUCHERS_BACKEND = {
+    "dulurdewe22": 22,
+    "nawakewed": 20,
+    "temanvivi": 20,
+    "temanardita": 20
+};
+// -------------------------------------------
+
 function isTokenValid(pinInput) {
     if (pinInput === MASTER_PIN) return true;
     for (var key in ADMIN_USERS) {
@@ -20,7 +28,6 @@ function isTokenValid(pinInput) {
     }
     return false;
 }
-// -------------------------------------------
 
 function getOrCreateSheet(ss, sheetName) {
   var sheet = ss.getSheetByName(sheetName);
@@ -46,24 +53,50 @@ function doPost(e) {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var payload = JSON.parse(e.postData.contents);
     
-    // JALUR PUBLIK (Form Pengajuan)
+    // ===============================================
+    // JALUR PUBLIK (Form Pengajuan Baru)
+    // ===============================================
     if (payload.tipe === "PENGAJUAN_BARU") {
       var s = getOrCreateSheet(ss, "Pengajuan");
       if (s.getLastRow() === 0) {
         s.appendRow(["ID Kontrak", "Tanggal", "Nama Lengkap", "NIK", "No WA", "Alamat", "Pekerjaan", "Gaji", "Darurat Nama", "Darurat WA", "Barang", "Harga", "DP", "Tenor", "Jaminan", "Jatuh Tempo", "Margin", "Status"]);
         s.getRange("A1:R1").setFontWeight("bold").setBackground("#fef3c7");
       }
+
+      // --- LOGIKA ANTI HACKER MARGIN 0% ---
+      // 1. Cek jalur jaminan dari teksnya
+      var baseMargin = 25; // Default Reguler
+      if (payload.jaminan && payload.jaminan !== "Tanpa Jaminan") {
+          baseMargin = 15; // Jika ada jaminan berarti VIP
+      }
+      
+      var finalMargin = baseMargin;
+      var kodeVoucher = String(payload.kodeVoucher || "").trim().toLowerCase();
+      
+      // 2. Validasi voucher langsung di server
+      if (kodeVoucher !== "" && VOUCHERS_BACKEND[kodeVoucher]) {
+          var vMargin = VOUCHERS_BACKEND[kodeVoucher];
+          // Pastikan voucher tidak merugikan toko jika nasabah pakai jalur VIP (15%)
+          if (vMargin < finalMargin) {
+              finalMargin = vMargin;
+          }
+      }
+      // -------------------------------------
+
+      // Abaikan payload.margin kiriman hacker, kita pakai finalMargin dari server!
       s.appendRow([
         "'" + cleanId(payload.idKontrak), payload.timestamp || new Date().toLocaleString('id-ID'), 
         sanitize(payload.nama), "'" + sanitize(payload.nik), "'" + sanitize(payload.wa), sanitize(payload.alamat), 
         sanitize(payload.pekerjaan), sanitize(payload.gaji), sanitize(payload.daruratNama), "'" + sanitize(payload.daruratWa), 
         sanitize(payload.barang), parseInt(payload.harga)||0, parseInt(payload.dp)||0, parseInt(payload.tenor)||0, 
-        sanitize(payload.jaminan), parseInt(payload.jatuhTempo)||1, parseInt(payload.margin) || 25, "PENDING"
+        sanitize(payload.jaminan), parseInt(payload.jatuhTempo)||1, finalMargin, "PENDING"
       ]);
       return createJsonResponse({status: "success"});
     }
 
-    // GERBANG KEAMANAN API
+    // ===============================================
+    // GERBANG KEAMANAN API (Cegah Bypass Data Transaksi)
+    // ===============================================
     if (!isTokenValid(payload.pin)) {
       return createJsonResponse({status: "error", message: "Akses Ilegal Ditolak! Kredensial Tidak Sah."});
     }
@@ -146,7 +179,6 @@ function doPost(e) {
     }
 
     if (payload.tipe === "PELUNASAN_AWAL") {
-      // VALIDASI PIN KHUSUS PELUNASAN
       if (payload.pinLunas !== PIN_PELUNASAN) {
          return createJsonResponse({status: "error", message: "Otorisasi Pelunasan Gagal! PIN Master Salah."});
       }
@@ -174,7 +206,6 @@ function doPost(e) {
         }
       }
 
-      // KIRIM EMAIL KEAMANAN MENGGUNAKAN VARIABEL DI ATAS
       try {
           var emailTujuan = EMAIL_NOTIFIKASI || Session.getEffectiveUser().getEmail();
           if (emailTujuan && emailTujuan.indexOf('@') > -1) {
@@ -216,11 +247,9 @@ function doGet(e) {
     // API PUBLIK
     if (action === "ping") return createJsonResponse({status: "online"});
 
-    // LOGIN VERIFIKASI
     if (action === "login") {
         var reqUser = String(e.parameter.user).trim().toUpperCase();
         var reqPass = String(e.parameter.pass);
-        
         if ((ADMIN_USERS[reqUser] && ADMIN_USERS[reqUser].sandi === reqPass) || reqPass === MASTER_PIN) {
             var namaKasir = ADMIN_USERS[reqUser] ? ADMIN_USERS[reqUser].nama : "Admin Pusat";
             return createJsonResponse({status: "success", nama: namaKasir});
