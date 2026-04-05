@@ -1,351 +1,235 @@
 <!DOCTYPE html>
 <html lang="id" class="antialiased">
-<head>    
-    <meta charset="UTF-8">    
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">    
-    <title>Portal Tagihan - Zenith Cell</title>    
-    <link rel="icon" type="image/png" href="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/6f184ccb-599f-4527-b31f-f416b7dc6b8d.png">    
-    <script src="https://cdn.tailwindcss.com"></script>    
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">    
-    <script src="https://unpkg.com/lucide@latest"></script>    
-    <script src="config.js"></script>    
-    <style>        
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; -webkit-tap-highlight-color: transparent; }        
-        .glass-card { background: rgba(255, 255, 255, 0.98); border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }        
-        .shining-badge { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #fcd34d 100%); color: #78350f; animation: pulse-soft 2s infinite; }        
-        @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }        
-        .animate-fade-in { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }        
-        .progress-bar-animated { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cek Tagihan & Rapor Kredit - Zenith Cell</title>
+    <link rel="icon" type="image/png" href="https://i.supaimg.com/74ab27fb-fcc0-4c79-86c8-843a9b5299c2/6f184ccb-599f-4527-b31f-f416b7dc6b8d.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="config.js?v=4"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px; -webkit-tap-highlight-color: transparent; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .glass-panel { background: rgba(255, 255, 255, 0.98); border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); }
+        .spinner { border: 3px solid rgba(16, 185, 129, 0.3); border-top: 3px solid #10b981; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .bg-gold-gradient { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
     </style>
 </head>
-<body class="text-slate-800 lg:p-8 min-h-screen flex flex-col items-center justify-center selection:bg-emerald-200">    
-    <div id="toastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[999] flex flex-col gap-2 pointer-events-none w-full max-w-sm px-4"></div>    
-    <main class="w-full max-w-md lg:max-w-xl mx-auto bg-white lg:glass-card lg:rounded-[2.5rem] lg:shadow-2xl relative z-10 flex flex-col min-h-screen lg:min-h-0 pb-10 lg:pb-0">                
-        <header class="px-6 pt-8 pb-5 flex items-center justify-between border-b border-slate-100 bg-white lg:rounded-t-[2.5rem] shrink-0">            
-            <a href="index.html" class="p-2.5 bg-slate-50 border border-slate-100 rounded-full text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 active:scale-95 transition-all">                
-                <i data-lucide="arrow-left" class="w-5 h-5"></i>            
-            </a>            
-            <div class="text-right">                
-                <h1 class="font-black text-xl text-slate-900 leading-none">Cek Tagihan</h1>                
-                <p class="text-[10px] font-bold text-emerald-500 uppercase mt-1.5 tracking-widest flex items-center justify-end gap-1"><i data-lucide="shield-check" class="w-3 h-3"></i> Portal Nasabah</p>            
-            </div>        
-        </header>        
-        <div class="p-6 flex-grow flex flex-col">                        
-            <form id="formCek" class="space-y-4 mb-2 shrink-0">                
-                <div>                    
-                    <label class="block text-[10px] font-extrabold text-slate-400 mb-2 uppercase tracking-widest px-1">Nomor WhatsApp Nasabah</label>                    
-                    <div class="relative flex items-center bg-slate-50 border border-slate-200 rounded-[1.25rem] shadow-sm focus-within:border-emerald-500 focus-within:bg-white transition-all overflow-hidden group">                        
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">                            
-                            <i data-lucide="phone" class="w-4 h-4 text-emerald-500"></i>                        
-                        </div>                                                
-                        <input type="tel" id="waInput" placeholder="Contoh: 08123456789" required class="w-full pl-11 pr-24 py-4 bg-transparent text-sm font-bold outline-none text-slate-800 placeholder-slate-400">                                                
-                        <div class="absolute inset-y-0 right-1 pr-1 flex items-center gap-1 z-20">                            
-                            <button type="button" onclick="pasteWA()" class="p-2 bg-white border border-slate-200 rounded-lg text-slate-500 hover:text-emerald-600 shadow-sm active:scale-95 transition-all" title="Paste">                                
-                                <i data-lucide="clipboard" class="w-4 h-4"></i>                            
-                            </button>                            
-                            <button type="button" onclick="clearWA()" class="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-red-500 shadow-sm active:scale-95 transition-all hidden group-focus-within:block" title="Hapus">                                
-                                <i data-lucide="x" class="w-4 h-4"></i>                            
-                            </button>                        
-                        </div>                    
-                    </div>                
-                </div>                
-                <button type="submit" id="btnCari" class="w-full bg-slate-900 text-white font-extrabold py-4 rounded-[1.25rem] active:scale-95 transition-all shadow-lg shadow-slate-900/20 flex justify-center items-center gap-2 hover:bg-slate-800">                    
-                    <i data-lucide="search" class="w-5 h-5 text-emerald-400"></i> Cek Status Pembayaran                
-                </button>                
-                <p id="errorMsg" class="text-[11px] text-red-500 font-bold text-center hidden bg-red-50 py-2 rounded-lg border border-red-100"></p>            
-            </form>            
-            <div id="hasilCard" class="hidden flex-col gap-5 mt-4 pt-4 animate-fade-in border-t border-slate-100">                                
-                <div class="flex justify-between items-center bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100">                    
-                    <div>                        
-                        <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1" id="greetingText">Ahlan wa Sahlan,</p>                        
-                        <h2 class="font-black text-lg text-slate-900 uppercase tracking-tight truncate max-w-[180px] sm:max-w-xs" id="resNama">Nama</h2>                    
-                    </div>                    
-                    <div id="badgeRapor" class="shining-badge px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md flex items-center gap-1.5 shrink-0">                        
-                        <i data-lucide="star" class="w-3.5 h-3.5"></i> VVIP                    
-                    </div>                
-                </div>                
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">                    
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">                        
-                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Objek Akad Pembiayaan</p>                        
-                        <p class="font-black text-slate-800 text-sm truncate" id="resBarang">iPhone</p>                    
-                    </div>                    
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">                        
-                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3 text-amber-500"></i> Jatuh Tempo Angsuran Berikutnya</p>                        
-                        <p class="font-black text-base text-slate-900" id="resTempoFull">Tgl</p>                    
-                    </div>                
-                </div>                
-                <div class="bg-slate-900 p-6 rounded-3xl shadow-xl text-white relative overflow-hidden flex flex-col gap-4">                    
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 blur-3xl rounded-full -mr-10 -mt-10 pointer-events-none"></div>                                        
-                    <div class="flex justify-between items-end relative z-10">                        
-                        <div>                            
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Sisa Tagihan Pokok</p>                            
-                            <div class="flex items-start gap-1">                                
-                                <span class="text-emerald-400 font-bold mt-1.5 text-sm">Rp</span>                                
-                                <span class="text-3xl sm:text-4xl font-black tracking-tighter" id="resHutang">0</span>                            
-                            </div>                        
-                        </div>                        
-                        <div class="text-right">                            
-                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Angsuran Ke</p>                            
-                            <p class="font-black text-xl text-white leading-none"><span id="resCicilanKe">0</span> <span class="text-sm text-slate-500 font-bold" id="resTotalTenor">/ 0</span></p>                        
-                        </div>                    
-                    </div>                    
-                    <div class="relative z-10 w-full pt-2 border-t border-white/10 mt-2">                        
-                        <div class="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">                            
-                            <span>Terkumpul: Rp <span id="resTerbayar">0</span></span>                            
-                            <span id="resPersen">0%</span>                        
-                        </div>                        
-                        <div class="w-full bg-slate-800 rounded-full h-2.5 border border-slate-700 overflow-hidden">                            
-                            <div id="progressBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-2.5 rounded-full progress-bar-animated shadow-[0_0_10px_rgba(16,185,129,0.5)]" style="width: 0%"></div>                        
-                        </div>                    
-                    </div>                
-                </div>                
-                <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm" id="rekeningCard">                    
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5 px-1"><i data-lucide="credit-card" class="w-3.5 h-3.5 text-emerald-500"></i> Rekening Pembayaran</p>                    
-                    <div class="space-y-2">                        
-                        <div class="flex justify-between items-center bg-slate-50 p-3.5 rounded-2xl border border-slate-100">                            
-                            <div class="flex items-center gap-3">                                
-                                <div class="w-9 h-9 rounded-full bg-[#0052A3] text-white flex items-center justify-center font-black text-sm shrink-0">BCA</div>                                
-                                <div>                                    
-                                    <p class="font-black text-slate-800 text-xs">BCA</p>                                    
-                                    <p class="text-[10px] text-slate-500 font-bold mt-0.5">a.n Ardita Rizki Fauzi</p>                                
-                                </div>                            
-                            </div>                            
-                            <div class="flex items-center gap-3">                                
-                                <p class="font-black text-sm text-slate-900 tracking-wide">8161292087</p>                                
-                                <button type="button" onclick="salinTeks('8161292087')" class="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-emerald-600 hover:border-emerald-200 shadow-sm active:scale-95 transition-all" title="Salin Rekening"><i data-lucide="copy" class="w-4 h-4"></i></button>                            
-                            </div>                        
-                        </div>                        
-                        <div class="flex justify-between items-center bg-slate-50 p-3.5 rounded-2xl border border-slate-100">                            
-                            <div class="flex items-center gap-3">                                
-                                <div class="w-9 h-9 rounded-full bg-[#007AC1] text-white flex items-center justify-center font-black text-sm shrink-0">BRI</div>                                
-                                <div>                                    
-                                    <p class="font-black text-slate-800 text-xs">BRI</p>                                    
-                                    <p class="text-[10px] text-slate-500 font-bold mt-0.5">a.n Vivi Nur Damayanti</p>                                
-                                </div>                            
-                            </div>                            
-                            <div class="flex items-center gap-3">                                
-                                <p class="font-black text-sm text-slate-900 tracking-wide">638501004971500</p>                                
-                                <button type="button" onclick="salinTeks('638501004971500')" class="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-emerald-600 hover:border-emerald-200 shadow-sm active:scale-95 transition-all" title="Salin Rekening"><i data-lucide="copy" class="w-4 h-4"></i></button>                            
-                            </div>                        
-                        </div>                        
-                        <div class="flex justify-between items-center bg-slate-50 p-3.5 rounded-2xl border border-slate-100">                            
-                            <div class="flex items-center gap-3">                                
-                                <div class="w-9 h-9 rounded-full bg-[#FF6A00] text-white flex items-center justify-center font-black text-[11px] shrink-0">SEA</div>                                
-                                <div>                                    
-                                    <p class="font-black text-slate-800 text-xs">SeaBank</p>                                    
-                                    <p class="text-[10px] text-slate-500 font-bold mt-0.5">a.n Ardita Rizki Fauzi</p>                                
-                                </div>                            
-                            </div>                            
-                            <div class="flex items-center gap-3">                                
-                                <p class="font-black text-sm text-slate-900 tracking-wide">901556541299</p>                                
-                                <button type="button" onclick="salinTeks('901556541299')" class="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-emerald-600 hover:border-emerald-200 shadow-sm active:scale-95 transition-all" title="Salin Rekening"><i data-lucide="copy" class="w-4 h-4"></i></button>                            
-                            </div>                        
-                        </div>                    
-                    </div>                
-                </div>                
-                <div class="text-center px-4 mt-2 mb-2">                    
-                    <p class="text-xs font-bold text-slate-500 italic" id="motivationalText"></p>                
-                </div>                
-                <a id="btnKalender" href="#" target="_blank" class="w-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-extrabold py-4 rounded-[1.25rem] active:scale-95 transition-all flex justify-center items-center gap-2 shadow-sm"><i data-lucide="calendar-plus" class="w-5 h-5"></i> Ingatkan Saya via Google Calendar</a>            
-            </div>        
-        </div>    
-    </main>    
-    <script>        
-        lucide.createIcons();        
-        const formatRp = (n) => new Intl.NumberFormat('id-ID').format(n);        
-        let toastTimer;        
-        
-        function showToast(msg, type = 'success') {            
-            const container = document.getElementById('toastContainer');            
-            container.innerHTML = '';             
-            if (toastTimer) clearTimeout(toastTimer);                        
-            const toast = document.createElement('div');            
-            toast.className = `${type === 'success' ? 'bg-emerald-500' : 'bg-red-500'} text-white px-5 py-3.5 rounded-2xl shadow-xl font-bold text-sm text-center transition-all animate-fade-in`;            
-            toast.innerText = msg;             
-            container.appendChild(toast);                        
-            toastTimer = setTimeout(() => { toast.remove(); }, 3000);         
-        }        
-        
-        async function salinTeks(teks) {            
-            try {                
-                await navigator.clipboard.writeText(teks);                
-                showToast("Nomor rekening berhasil disalin!", "success");            
-            } catch (err) {                
-                showToast("Gagal menyalin. Silakan salin manual.", "error");            
-            }        
-        }        
+<body class="text-slate-800 lg:p-8 min-h-screen flex selection:bg-emerald-200">
 
-        // ==========================================
-        // LOGIKA BARU: MENGUBAH SEMUA KE AWALAN 0
-        // ==========================================
-        function formatNomorWA(nomor) {
-            // Hapus semua karakter selain angka
-            let cleanNumber = nomor.replace(/[^0-9]/g, '');
-            // Jika nomor diawali dengan '62', ubah menjadi '0'
-            if (cleanNumber.startsWith('62')) {
-                cleanNumber = '0' + cleanNumber.substring(2);
-            }
-            return cleanNumber;
-        }
+    <main class="m-auto w-full max-w-md lg:max-w-xl bg-white/50 lg:bg-white lg:glass-panel lg:rounded-[2.5rem] lg:p-8 lg:shadow-xl relative z-10 flex flex-col pb-24 lg:pb-8 pt-6 lg:pt-8 min-h-screen lg:min-h-0">
+        <header class="mb-6 flex items-center gap-4 bg-white p-4 rounded-[2rem] lg:rounded-2xl shadow-sm border relative mx-4 lg:mx-0">
+            <a href="index.html" class="p-2.5 bg-slate-50 border border-slate-100 rounded-full text-slate-500 active:scale-95 transition-all"><i data-lucide="arrow-left" class="w-5 h-5"></i></a>
+            <div>
+                <h1 class="font-black text-xl leading-none text-slate-900">Rapor Tagihan</h1>
+                <p class="text-[10px] font-bold text-emerald-600 uppercase mt-1 tracking-widest">Sistem Transparan</p>
+            </div>
+        </header>
 
-        async function pasteWA() {            
-            try {                
-                const text = await navigator.clipboard.readText();                
-                const input = document.getElementById('waInput');                
-                // Format langsung saat dipaste
-                input.value = formatNomorWA(text);                
-                input.focus();            
-            } catch (err) {                
-                showToast("Tahan kolom input dan pilih 'Tempel'", "error");            
-            }        
-        }                
-        
-        function clearWA() {             
-            const input = document.getElementById('waInput');            
-            input.value = '';             
-            input.focus();         
-        }        
+        <div class="px-4 lg:px-0 flex-grow flex flex-col">
+            <div id="searchView" class="flex flex-col items-center justify-center flex-grow py-10">
+                <div class="w-20 h-20 bg-emerald-50 rounded-[2rem] flex items-center justify-center mb-6 shadow-inner border border-emerald-100">
+                    <i data-lucide="search" class="w-10 h-10 text-emerald-500"></i>
+                </div>
+                <h2 class="text-xl font-black text-slate-800 mb-2">Cek Status Tagihanmu</h2>
+                <p class="text-xs text-slate-500 text-center font-medium mb-8 max-w-xs">Masukkan nomor WhatsApp yang terdaftar untuk melihat Rapor Kredit dan rincian angsuran.</p>
+                
+                <div class="w-full relative max-w-sm mx-auto group">
+                    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none"><i data-lucide="phone" class="w-5 h-5 text-emerald-500"></i></div>
+                    <input type="tel" id="inputWA" placeholder="Contoh: 08123456789" class="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-200 rounded-2xl font-bold outline-none text-base focus:border-emerald-500 transition-all shadow-sm">
+                </div>
+                
+                <button id="btnCari" onclick="cekTagihan()" class="w-full max-w-sm mt-4 bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-4 rounded-2xl shadow-lg active:scale-95 transition-all flex justify-center items-center gap-2">
+                    <span id="txtBtnCari">Lihat Rapor Saya</span><i data-lucide="arrow-right" id="iconBtnCari" class="w-5 h-5 text-emerald-400"></i>
+                </button>
+                <p id="errorMsg" class="text-xs font-bold text-red-500 mt-4 hidden text-center"></p>
+            </div>
 
-        // Otomatis bersihkan spasi/+/- kalau paste manual (tahan layar)
-        document.getElementById('waInput').addEventListener('input', function(e) {
-            this.value = this.value.replace(/[^0-9+\-\s]/g, ''); 
+            <div id="resultView" class="hidden flex-col space-y-6 pb-6">
+                
+                <div class="bg-slate-900 rounded-[2rem] p-6 shadow-xl relative overflow-hidden border border-slate-800 mt-2">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                    <div class="relative z-10 flex justify-between items-start gap-2">
+                        <div>
+                            <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-1">Nama Pelanggan</p>
+                            <h2 id="resNama" class="text-xl font-black text-white leading-tight uppercase">...</h2>
+                            <p id="resWA" class="text-[11px] text-slate-400 font-medium mt-1">...</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Skor Kredit</p>
+                            <h3 id="resSkorAbjad" class="text-3xl font-black text-white leading-none">A</h3>
+                        </div>
+                    </div>
+                    <div class="mt-5 pt-4 border-t border-slate-700/50 flex items-center justify-between">
+                        <span id="resBadge" class="bg-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg text-xs font-black border border-emerald-500/30">...</span>
+                        <button onclick="location.reload()" class="text-[10px] font-bold text-slate-400 hover:text-white flex items-center gap-1 transition-colors"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Cek Lainnya</button>
+                    </div>
+                </div>
+
+                <div id="promoBanner" class="hidden bg-amber-50 border border-amber-200 p-4 rounded-2xl flex gap-3 items-start shadow-sm">
+                    <div class="bg-amber-100 p-2 rounded-xl shrink-0"><i data-lucide="gift" class="w-5 h-5 text-amber-600"></i></div>
+                    <div>
+                        <h4 class="text-xs font-black text-amber-900 mb-1">Keistimewaan VVIP!</h4>
+                        <p class="text-[10px] font-bold text-amber-700 leading-relaxed">Pertahankan skor Anda! Saat pelunasan, Anda berhak mendapat <span class="bg-amber-200 px-1 rounded">Cashback Rp50.000</span> atau Jastip Gadget baru tanpa DP.</p>
+                    </div>
+                </div>
+
+                <div id="pendingContainer" class="hidden space-y-3">
+                    <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1"><i data-lucide="clock" class="w-3.5 h-3.5"></i> Sedang Diproses</h3>
+                    <div id="pendingList" class="space-y-3"></div>
+                </div>
+
+                <div id="activeContainer" class="hidden space-y-3">
+                    <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1"><i data-lucide="credit-card" class="w-3.5 h-3.5"></i> Tagihan Aktif</h3>
+                    <div id="activeList" class="space-y-4"></div>
+                </div>
+
+                <div id="historyContainer" class="hidden space-y-3 pt-4 border-t border-slate-100">
+                    <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1"><i data-lucide="check-square" class="w-3.5 h-3.5"></i> Riwayat Selesai</h3>
+                    <div id="historyList" class="space-y-3"></div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+        const fr = (n) => new Intl.NumberFormat('id-ID').format(n);
+        const namaBulan = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+        document.getElementById('inputWA').addEventListener('input', function() { 
+            let v = this.value.replace(/[^0-9]/g, ''); 
+            if(v.startsWith('62')) v = '0' + v.substring(2); 
+            this.value = v; 
         });
 
-        document.getElementById('formCek').addEventListener('submit', async (e) => {            
-            e.preventDefault();            
+        async function cekTagihan() {
+            const wa = document.getElementById('inputWA').value;
+            const err = document.getElementById('errorMsg');
+            if (wa.length < 9) { err.innerText = "Nomor WhatsApp tidak valid."; err.classList.remove('hidden'); return; }
             
-            const inputElement = document.getElementById('waInput');
-            // Bersihkan dan jadikan awalan 0 sebelum dikirim ke API
-            const wa = formatNomorWA(inputElement.value);
+            err.classList.add('hidden');
+            const btn = document.getElementById('btnCari');
+            const btnTxt = document.getElementById('txtBtnCari');
+            const btnIcon = document.getElementById('iconBtnCari');
             
-            // Ubah tampilan di input agar sesuai dengan yang dicari (opsional biar rapi)
-            inputElement.value = wa;
+            btn.disabled = true; btnTxt.innerText = "Mencari Data...";
+            btnIcon.outerHTML = `<div id="iconBtnCari" class="spinner border-[rgba(255,255,255,0.3)] border-t-white w-5 h-5"></div>`;
 
-            if(!wa) return;                        
+            try {
+                const res = await fetch(`${CONFIG.API_URL}?wa=${encodeURIComponent(wa)}&nocache=${Date.now()}`);
+                const r = await res.json();
+
+                if (r.status === "success") {
+                    renderRapor(r.data);
+                } else {
+                    err.innerText = "Maaf, nomor ini belum memiliki riwayat/tagihan di Zenith Cell.";
+                    err.classList.remove('hidden');
+                }
+            } catch (e) {
+                err.innerText = "Terjadi kesalahan jaringan. Coba lagi.";
+                err.classList.remove('hidden');
+            }
             
-            const btn = document.getElementById('btnCari');            
-            const err = document.getElementById('errorMsg');                        
+            btn.disabled = false; btnTxt.innerText = "Lihat Rapor Saya";
+            document.getElementById('iconBtnCari').outerHTML = `<i data-lucide="arrow-right" id="iconBtnCari" class="w-5 h-5 text-emerald-400"></i>`;
+            lucide.createIcons();
+        }
+
+        function renderRapor(data) {
+            document.getElementById('searchView').classList.add('hidden');
+            document.getElementById('resultView').classList.remove('hidden');
+            document.getElementById('resultView').classList.add('flex');
+
+            // HEADER PROFIL
+            document.getElementById('resNama').innerText = data.nama;
+            document.getElementById('resWA').innerText = data.wa;
+            document.getElementById('resSkorAbjad').innerText = data.skor.score;
+            document.getElementById('resBadge').innerText = data.skor.badge;
             
-            btn.disabled = true;             
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Sedang Mencari Data...`;            
-            lucide.createIcons();            
-            err.classList.add('hidden');             
-            document.getElementById('hasilCard').classList.replace('flex', 'hidden');            
-            document.getElementById('progressBar').style.width = '0%';            
-            
-            try {                
-                const res = await fetch(`${CONFIG.API_URL}?wa=${wa}`);                
-                const result = await res.json();                                
-                if (result.status === 'success') {                    
-                    tampilkanHasil(result.data);                
-                } else if (result.status === 'pending') {                    
-                    err.innerHTML = `<i data-lucide="info" class="w-3.5 h-3.5 inline"></i> Pengajuan Anda masih dalam antrean verifikasi admin.`;                     
-                    err.classList.remove('hidden');                
-                } else {                    
-                    err.innerHTML = `<i data-lucide="x-circle" class="w-3.5 h-3.5 inline"></i> Data tidak ditemukan. Cek kembali nomor WA.`;                     
-                    err.classList.remove('hidden');                
-                }            
-            } catch(e) {                
-                console.error("Error System:", e);                
-                err.innerHTML = `<i data-lucide="wifi-off" class="w-3.5 h-3.5 inline"></i> Sistem Error: Gagal terhubung ke server.`;                 
-                err.classList.remove('hidden');            
-            }                        
-            
-            btn.disabled = false;             
-            btn.innerHTML = `<i data-lucide="search" class="w-5 h-5 text-emerald-400"></i> Cek Status Pembayaran`;             
-            lucide.createIcons();        
-        });        
-        
-        function tampilkanHasil(data) {            
-            document.getElementById('resNama').innerText = data.nama;            
-            document.getElementById('resBarang').innerText = data.barang;            
-            document.getElementById('resCicilanKe').innerText = data.cicilanKe;                        
-            
-            let totalHutang = parseInt(data.totalHutang) || 0;            
-            let terbayar = parseInt(data.terbayar) || 0;            
-            let sisaHutang = totalHutang - terbayar;            
-            let cicilanPerBln = parseInt(data.cicilanPerBulan) || Math.round(totalHutang/6);                         
-            let totalTenor = Math.round(totalHutang / cicilanPerBln);            
-            if(totalTenor < 1 || totalTenor === Infinity) totalTenor = 1;                        
-            
-            document.getElementById('resTotalTenor').innerText = `/ ${totalTenor}`;            
-            document.getElementById('resTerbayar').innerText = formatRp(terbayar);            
-            document.getElementById('resHutang').innerText = sisaHutang <= 0 ? "LUNAS" : formatRp(sisaHutang);            
-            let persen = (terbayar / totalHutang) * 100;            
-            if(persen > 100) persen = 100;            
-            document.getElementById('resPersen').innerText = `${Math.round(persen)}%`;                        
-            
-            setTimeout(() => { document.getElementById('progressBar').style.width = `${persen}%`; }, 200);            
-                       
-            const namaBulanArr = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];            
-            const dateSekarang = new Date();            
-            const tglSkrg = dateSekarang.getDate();            
-            const blnSkrg = dateSekarang.getMonth() + 1;             
-            let thnSkrg = dateSekarang.getFullYear();                        
-            
-            let angkaTgl = parseInt(data.jatuhTempo);            
-            let targetBln = blnSkrg;            
-            let bulanTerakhirDB = parseInt(data.bulanTerakhirBayar) || 0;            
-            if (bulanTerakhirDB !== 0) {                
-                targetBln = bulanTerakhirDB + 1;             
-            } else {                
-                if (tglSkrg > angkaTgl) { targetBln = blnSkrg + 1; }            
-            }            
-            if (targetBln > 12) { targetBln -= 12; thnSkrg++; }                        
-            
-            targetBulanInt = targetBln; targetTahunInt = thnSkrg;            
-            document.getElementById('resTempoFull').innerText = `${angkaTgl} ${namaBulanArr[targetBln]} ${thnSkrg}`;            
-            
-            const badge = document.getElementById('badgeRapor');            
-            const btnKal = document.getElementById('btnKalender');            
-            const motTeks = document.getElementById('motivationalText');            
-            const rekCard = document.getElementById('rekeningCard');                        
-            
-            if (sisaHutang <= 0) {                
-                badge.className = "px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md flex items-center gap-1.5 bg-emerald-500 text-white shrink-0";                
-                badge.innerHTML = `<i data-lucide="award" class="w-4 h-4"></i> LUNAS`;                
-                btnKal.style.display = 'none';                
-                rekCard.style.display = 'none';                
-                document.getElementById('resTempoFull').innerText = "Sudah Lunas";                
-                document.getElementById('resTempoFull').classList.replace("text-slate-900", "text-emerald-500");                
-                motTeks.innerText = "✨ Alhamdulillah! Gadget impian resmi jadi milik Kakak 100%. Semoga berkah dan ditunggu pesanan selanjutnya! ✨";            
-            } else {                
-                document.getElementById('resTempoFull').classList.replace("text-emerald-500", "text-slate-900");                
-                btnKal.style.display = 'flex';                
-                rekCard.style.display = 'block';                                
-                              
-                let dateHariIniValid = new Date(dateSekarang.getFullYear(), blnSkrg - 1, tglSkrg);                
-                let dateJatuhTempoValid = new Date(targetTahunInt, targetBulanInt - 1, angkaTgl);                                
-                
-                let selisihWaktu = dateHariIniValid.getTime() - dateJatuhTempoValid.getTime();                
-                let selisihHari = Math.floor(selisihWaktu / (1000 * 3600 * 24));                
-                
-                if (selisihHari > 0) {                    
-                    badge.className = "px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md flex items-center gap-1.5 bg-red-100 text-red-600 animate-pulse border border-red-200 shrink-0";                    
-                    badge.innerHTML = `<i data-lucide="alert-circle" class="w-4 h-4"></i> Telat ${selisihHari} Hari`;                    
-                    motTeks.innerHTML = `<span class="text-red-500">Astaghfirullah, sudah lewat jatuh tempo nih Kak. Yuk segera tunaikan kewajibannya agar rezeki makin lancar! 🤲</span>`;                
-                } else {                    
-                    badge.className = "shining-badge px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md flex items-center gap-1.5 shrink-0";                    
-                    badge.innerHTML = `<i data-lucide="star" class="w-4 h-4"></i> VVIP Lancar`;                    
-                    if (persen < 30) motTeks.innerText = "🚀 Bismillah! Perjalanan baru dimulai, semangat terus kerjanya ya Kak!";                    
-                    else if (persen >= 30 && persen < 70) motTeks.innerText = "🔥 Masya Allah, udah lumayan jauh nih perjalanannya. Keep going Kak!";                    
-                    else motTeks.innerText = "✨ Alhamdulillah, sikit lagi lunas Kak! Tetap istiqomah ya! 🚀";                
-                }                
-                
-                const judulEvent = encodeURIComponent(`Angsuran HP (${data.barang})`);                
-                const descEvent = encodeURIComponent(`Halo ${data.nama}, waktunya bayar angsuran Zenith Cell bulan ini senilai Rp ${formatRp(cicilanPerBln)} agar rapor VVIP Kakak aman. Semangat!`);                
-                const yyyy = dateJatuhTempoValid.getFullYear();                
-                const mm = String(dateJatuhTempoValid.getMonth() + 1).padStart(2, '0');                
-                const dd = String(dateJatuhTempoValid.getDate()).padStart(2, '0');                
-                const tglMulai = `${yyyy}${mm}${dd}T080000`;                 
-                const tglSelesai = `${yyyy}${mm}${dd}T090000`;                
-                btnKal.href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${judulEvent}&dates=${tglMulai}/${tglSelesai}&details=${descEvent}`;            
-            }            
-            
-            document.getElementById('hasilCard').classList.replace('hidden', 'flex');            
-            lucide.createIcons();        
-        }    
+            if(data.skor.score.includes("A")) {
+                document.getElementById('resSkorAbjad').className = "text-3xl font-black text-emerald-400 leading-none";
+                document.getElementById('promoBanner').classList.remove('hidden'); // Munculkan Promo VVIP
+            } else if(data.skor.score.includes("B")) {
+                document.getElementById('resSkorAbjad').className = "text-3xl font-black text-amber-400 leading-none";
+                document.getElementById('resBadge').className = "bg-amber-500/20 text-amber-400 px-3 py-1.5 rounded-lg text-xs font-black border border-amber-500/30";
+            } else {
+                document.getElementById('resSkorAbjad').className = "text-3xl font-black text-red-400 leading-none";
+                document.getElementById('resBadge').className = "bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg text-xs font-black border border-red-500/30";
+            }
+
+            // RENDER PENDING (ANTREAN)
+            const pendC = document.getElementById('pendingContainer');
+            const pendL = document.getElementById('pendingList');
+            pendL.innerHTML = '';
+            if (data.pending && data.pending.length > 0) {
+                data.pending.forEach(p => {
+                    pendL.innerHTML += `<div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="loader" class="w-5 h-5 text-slate-400"></i></div><div><p class="text-xs font-black text-slate-800 uppercase">${p.barang}</p><p class="text-[9px] font-bold text-slate-400 mt-0.5">Sedang diverifikasi admin</p></div></div><span class="bg-slate-100 text-slate-500 px-2 py-1 rounded text-[8px] font-black uppercase">PENDING</span></div>`;
+                });
+                pendC.classList.remove('hidden');
+            }
+
+            // RENDER AKTIF
+            const actC = document.getElementById('activeContainer');
+            const actL = document.getElementById('activeList');
+            actL.innerHTML = '';
+            if (data.aktif && data.aktif.length > 0) {
+                data.aktif.forEach(p => {
+                    let sisaHutang = p.totalHutang - p.terbayar;
+                    let tagihanBulanIni = p.cicilanPerBulan > 0 ? p.cicilanPerBulan : Math.round(p.totalHutang / 6);
+                    let isBulanTerakhir = false;
+
+                    if (sisaHutang <= tagihanBulanIni) {
+                        tagihanBulanIni = sisaHutang;
+                        isBulanTerakhir = true;
+                    }
+
+                    let tglLengkap = `${p.jatuhTempo} ${namaBulan[p.targetBulan]} ${p.targetTahun}`;
+                    let colorTheme = p.selisihHari > 0 ? 'red' : 'emerald';
+                    let bgCard = p.selisihHari > 0 ? 'bg-red-50 border-red-100' : 'bg-white border-slate-200';
+                    let msgLunas = isBulanTerakhir ? `<div class="mt-3 bg-amber-50 p-2.5 rounded-xl border border-amber-100 flex items-start gap-2"><i data-lucide="award" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i><p class="text-[10px] font-bold text-amber-800 leading-relaxed">Ini adalah bulan terakhir cicilan Anda! Lunasi tagihan ini untuk mendapatkan <span class="bg-amber-200 px-1 rounded">Diskon Muroqoshoh 10%</span> langsung dari Admin.</p></div>` : '';
+
+                    actL.innerHTML += `
+                    <div class="${bgCard} rounded-2xl p-5 shadow-sm border relative overflow-hidden">
+                        ${p.selisihHari > 0 ? `<div class="absolute top-0 right-0 bg-red-500 text-white text-[8px] font-black px-3 py-1 rounded-bl-xl tracking-widest animate-pulse">TELAT ${p.selisihHari} HARI</div>` : ''}
+                        
+                        <div class="flex justify-between items-start mb-4">
+                            <div><p class="text-[10px] font-bold text-slate-400">ID: ${p.idKontrak}</p><h4 class="text-sm font-black text-slate-800 uppercase mt-0.5">${p.barang}</h4></div>
+                            <div class="text-right"><p class="text-[9px] font-bold text-slate-400">Sisa Total</p><p class="text-xs font-black text-slate-700">Rp ${fr(sisaHutang)}</p></div>
+                        </div>
+                        
+                        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-100 flex justify-between items-center">
+                            <div><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">${isBulanTerakhir ? 'Sisa Pelunasan' : 'Wajib Bayar (Bulan Ke-'+p.cicilanKe+')'}</p><p class="text-base font-black text-${colorTheme}-600 mt-0.5">Rp ${fr(tagihanBulanIni)}</p></div>
+                            <div class="text-right"><p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Jatuh Tempo</p><p class="text-xs font-black text-slate-700 mt-1">${tglLengkap}</p></div>
+                        </div>
+                        ${msgLunas}
+                        <div class="mt-4 grid grid-cols-2 gap-2">
+                            <a href="https://api.whatsapp.com/send?phone=${CONFIG.WA_ADMIN}&text=Assalamu'alaikum%20Admin,%20saya%20ingin%20membayar%20tagihan%20untuk%20kontrak%20${p.idKontrak}.%20Boleh%20minta%20rekeningnya?" target="_blank" class="bg-slate-900 text-white text-[10px] font-bold py-3 rounded-xl text-center flex items-center justify-center gap-1.5 active:scale-95"><i data-lucide="wallet" class="w-3.5 h-3.5"></i> Bayar Sekarang</a>
+                            <a href="Kalkulator Cicilan.html" class="bg-white border border-slate-200 text-slate-600 text-[10px] font-bold py-3 rounded-xl text-center flex items-center justify-center gap-1.5 hover:bg-slate-50 active:scale-95"><i data-lucide="calculator" class="w-3.5 h-3.5"></i> Simulasi Jastip</a>
+                        </div>
+                    </div>`;
+                });
+                actC.classList.remove('hidden');
+            }
+
+            // RENDER RIWAYAT LUNAS
+            const histC = document.getElementById('historyContainer');
+            const histL = document.getElementById('historyList');
+            histL.innerHTML = '';
+            if (data.riwayat && data.riwayat.length > 0) {
+                data.riwayat.forEach(h => {
+                    histL.innerHTML += `<div class="bg-white border border-emerald-100 rounded-2xl p-4 shadow-sm flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i></div><div><p class="text-xs font-black text-slate-800 uppercase line-through opacity-70">${h.barang}</p><p class="text-[9px] font-bold text-emerald-600 mt-0.5">Selesai: ${h.tanggalLunas.split(' ')[0]}</p></div></div><span class="bg-emerald-500 text-white px-2 py-1 rounded text-[8px] font-black uppercase shadow-sm">LUNAS</span></div>`;
+                });
+                histC.classList.remove('hidden');
+            }
+
+            lucide.createIcons();
+        }
     </script>
 </body>
 </html>
