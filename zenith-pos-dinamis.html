@@ -326,12 +326,19 @@
 
         ['nominal', 'denda'].forEach(id => document.getElementById(id).addEventListener('input', (e) => { if(isSaved) return; e.target.value = formatRp(parseRp(e.target.value)); renderPreview(); }));
 
-        const eksekusiSimpan = async (e) => {
+       const eksekusiSimpan = async (e) => {
             if(e) e.preventDefault();
             
             try {
                 const p = renderPreview(); 
                 if (!p) return showToast("Lengkapi data nominal!", "error");
+
+                // ==========================================
+                // FIX ANTI-TYPO: Cegah kurang nol saat Pelunasan!
+                // ==========================================
+                if (p.isLunas && p.diskonIbra > (p.sisaHutangAsli * 0.2)) {
+                    return showToast("⚠️ CEK NOMINAL! Masa diskonnya lebih dari 20%?", "error");
+                }
 
                 const btnP = document.getElementById('btnProses');
                 btnP.disabled = true; 
