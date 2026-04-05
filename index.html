@@ -408,23 +408,35 @@
         // ==========================================
         // LOGIKA LOGIN BARU (SIMPAN TOKEN KEAMANAN)
         // ==========================================
-        document.getElementById('pinForm').addEventListener('submit', (e) => { 
+        document.getElementById('pinForm').addEventListener('submit', async (e) => { 
             e.preventDefault(); 
             const user = document.getElementById('usernameInput').value.trim().toUpperCase(); 
             const pass = document.getElementById('pinInput').value; 
             
-            const adminData = typeof CONFIG !== 'undefined' && CONFIG.DAFTAR_ADMIN ? CONFIG.DAFTAR_ADMIN : {}; 
-            const masterPin = typeof CONFIG !== 'undefined' && CONFIG.PIN_ADMIN ? CONFIG.PIN_ADMIN : "zenith123";
-            
-            // Simpan password sebagai token rahasia untuk API Backend
-            localStorage.setItem('zenithSecretToken', pass);
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto"></i>`;
+            btn.disabled = true;
+            lucide.createIcons();
 
-            if ((adminData[user] && adminData[user].sandi === pass) || pass === masterPin || pass === "zenith123") { 
-                localStorage.setItem('kasirZenithAktif', adminData[user] ? adminData[user].namaLengkap : "Admin Pusat"); 
-                window.location.href = pendingUrl; 
-            } else { 
-                showToast("ID/Sandi tidak valid!", "error"); 
-            } 
+            try {
+                // Mengirim permintaan validasi ke Database langsung (Lebih Aman)
+                const response = await fetch(`${CONFIG.API_URL}?action=login&user=${encodeURIComponent(user)}&pass=${encodeURIComponent(pass)}&nocache=${Date.now()}`);
+                const result = await response.json();
+
+                if (result.status === 'success') { 
+                    localStorage.setItem('zenithSecretToken', pass); // Simpan Kunci Token
+                    localStorage.setItem('kasirZenithAktif', result.nama); 
+                    window.location.href = pendingUrl; 
+                } else { 
+                    showToast(result.message || "ID/Sandi tidak valid!", "error"); 
+                } 
+            } catch(err) {
+                showToast("Gagal terhubung ke Server Keamanan", "error");
+            }
+
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         });
     </script>
 </body>
