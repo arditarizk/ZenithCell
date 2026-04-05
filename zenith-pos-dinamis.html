@@ -316,7 +316,7 @@
 
         ['nominal', 'denda'].forEach(id => document.getElementById(id).addEventListener('input', (e) => { if(isSaved) return; e.target.value = formatRp(parseRp(e.target.value)); renderPreview(); }));
 
-        // FIX BUG RACE CONDITION FRONTEND KASIR
+     // FIX BUG: AUTO REFRESH JIKA DATA DITOLAK SERVER KARENA SUDAH LUNAS DI HP LAIN
         const eksekusiSimpan = async (e) => {
             if(e) e.preventDefault();
             
@@ -340,15 +340,17 @@
                     catatan: p.isLunas ? "Pelunasan" : "Sisa Pokok: Rp " + formatRp(p.sisaBaru)
                 };
                 
-                // Hilangkan mode no-cors agar dapat membaca jawaban server
                 const response = await fetch(typeof CONFIG !== 'undefined' ? CONFIG.API_URL : '', { method: 'POST', body: JSON.stringify(payload) });
                 const result = await response.json();
                 
                 if (result.status === 'error') {
                     showToast(result.message, "error");
-                    document.getElementById('txtBtnProses').innerText = "Simpan & Buat Struk";
-                    btnP.disabled = false;
-                    return; // BATALKAN MEMBUAT STRUK & BUKA WA!
+                    // HENTIKAN PROSES, UBAH TOMBOL JADI REFRESH
+                    document.getElementById('btnProses').innerHTML = `<i data-lucide="refresh-cw" class="w-5 h-5 text-red-400"></i> Memperbarui Data Layar...`;
+                    lucide.createIcons();
+                    // AUTO REFRESH DALAM 2 DETIK
+                    setTimeout(() => { window.location.reload(); }, 2000);
+                    return; 
                 }
                 
                 setTimeout(() => {
@@ -361,13 +363,14 @@
                     const actionBtns = document.getElementById('actionButtons');
                     actionBtns.classList.remove('hidden'); actionBtns.classList.add('flex');
                     
-                    showToast(p.isLunas ? "LUNAS! Owner telah diberitahu via Email." : "Berhasil Disimpan!", "success");
+                    showToast(p.isLunas ? "LUNAS! Notifikasi masuk ke Email." : "Berhasil Disimpan!", "success");
                     if(window.innerWidth < 1024) document.getElementById('previewPanel').scrollIntoView({behavior: 'smooth'});
                 }, 300); 
             } catch (err) {
-                document.getElementById('txtBtnProses').innerText = "Simpan & Buat Struk";
-                document.getElementById('btnProses').disabled = false;
+                document.getElementById('txtBtnProses').innerText = "Gagal. Memuat Ulang...";
+                document.getElementById('btnProses').disabled = true;
                 showToast("Gagal terhubung ke Server.", "error");
+                setTimeout(() => { window.location.reload(); }, 2000);
             }
         };
 
